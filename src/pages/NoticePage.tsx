@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Header from '../components/layout/Header'
 import { getNotices, type Notice } from '../services/noticeService'
 
 function formatDate(value: string) {
@@ -34,14 +35,7 @@ export default function NoticePage() {
 
   return (
     <div className="min-h-screen bg-[#f4f5f7] text-slate-800">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-4">
-          <div className="flex h-9 w-9 items-center justify-center rounded bg-[#002c5f]">
-            <span className="text-sm font-bold text-white">OF</span>
-          </div>
-          <span className="text-lg font-semibold tracking-tight text-[#002c5f]">OfficeFlow</span>
-        </div>
-      </header>
+      <Header />
 
       <main className="mx-auto max-w-3xl px-6 py-12">
         <h1 className="mb-6 text-2xl font-bold tracking-tight text-[#002c5f]">공지사항</h1>

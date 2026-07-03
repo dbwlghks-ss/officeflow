@@ -52,7 +52,7 @@ export async function createNotice(input: { title: string; content: string }): P
     author_id: user.id,
   })
 
-  if (error) throw error
+  if (error) throw new Error(error.message)
 }
 
 export async function updateNotice(
@@ -64,7 +64,7 @@ export async function updateNotice(
     .update({ title: input.title, content: input.content })
     .eq('id', id)
 
-  if (error) throw error
+  if (error) throw new Error(error.message)
 }
 
 export async function deleteNotice(id: number): Promise<void> {

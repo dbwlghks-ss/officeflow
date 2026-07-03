@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Header from '../components/layout/Header'
 import { supabase } from '../lib/supabase'
 import {
   applyMeal,
@@ -96,14 +97,7 @@ export default function MealPage() {
 
   return (
     <div className="min-h-screen bg-[#f4f5f7] text-slate-800">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-4">
-          <div className="flex h-9 w-9 items-center justify-center rounded bg-[#002c5f]">
-            <span className="text-sm font-bold text-white">OF</span>
-          </div>
-          <span className="text-lg font-semibold tracking-tight text-[#002c5f]">OfficeFlow</span>
-        </div>
-      </header>
+      <Header />
 
       <main className="mx-auto max-w-md px-6 py-16">
         <div className="rounded-lg border border-slate-200 bg-white p-8">

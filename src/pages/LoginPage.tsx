@@ -45,17 +45,51 @@ export default function LoginPage() {
 
     const user = data.user
     if (user) {
-      await supabase.from('profiles').upsert(
-        {
-          id: user.id,
-          email: user.email,
-          full_name: user.email ? user.email.split('@')[0] : '',
-          department_id: null,
-          role: 'employee',
-          is_active: true,
-        },
-        { onConflict: 'id', ignoreDuplicates: true },
-      )
+      const { data: existing, error: selectError } = await supabase
+        .from('profiles')
+        .select('id, is_active')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (selectError) {
+        await supabase.auth.signOut()
+        setError(`프로필 확인에 실패했습니다: ${selectError.message}`)
+        setLoading(false)
+        return
+      }
+
+      let profile = existing
+
+      if (!profile) {
+        const { data: inserted, error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            email: user.email,
+            full_name: user.email ? user.email.split('@')[0] : '',
+            department_id: null,
+            role: 'employee',
+            is_active: true,
+          })
+          .select('id, is_active')
+          .single()
+
+        if (insertError) {
+          await supabase.auth.signOut()
+          setError(`프로필 생성에 실패했습니다: ${insertError.message}`)
+          setLoading(false)
+          return
+        }
+
+        profile = inserted
+      }
+
+      if (profile && profile.is_active === false) {
+        await supabase.auth.signOut()
+        setError('비활성화된 계정입니다.')
+        setLoading(false)
+        return
+      }
     }
 
     navigate('/dashboard', { replace: true })
