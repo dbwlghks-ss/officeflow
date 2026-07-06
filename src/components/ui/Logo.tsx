@@ -76,20 +76,16 @@ export function HwashinLogo({ className, header = false }: LogoProps) {
   )
 }
 
-/** Header brand lockup: [HWASHIN symbol] HWASHIN · OfficeFlow */
+/** Header brand lockup: [official HWASHIN CI] · OfficeFlow */
 export function HeaderBrandLockup() {
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex items-center gap-3">
       <img
-        src="/hwashin-symbol.png"
-        alt=""
-        aria-hidden="true"
-        className="h-8 w-auto shrink-0 object-contain"
+        src="/hwashin-logo.png"
+        alt="HWASHIN"
+        className="h-[32px] w-auto shrink-0 object-contain"
       />
-      <span className="text-[21px] font-extrabold leading-none tracking-tight text-brand">
-        HWASHIN
-      </span>
-      <span className="ml-1.5 text-[15px] font-medium leading-none tracking-tight text-slate-500">
+      <span className="text-[15px] font-medium leading-none tracking-tight text-slate-500">
         OfficeFlow
       </span>
     </div>
