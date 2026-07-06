@@ -31,22 +31,42 @@ export async function getOpenSurveys(): Promise<Survey[]> {
   return data ?? []
 }
 
-export async function createSurvey(input: {
+export type NewSurveyQuestion = {
+  questionText: string
+  questionType: Extract<QuestionType, 'single' | 'text'>
+  isRequired: boolean
+  options: string[]
+}
+
+// surveys / survey_questions / survey_options 를 단일 트랜잭션으로 저장한다.
+// 실제 저장은 Supabase RPC(create_survey_with_questions) 안에서 이루어지며,
+// plpgsql 함수 본문은 하나의 트랜잭션이므로 중간에 하나라도 실패하면 전체가 롤백된다.
+export async function createSurveyWithQuestions(input: {
   title: string
   description: string
   status: Extract<SurveyStatus, 'draft' | 'open'>
+  questions: NewSurveyQuestion[]
 }): Promise<void> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error('로그인이 필요합니다.')
-
-  const { error } = await supabase.from('surveys').insert({
-    title: input.title,
-    description: input.description ? input.description : null,
-    status: input.status,
-    author_id: user.id,
+  const { error } = await supabase.rpc('create_survey_with_questions', {
+    p_title: input.title,
+    p_description: input.description,
+    p_status: input.status,
+    p_questions: input.questions.map((question) => ({
+      question_text: question.questionText,
+      question_type: question.questionType,
+      is_required: question.isRequired,
+      options: question.options,
+    })),
   })
+
+  if (error) throw error
+}
+
+export async function publishSurvey(id: number): Promise<void> {
+  const { error } = await supabase
+    .from('surveys')
+    .update({ status: 'open' })
+    .eq('id', id)
 
   if (error) throw error
 }
@@ -92,45 +112,6 @@ export async function getQuestions(surveyId: number): Promise<SurveyQuestion[]> 
     ...q,
     survey_options: [...(q.survey_options ?? [])].sort((a, b) => a.position - b.position),
   })) as SurveyQuestion[]
-}
-
-export async function createQuestion(input: {
-  surveyId: number
-  questionText: string
-  questionType: QuestionType
-  isRequired: boolean
-  position: number
-  options: string[]
-}): Promise<void> {
-  const { data, error } = await supabase
-    .from('survey_questions')
-    .insert({
-      survey_id: input.surveyId,
-      question_text: input.questionText,
-      question_type: input.questionType,
-      is_required: input.isRequired,
-      position: input.position,
-    })
-    .select('id')
-    .single()
-
-  if (error) throw error
-
-  if (input.questionType === 'single' && input.options.length > 0) {
-    const rows = input.options.map((text, index) => ({
-      question_id: data.id,
-      option_text: text,
-      position: index,
-    }))
-
-    const { error: optionError } = await supabase.from('survey_options').insert(rows)
-    if (optionError) throw optionError
-  }
-}
-
-export async function deleteQuestion(id: number): Promise<void> {
-  const { error } = await supabase.from('survey_questions').delete().eq('id', id)
-  if (error) throw error
 }
 
 // ---------------------------------------------------------
