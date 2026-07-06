@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react'
 import Header from '../components/layout/Header'
 import { supabase } from '../lib/supabase'
 import {
+  getMyResponseAnswers,
   getOpenSurveys,
   getQuestions,
   hasResponded,
   submitSurveyResponse,
+  updateSurveyResponse,
+  type ExistingAnswer,
   type SubmitAnswer,
   type Survey,
   type SurveyQuestion,
@@ -19,10 +22,41 @@ function formatDate(value: string) {
   })
 }
 
+function extractMessage(err: unknown, fallback: string): string {
+  if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string') {
+    return err.message
+  }
+  return fallback
+}
+
 type AnswerState = {
   optionId?: number
   text?: string
   rating?: number
+}
+
+function buildAnswersState(
+  questions: SurveyQuestion[],
+  existing: ExistingAnswer[],
+): Record<number, AnswerState> {
+  const byQuestion = new Map(existing.map((answer) => [answer.questionId, answer]))
+  const state: Record<number, AnswerState> = {}
+
+  for (const question of questions) {
+    const answer = byQuestion.get(question.id)
+    if (!answer) continue
+
+    if (question.question_type === 'single') {
+      if (answer.optionId != null) state[question.id] = { optionId: answer.optionId }
+    } else if (question.question_type === 'rating') {
+      const score = Number(answer.answerText)
+      if (!Number.isNaN(score)) state[question.id] = { rating: score }
+    } else {
+      state[question.id] = { text: answer.answerText ?? '' }
+    }
+  }
+
+  return state
 }
 
 function SurveyDetail({ survey, onBack }: { survey: Survey; onBack: () => void }) {
@@ -32,6 +66,10 @@ function SurveyDetail({ survey, onBack }: { survey: Survey; onBack: () => void }
   const [answers, setAnswers] = useState<Record<number, AnswerState>>({})
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [preparingEdit, setPreparingEdit] = useState(false)
+  const [updatedMessage, setUpdatedMessage] = useState<string | null>(null)
 
   useEffect(() => {
     let active = true
@@ -53,6 +91,7 @@ function SurveyDetail({ survey, onBack }: { survey: Survey; onBack: () => void }
         ])
 
         if (!active) return
+        setUserId(user.id)
         setSubmitted(alreadyResponded)
         setQuestions(questionList)
       } catch {
@@ -79,7 +118,28 @@ function SurveyDetail({ survey, onBack }: { survey: Survey; onBack: () => void }
     setAnswers((prev) => ({ ...prev, [questionId]: { rating } }))
   }
 
-  async function handleSubmit() {
+  async function startEditing() {
+    if (!userId) return
+    setPreparingEdit(true)
+    setError(null)
+    try {
+      const existing = await getMyResponseAnswers(survey.id, userId)
+      setAnswers(existing ? buildAnswersState(questions, existing) : {})
+      setUpdatedMessage(null)
+      setEditing(true)
+    } catch (err) {
+      setError(extractMessage(err, '기존 응답을 불러오지 못했습니다.'))
+    } finally {
+      setPreparingEdit(false)
+    }
+  }
+
+  function cancelEditing() {
+    setEditing(false)
+    setError(null)
+  }
+
+  async function handleSave() {
     const payload: SubmitAnswer[] = []
 
     for (const question of questions) {
@@ -113,14 +173,18 @@ function SurveyDetail({ survey, onBack }: { survey: Survey; onBack: () => void }
     setSubmitting(true)
     setError(null)
     try {
-      await submitSurveyResponse({ surveyId: survey.id, answers: payload })
-      setSubmitted(true)
+      if (editing) {
+        await updateSurveyResponse({ surveyId: survey.id, answers: payload })
+        setEditing(false)
+        setSubmitted(true)
+        setUpdatedMessage('응답이 수정되었습니다.')
+      } else {
+        await submitSurveyResponse({ surveyId: survey.id, answers: payload })
+        setSubmitted(true)
+        setUpdatedMessage(null)
+      }
     } catch (err) {
-      const message =
-        err && typeof err === 'object' && 'message' in err && typeof err.message === 'string'
-          ? err.message
-          : '제출에 실패했습니다.'
-      setError(message)
+      setError(extractMessage(err, editing ? '수정에 실패했습니다.' : '제출에 실패했습니다.'))
     } finally {
       setSubmitting(false)
     }
@@ -146,10 +210,23 @@ function SurveyDetail({ survey, onBack }: { survey: Survey; onBack: () => void }
 
       {loading ? (
         <p className="text-sm text-slate-500">불러오는 중...</p>
-      ) : submitted ? (
+      ) : submitted && !editing ? (
         <div className="rounded-md bg-emerald-50 px-4 py-6 text-center">
-          <p className="text-sm font-semibold text-emerald-700">이미 제출한 설문입니다.</p>
+          <p className="text-sm font-semibold text-emerald-700">
+            {updatedMessage ?? '이미 제출한 설문입니다.'}
+          </p>
           <p className="mt-1 text-sm text-emerald-600">응답해 주셔서 감사합니다.</p>
+          <button
+            type="button"
+            onClick={startEditing}
+            disabled={preparingEdit}
+            className="mt-4 rounded-md border border-[#002c5f] px-5 py-2 text-sm font-medium text-[#002c5f] transition-colors hover:bg-[#002c5f]/5 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {preparingEdit ? '불러오는 중...' : '응답 수정'}
+          </button>
+          {error && (
+            <p className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+          )}
         </div>
       ) : questions.length === 0 ? (
         <p className="rounded-md bg-slate-50 px-4 py-3 text-sm text-slate-600">
@@ -157,6 +234,11 @@ function SurveyDetail({ survey, onBack }: { survey: Survey; onBack: () => void }
         </p>
       ) : (
         <div className="flex flex-col gap-8">
+          {editing && (
+            <p className="rounded-md bg-[#002c5f]/5 px-4 py-3 text-sm font-medium text-[#002c5f]">
+              응답 수정 중입니다. 수정 후 &lsquo;수정 완료&rsquo;를 눌러 저장하세요.
+            </p>
+          )}
           {questions.map((question, index) => (
             <div key={question.id}>
               <p className="mb-3 text-sm font-medium text-slate-800">
@@ -226,14 +308,32 @@ function SurveyDetail({ survey, onBack }: { survey: Survey; onBack: () => void }
             <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
           )}
 
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="self-start rounded-md bg-[#002c5f] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#00234c] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {submitting ? '제출 중...' : '제출'}
-          </button>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={submitting}
+              className="rounded-md bg-[#002c5f] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#00234c] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {submitting
+                ? editing
+                  ? '저장 중...'
+                  : '제출 중...'
+                : editing
+                  ? '수정 완료'
+                  : '제출'}
+            </button>
+            {editing && (
+              <button
+                type="button"
+                onClick={cancelEditing}
+                disabled={submitting}
+                className="rounded-md border border-slate-300 px-6 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
+              >
+                취소
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

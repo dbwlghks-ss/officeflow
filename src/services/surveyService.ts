@@ -224,3 +224,57 @@ export async function submitSurveyResponse(input: {
 
   if (error) throw error
 }
+
+export type ExistingAnswer = {
+  questionId: number
+  optionId: number | null
+  answerText: string | null
+}
+
+// 현재 로그인 사용자가 해당 설문에 제출했던 답변을 불러온다. (수정 화면 프리필용)
+export async function getMyResponseAnswers(
+  surveyId: number,
+  userId: string,
+): Promise<ExistingAnswer[] | null> {
+  const { data: response, error } = await supabase
+    .from('survey_responses')
+    .select('id')
+    .eq('survey_id', surveyId)
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (error) throw error
+  if (!response) return null
+
+  const { data, error: answersError } = await supabase
+    .from('survey_answers')
+    .select('question_id, option_id, answer_text')
+    .eq('response_id', response.id)
+
+  if (answersError) throw answersError
+
+  return (data ?? []).map((answer) => ({
+    questionId: answer.question_id,
+    optionId: answer.option_id,
+    answerText: answer.answer_text,
+  }))
+}
+
+// 기존 응답을 수정한다. survey_responses(response_id)는 유지하고
+// 해당 응답의 survey_answers 를 모두 삭제한 뒤 새 답변으로 다시 저장한다.
+// 삭제 + 재삽입은 RPC 안에서 하나의 트랜잭션으로 처리된다.
+export async function updateSurveyResponse(input: {
+  surveyId: number
+  answers: SubmitAnswer[]
+}): Promise<void> {
+  const { error } = await supabase.rpc('update_survey_response', {
+    p_survey_id: input.surveyId,
+    p_answers: input.answers.map((answer) => ({
+      question_id: answer.questionId,
+      option_id: answer.optionId ?? null,
+      answer_text: answer.answerText ?? null,
+    })),
+  })
+
+  if (error) throw error
+}
