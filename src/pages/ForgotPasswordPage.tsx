@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MailCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import { HwashinLogo, OfficeFlowLogoImage } from '../components/ui/Logo'
+import { OfficeFlowLogoImage } from '../components/ui/Logo'
 import { Button, Card, inputClass } from '../components/ui/primitives'
 
 export default function ForgotPasswordPage() {
@@ -114,10 +114,6 @@ export default function ForgotPasswordPage() {
             </Button>
           </form>
         </Card>
-
-        <div className="mt-8 flex items-center justify-center opacity-70">
-          <HwashinLogo />
-        </div>
       </div>
     </div>
   )

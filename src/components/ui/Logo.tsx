@@ -98,7 +98,7 @@ export function OfficeFlowLogoImage({
 /** Header brand lockup: [official HWASHIN CI] · [OfficeFlow logo PNG] */
 export function HeaderBrandLockup({ onOfficeFlowClick }: { onOfficeFlowClick?: () => void }) {
   return (
-    <div className="flex items-center gap-3.5">
+    <div className="flex items-center gap-2.5">
       <a
         href="https://www.hwashin.co.kr"
         target="_blank"

@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MailCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import { HwashinLogo, OfficeFlowLogoImage } from '../components/ui/Logo'
+import { OfficeFlowLogoImage } from '../components/ui/Logo'
 import { Button, Card, inputClass } from '../components/ui/primitives'
 
 const POSITIONS = ['사원', '주임', '대리', '과장', '차장', '부장', '임원'] as const
@@ -260,10 +260,6 @@ export default function SignupPage() {
           </Button>
           </form>
         </Card>
-
-        <div className="mt-8 flex items-center justify-center opacity-70">
-          <HwashinLogo />
-        </div>
       </div>
     </div>
   )
