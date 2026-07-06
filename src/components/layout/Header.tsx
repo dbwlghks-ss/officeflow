@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, LogIn, LogOut, Search } from 'lucide-react'
+import { Bell, LogIn, LogOut, Search, Settings } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import { HwashinLogo, OfficeFlowLogo } from '../ui/Logo'
-import { Badge, Button } from '../ui/primitives'
+import { HeaderBrandLockup } from '../ui/Logo'
+import { Button } from '../ui/primitives'
 
 type AuthUser = { name: string; position: string | null; role: string | null }
 
@@ -60,7 +60,6 @@ export default function Header() {
     navigate('/')
   }
 
-  const isAdmin = authUser?.role === 'admin'
   const initial = authUser?.name?.trim()?.charAt(0) ?? 'U'
 
   return (
@@ -69,13 +68,9 @@ export default function Header() {
         <button
           type="button"
           onClick={() => navigate('/')}
-          className="flex items-center gap-3 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
+          className="rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
         >
-          <OfficeFlowLogo />
-          <span className="hidden h-6 w-px bg-line md:block" />
-          <span className="hidden md:block">
-            <HwashinLogo />
-          </span>
+          <HeaderBrandLockup />
         </button>
 
         <div className="relative mx-auto hidden w-full max-w-md lg:block">
@@ -93,7 +88,7 @@ export default function Header() {
               <button
                 type="button"
                 aria-label="알림"
-                className="relative grid h-10 w-10 place-items-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                className="relative grid h-10 w-10 place-items-center rounded-full text-slate-500 transition-all duration-200 hover:bg-slate-100 hover:text-slate-700"
               >
                 <Bell size={19} />
                 <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-danger ring-2 ring-surface" />
@@ -102,17 +97,32 @@ export default function Header() {
               <span className="hidden h-6 w-px bg-line sm:block" />
 
               <div className="flex items-center gap-2.5 pl-0.5">
-                <div className="grid h-9 w-9 place-items-center rounded-full bg-brand-light text-sm font-bold text-brand">
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-light text-sm font-bold text-brand">
                   {initial}
                 </div>
                 <div className="hidden text-left leading-tight sm:block">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-semibold text-slate-800">{authUser.name}</span>
-                    {isAdmin && <Badge tone="brand">관리자</Badge>}
-                  </div>
-                  <span className="text-xs text-slate-400">{authUser.position ?? '임직원'}</span>
+                  <span className="block text-sm font-semibold text-slate-800">{authUser.name}</span>
+                  <span className="block text-xs text-slate-400">{authUser.position ?? '임직원'}</span>
                 </div>
               </div>
+
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => navigate('/admin')}
+                className="hidden sm:inline-flex"
+              >
+                <Settings size={14} />
+                관리자
+              </Button>
+              <button
+                type="button"
+                onClick={() => navigate('/admin')}
+                aria-label="관리자"
+                className="grid h-10 w-10 place-items-center rounded-full text-slate-500 transition-all duration-200 hover:bg-slate-100 sm:hidden"
+              >
+                <Settings size={18} />
+              </button>
 
               <Button variant="secondary" size="sm" onClick={handleLogout} className="hidden sm:inline-flex">
                 <LogOut size={15} />
@@ -122,7 +132,7 @@ export default function Header() {
                 type="button"
                 onClick={handleLogout}
                 aria-label="로그아웃"
-                className="grid h-10 w-10 place-items-center rounded-full text-slate-500 hover:bg-slate-100 sm:hidden"
+                className="grid h-10 w-10 place-items-center rounded-full text-slate-500 transition-all duration-200 hover:bg-slate-100 sm:hidden"
               >
                 <LogOut size={18} />
               </button>
