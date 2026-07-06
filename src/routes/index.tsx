@@ -59,7 +59,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
   if (state === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f4f5f7]">
+      <div className="flex min-h-screen items-center justify-center bg-[#f7f9fc]">
         <span className="text-sm text-slate-500">불러오는 중...</span>
       </div>
     )
@@ -114,7 +114,7 @@ function AdminRoute({ children }: { children: ReactNode }) {
 
   if (state === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f4f5f7]">
+      <div className="flex min-h-screen items-center justify-center bg-[#f7f9fc]">
         <span className="text-sm text-slate-500">불러오는 중...</span>
       </div>
     )

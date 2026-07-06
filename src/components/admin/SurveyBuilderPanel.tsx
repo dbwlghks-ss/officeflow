@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { ArrowLeft, Plus } from 'lucide-react'
 import {
   createSurveyWithQuestions,
   type NewSurveyQuestion,
 } from '../../services/surveyService'
+import { Button } from '../ui/primitives'
 import QuestionEditor, {
   type BuilderQuestion,
   type BuilderQuestionType,
@@ -171,32 +173,36 @@ export default function SurveyBuilderPanel({
         type="button"
         onClick={onCancel}
         disabled={saving}
-        className="mb-4 text-sm font-medium text-[#002c5f] transition-colors hover:underline disabled:opacity-50"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-brand transition-colors hover:text-brand-hover disabled:opacity-50"
       >
-        &larr; 설문 목록
+        <ArrowLeft size={16} />
+        설문 목록
       </button>
 
       {error && (
-        <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <p className="mb-4 rounded-btn bg-red-50 px-3 py-2 text-sm text-danger">{error}</p>
       )}
 
-      <div className="mb-6 rounded-lg border-t-4 border-[#002c5f] bg-white p-6 shadow-sm">
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          disabled={saving}
-          className="w-full border-b border-slate-200 pb-2 text-xl font-semibold text-slate-800 outline-none transition-colors focus:border-[#002c5f] disabled:bg-slate-50"
-          placeholder="설문 제목"
-        />
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          disabled={saving}
-          rows={2}
-          className="mt-3 w-full resize-y border-b border-slate-200 pb-2 text-sm text-slate-700 outline-none transition-colors focus:border-[#002c5f] disabled:bg-slate-50"
-          placeholder="설문 설명 (선택)"
-        />
+      <div className="mb-6 overflow-hidden rounded-card border border-line bg-surface shadow-soft">
+        <div className="h-1.5 bg-gradient-to-r from-brand to-brand-hover" />
+        <div className="p-6">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            disabled={saving}
+            className="w-full border-b border-line pb-2 text-xl font-bold text-slate-900 outline-none transition-colors placeholder:text-slate-300 focus:border-brand disabled:bg-slate-50"
+            placeholder="설문 제목"
+          />
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            disabled={saving}
+            rows={2}
+            className="mt-3 w-full resize-y border-b border-line pb-2 text-sm text-slate-600 outline-none transition-colors placeholder:text-slate-300 focus:border-brand disabled:bg-slate-50"
+            placeholder="설문 설명 (선택)"
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-4">
@@ -224,28 +230,19 @@ export default function SurveyBuilderPanel({
         type="button"
         onClick={addQuestion}
         disabled={saving}
-        className="mt-4 w-full rounded-lg border border-dashed border-slate-300 bg-white py-3 text-sm font-medium text-[#002c5f] transition-colors hover:bg-slate-50 disabled:opacity-50"
+        className="mt-4 flex w-full items-center justify-center gap-2 rounded-card border border-dashed border-line bg-surface py-3.5 text-sm font-semibold text-brand transition-colors hover:border-brand/40 hover:bg-brand-light/40 disabled:opacity-50"
       >
-        + 문항 추가
+        <Plus size={16} />
+        문항 추가
       </button>
 
       <div className="mt-8 flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={() => handleSave('draft')}
-          disabled={saving}
-          className="rounded-md border border-slate-300 px-6 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        <Button type="button" variant="secondary" size="lg" onClick={() => handleSave('draft')} disabled={saving}>
           {saving ? '저장 중...' : '임시저장'}
-        </button>
-        <button
-          type="button"
-          onClick={() => handleSave('open')}
-          disabled={saving}
-          className="rounded-md bg-[#002c5f] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#00234c] disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        </Button>
+        <Button type="button" size="lg" onClick={() => handleSave('open')} disabled={saving}>
           {saving ? '저장 중...' : '게시'}
-        </button>
+        </Button>
       </div>
     </div>
   )

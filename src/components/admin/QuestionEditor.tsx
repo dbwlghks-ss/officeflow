@@ -1,3 +1,6 @@
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import { inputClass } from '../ui/primitives'
+
 export type BuilderQuestionType = 'single' | 'text'
 
 export type BuilderQuestion = {
@@ -24,7 +27,7 @@ type QuestionEditorProps = {
 }
 
 const moveButtonClass =
-  'flex h-7 w-7 items-center justify-center rounded border border-slate-300 text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40'
+  'flex h-8 w-8 items-center justify-center rounded-lg border border-line text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40'
 
 export default function QuestionEditor({
   question,
@@ -42,9 +45,9 @@ export default function QuestionEditor({
   onMoveOption,
 }: QuestionEditorProps) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-card border border-line bg-surface p-6 shadow-soft">
       <div className="mb-4 flex items-center justify-between gap-4">
-        <span className="text-sm font-semibold text-[#002c5f]">문항 {index + 1}</span>
+        <span className="text-sm font-semibold text-brand">문항 {index + 1}</span>
         <div className="flex items-center gap-1.5">
           <button
             type="button"
@@ -53,7 +56,7 @@ export default function QuestionEditor({
             aria-label="위로 이동"
             className={moveButtonClass}
           >
-            ↑
+            <ChevronUp size={15} />
           </button>
           <button
             type="button"
@@ -62,7 +65,7 @@ export default function QuestionEditor({
             aria-label="아래로 이동"
             className={moveButtonClass}
           >
-            ↓
+            <ChevronDown size={15} />
           </button>
           <button
             type="button"
@@ -82,7 +85,7 @@ export default function QuestionEditor({
           value={question.text}
           onChange={(e) => onChangeText(question.id, e.target.value)}
           disabled={disabled}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition-colors focus:border-[#002c5f] focus:ring-1 focus:ring-[#002c5f] disabled:bg-slate-50"
+          className={inputClass}
           placeholder="질문을 입력하세요"
         />
       </div>
@@ -97,7 +100,7 @@ export default function QuestionEditor({
               checked={question.type === 'single'}
               onChange={() => onChangeType(question.id, 'single')}
               disabled={disabled}
-              className="accent-[#002c5f]"
+              className="accent-brand"
             />
             객관식
           </label>
@@ -108,7 +111,7 @@ export default function QuestionEditor({
               checked={question.type === 'text'}
               onChange={() => onChangeType(question.id, 'text')}
               disabled={disabled}
-              className="accent-[#002c5f]"
+              className="accent-brand"
             />
             주관식
           </label>
@@ -129,7 +132,7 @@ export default function QuestionEditor({
                   value={option}
                   onChange={(e) => onChangeOption(question.id, optionIndex, e.target.value)}
                   disabled={disabled}
-                  className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition-colors focus:border-[#002c5f] focus:ring-1 focus:ring-[#002c5f] disabled:bg-slate-50"
+                  className={inputClass + ' flex-1'}
                   placeholder={`보기 ${optionIndex + 1}`}
                 />
                 <button
@@ -154,7 +157,7 @@ export default function QuestionEditor({
                   type="button"
                   onClick={() => onRemoveOption(question.id, optionIndex)}
                   disabled={disabled || question.options.length <= 1}
-                  className="rounded-md border border-slate-300 px-3 py-2 text-xs text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-40"
+                  className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-40"
                 >
                   삭제
                 </button>
@@ -165,7 +168,7 @@ export default function QuestionEditor({
             type="button"
             onClick={() => onAddOption(question.id)}
             disabled={disabled}
-            className="mt-2 text-sm font-medium text-[#002c5f] transition-colors hover:underline disabled:opacity-50"
+            className="mt-2 text-sm font-medium text-[#004098] transition-colors hover:underline disabled:opacity-50"
           >
             + 보기 추가
           </button>

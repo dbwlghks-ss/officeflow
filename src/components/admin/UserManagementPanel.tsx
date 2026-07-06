@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Search, ShieldCheck, User as UserIcon } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import {
   getProfiles,
@@ -6,6 +7,7 @@ import {
   updateProfileRole,
   type Profile,
 } from '../../services/userService'
+import { Badge, Button, Card } from '../ui/primitives'
 
 export default function UserManagementPanel() {
   const [profiles, setProfiles] = useState<Profile[]>([])
@@ -91,92 +93,106 @@ export default function UserManagementPanel() {
   }
 
   return (
-    <section className="max-w-4xl rounded-lg border border-slate-200 bg-white">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-6 py-4">
+    <Card className="overflow-hidden">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-6 py-5">
         <div>
-          <h2 className="text-base font-semibold text-slate-800">사용자 관리</h2>
+          <h2 className="text-base font-semibold text-slate-900">사용자 관리</h2>
           <p className="mt-0.5 text-sm text-slate-500">직원 권한과 활성 상태를 관리합니다.</p>
         </div>
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-56 rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition-colors focus:border-[#002c5f] focus:ring-1 focus:ring-[#002c5f]"
-          placeholder="이름 또는 이메일 검색"
-        />
+        <div className="relative w-full sm:w-64">
+          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-10 w-full rounded-btn border border-line bg-canvas pl-9 pr-3 text-sm text-slate-800 outline-none transition-colors focus:border-brand/40 focus:bg-surface focus:ring-4 focus:ring-brand/10"
+            placeholder="이름 또는 이메일 검색"
+          />
+        </div>
       </div>
 
       {error && (
-        <p className="mx-6 mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <p className="mx-6 mt-4 rounded-btn bg-red-50 px-3 py-2 text-sm text-danger">{error}</p>
       )}
 
       {loading ? (
-        <p className="px-6 py-6 text-sm text-slate-500">불러오는 중...</p>
+        <div className="space-y-3 p-6">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-12 animate-pulse rounded-btn bg-slate-100/70" />
+          ))}
+        </div>
       ) : filtered.length === 0 ? (
-        <p className="px-6 py-6 text-sm text-slate-600">
-          {profiles.length === 0 ? '등록된 사용자가 없습니다.' : '검색 결과가 없습니다.'}
-        </p>
+        <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+          <div className="mb-3 grid h-12 w-12 place-items-center rounded-full bg-slate-100 text-slate-400">
+            <UserIcon size={22} />
+          </div>
+          <p className="text-sm font-medium text-slate-600">
+            {profiles.length === 0 ? '등록된 사용자가 없습니다.' : '검색 결과가 없습니다.'}
+          </p>
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                <th className="px-6 py-3">이름</th>
-                <th className="px-6 py-3">이메일</th>
-                <th className="px-6 py-3">부서</th>
-                <th className="px-6 py-3">권한</th>
-                <th className="px-6 py-3">활성</th>
-                <th className="px-6 py-3">관리</th>
+              <tr className="border-b border-line bg-slate-50/60 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <th className="px-6 py-3 font-semibold">이름</th>
+                <th className="px-6 py-3 font-semibold">이메일</th>
+                <th className="px-6 py-3 font-semibold">부서</th>
+                <th className="px-6 py-3 font-semibold">권한</th>
+                <th className="px-6 py-3 font-semibold">상태</th>
+                <th className="px-6 py-3 text-right font-semibold">관리</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-line">
               {filtered.map((profile) => (
-                <tr key={profile.id}>
-                  <td className="px-6 py-3 font-medium text-slate-800">{profile.full_name}</td>
-                  <td className="px-6 py-3 text-slate-600">{profile.email}</td>
-                  <td className="px-6 py-3 text-slate-600">
+                <tr key={profile.id} className="transition-colors hover:bg-slate-50/60">
+                  <td className="px-6 py-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-light text-xs font-bold text-brand">
+                        {profile.full_name?.charAt(0) ?? '·'}
+                      </div>
+                      <span className="font-medium text-slate-800">{profile.full_name}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-3.5 text-slate-500">{profile.email}</td>
+                  <td className="px-6 py-3.5 text-slate-500">
                     {profile.department ?? profile.department_name ?? '-'}
                   </td>
-                  <td className="px-6 py-3">
-                    <span
-                      className={
-                        profile.role === 'admin'
-                          ? 'rounded bg-[#002c5f]/10 px-2 py-0.5 text-xs font-semibold text-[#002c5f]'
-                          : 'rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500'
-                      }
-                    >
-                      {profile.role === 'admin' ? '관리자' : '직원'}
-                    </span>
+                  <td className="px-6 py-3.5">
+                    {profile.role === 'admin' ? (
+                      <Badge tone="brand">
+                        <ShieldCheck size={12} />
+                        관리자
+                      </Badge>
+                    ) : (
+                      <Badge tone="neutral">직원</Badge>
+                    )}
                   </td>
-                  <td className="px-6 py-3">
-                    <span
-                      className={
-                        profile.is_active
-                          ? 'rounded bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700'
-                          : 'rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500'
-                      }
-                    >
-                      {profile.is_active ? '활성' : '비활성'}
-                    </span>
+                  <td className="px-6 py-3.5">
+                    {profile.is_active ? (
+                      <Badge tone="success">활성</Badge>
+                    ) : (
+                      <Badge tone="neutral">비활성</Badge>
+                    )}
                   </td>
-                  <td className="px-6 py-3">
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
+                  <td className="px-6 py-3.5">
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
                         onClick={() => handleToggleRole(profile)}
                         disabled={busyId === profile.id}
-                        className="rounded border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
                       >
                         {profile.role === 'admin' ? '직원으로' : '관리자로'}
-                      </button>
-                      <button
-                        type="button"
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleToggleActive(profile)}
                         disabled={busyId === profile.id}
-                        className="rounded border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
                       >
                         {profile.is_active ? '비활성화' : '활성화'}
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -185,6 +201,6 @@ export default function UserManagementPanel() {
           </table>
         </div>
       )}
-    </section>
+    </Card>
   )
 }

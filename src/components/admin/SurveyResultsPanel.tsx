@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
+import { ArrowLeft } from 'lucide-react'
 import {
   getSurveyResults,
   type QuestionResult,
   type Survey,
 } from '../../services/surveyService'
+import { Badge, Card } from '../ui/primitives'
 
 const TYPE_LABELS: Record<string, string> = {
   single: '객관식',
@@ -39,45 +41,45 @@ export default function SurveyResultsPanel({
   }, [load])
 
   return (
-    <section className="max-w-3xl rounded-lg border border-slate-200 bg-white">
-      <div className="border-b border-slate-200 px-6 py-4">
+    <Card className="max-w-3xl overflow-hidden">
+      <div className="border-b border-line px-6 py-5">
         <button
           type="button"
           onClick={onBack}
-          className="mb-1 text-sm font-medium text-[#002c5f] transition-colors hover:underline"
+          className="mb-1.5 inline-flex items-center gap-1.5 text-sm font-medium text-brand transition-colors hover:text-brand-hover"
         >
-          &larr; 설문 목록
+          <ArrowLeft size={16} />
+          설문 목록
         </button>
-        <h2 className="truncate text-base font-semibold text-slate-800">
-          설문 결과 &middot; {survey.title}
-        </h2>
+        <h2 className="truncate text-lg font-bold text-slate-900">설문 결과 · {survey.title}</h2>
       </div>
 
       {error && (
-        <p className="mx-6 mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <p className="mx-6 mt-4 rounded-btn bg-red-50 px-3 py-2 text-sm text-danger">{error}</p>
       )}
 
       {loading ? (
-        <p className="px-6 py-6 text-sm text-slate-500">불러오는 중...</p>
+        <div className="space-y-3 p-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-24 animate-pulse rounded-btn bg-slate-100/70" />
+          ))}
+        </div>
       ) : results.length === 0 ? (
-        <p className="px-6 py-6 text-sm text-slate-600">등록된 문항이 없습니다.</p>
+        <p className="px-6 py-16 text-center text-sm text-slate-400">등록된 문항이 없습니다.</p>
       ) : (
-        <ul className="divide-y divide-slate-200">
+        <ul className="divide-y divide-line">
           {results.map((result, index) => (
             <li key={result.question.id} className="px-6 py-5">
               <div className="mb-3 flex flex-wrap items-center gap-2">
-                <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
+                <span className="grid h-6 w-6 place-items-center rounded-full bg-slate-100 text-xs font-semibold text-slate-500">
                   {index + 1}
                 </span>
-                <span className="rounded bg-[#002c5f]/10 px-2 py-0.5 text-xs font-semibold text-[#002c5f]">
-                  {TYPE_LABELS[result.question.question_type]}
-                </span>
-                <span className="text-sm font-medium text-slate-800">
+                <Badge tone="brand">{TYPE_LABELS[result.question.question_type]}</Badge>
+                <span className="text-sm font-semibold text-slate-800">
                   {result.question.question_text}
                 </span>
               </div>
 
-              {/* 객관식 */}
               {result.single && (
                 <div className="flex flex-col gap-3">
                   <p className="text-xs text-slate-400">총 {result.single.total}명 응답</p>
@@ -89,9 +91,9 @@ export default function SurveyResultsPanel({
                           {option.count}명 ({option.percent}%)
                         </span>
                       </div>
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
                         <div
-                          className="h-full rounded-full bg-[#002c5f]"
+                          className="h-full rounded-full bg-brand transition-all"
                           style={{ width: `${option.percent}%` }}
                         />
                       </div>
@@ -100,12 +102,11 @@ export default function SurveyResultsPanel({
                 </div>
               )}
 
-              {/* 평점 */}
               {result.rating && (
                 <div className="flex flex-col gap-3">
                   <p className="text-sm text-slate-700">
                     평균{' '}
-                    <span className="font-semibold text-[#002c5f]">
+                    <span className="font-semibold text-brand">
                       {result.rating.average.toFixed(1)}
                     </span>{' '}
                     <span className="text-xs text-slate-400">
@@ -123,9 +124,9 @@ export default function SurveyResultsPanel({
                           <span className="text-slate-700">{item.score}점</span>
                           <span className="text-slate-500">{item.count}명</span>
                         </div>
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                        <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
                           <div
-                            className="h-full rounded-full bg-[#002c5f]"
+                            className="h-full rounded-full bg-brand transition-all"
                             style={{ width: `${percent}%` }}
                           />
                         </div>
@@ -135,12 +136,11 @@ export default function SurveyResultsPanel({
                 </div>
               )}
 
-              {/* 주관식 */}
               {result.text && (
                 <div>
                   <p className="mb-2 text-xs text-slate-400">총 {result.text.length}개 응답</p>
                   {result.text.length === 0 ? (
-                    <p className="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-500">
+                    <p className="rounded-btn bg-slate-50 px-3 py-2 text-sm text-slate-500">
                       응답이 없습니다.
                     </p>
                   ) : (
@@ -148,7 +148,7 @@ export default function SurveyResultsPanel({
                       {result.text.map((answer, i) => (
                         <li
                           key={i}
-                          className="whitespace-pre-wrap rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-700"
+                          className="whitespace-pre-wrap rounded-btn bg-slate-50 px-3.5 py-2.5 text-sm text-slate-700"
                         >
                           {answer}
                         </li>
@@ -161,6 +161,6 @@ export default function SurveyResultsPanel({
           ))}
         </ul>
       )}
-    </section>
+    </Card>
   )
 }

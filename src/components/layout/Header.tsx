@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Bell, LogIn, LogOut, Search } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { HwashinLogo, OfficeFlowLogo } from '../ui/Logo'
+import { Badge, Button } from '../ui/primitives'
 
-type AuthUser = { name: string; position: string | null }
+type AuthUser = { name: string; position: string | null; role: string | null }
 
 export default function Header() {
   const navigate = useNavigate()
@@ -14,13 +17,14 @@ export default function Header() {
     async function resolveProfile(userId: string, fallback: string | null) {
       const { data } = await supabase
         .from('profiles')
-        .select('full_name, position')
+        .select('full_name, position, role')
         .eq('id', userId)
         .maybeSingle()
       if (active) {
         setAuthUser({
           name: data?.full_name ?? fallback ?? '사용자',
           position: data?.position ?? null,
+          role: data?.role ?? null,
         })
       }
     }
@@ -56,49 +60,78 @@ export default function Header() {
     navigate('/')
   }
 
-  const today = new Date().toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
-  })
+  const isAdmin = authUser?.role === 'admin'
+  const initial = authUser?.name?.trim()?.charAt(0) ?? 'U'
 
   return (
-    <header className="border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded bg-[#002c5f]">
-            <span className="text-sm font-bold text-white">OF</span>
-          </div>
-          <span className="text-lg font-semibold tracking-tight text-[#002c5f]">OfficeFlow</span>
+    <header className="sticky top-0 z-30 h-[72px] border-b border-line bg-surface/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-full max-w-[1600px] items-center gap-6 px-6 lg:px-10">
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="flex items-center gap-3 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
+        >
+          <OfficeFlowLogo />
+          <span className="hidden h-6 w-px bg-line md:block" />
+          <span className="hidden md:block">
+            <HwashinLogo />
+          </span>
+        </button>
+
+        <div className="relative mx-auto hidden w-full max-w-md lg:block">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={17} />
+          <input
+            type="text"
+            placeholder="검색 (식수, 설문, 공지...)"
+            className="h-10 w-full rounded-btn border border-line bg-canvas pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 transition-colors focus:border-brand/40 focus:bg-surface focus:outline-none focus:ring-4 focus:ring-brand/10"
+          />
         </div>
 
-        <div className="flex items-center gap-6">
-          <time className="hidden text-sm text-slate-500 sm:block">{today}</time>
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
           {authUser ? (
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-slate-700">
-                {authUser.name}
-                {authUser.position && (
-                  <span className="ml-1.5 text-slate-400">{authUser.position}</span>
-                )}
-              </span>
+            <>
+              <button
+                type="button"
+                aria-label="알림"
+                className="relative grid h-10 w-10 place-items-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              >
+                <Bell size={19} />
+                <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-danger ring-2 ring-surface" />
+              </button>
+
+              <span className="hidden h-6 w-px bg-line sm:block" />
+
+              <div className="flex items-center gap-2.5 pl-0.5">
+                <div className="grid h-9 w-9 place-items-center rounded-full bg-brand-light text-sm font-bold text-brand">
+                  {initial}
+                </div>
+                <div className="hidden text-left leading-tight sm:block">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-semibold text-slate-800">{authUser.name}</span>
+                    {isAdmin && <Badge tone="brand">관리자</Badge>}
+                  </div>
+                  <span className="text-xs text-slate-400">{authUser.position ?? '임직원'}</span>
+                </div>
+              </div>
+
+              <Button variant="secondary" size="sm" onClick={handleLogout} className="hidden sm:inline-flex">
+                <LogOut size={15} />
+                로그아웃
+              </Button>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="rounded border border-[#002c5f] px-4 py-1.5 text-sm font-medium text-[#002c5f] transition-colors hover:bg-[#002c5f] hover:text-white"
+                aria-label="로그아웃"
+                className="grid h-10 w-10 place-items-center rounded-full text-slate-500 hover:bg-slate-100 sm:hidden"
               >
-                로그아웃
+                <LogOut size={18} />
               </button>
-            </div>
+            </>
           ) : authUser === null ? (
-            <button
-              type="button"
-              onClick={() => navigate('/login')}
-              className="rounded border border-[#002c5f] px-4 py-1.5 text-sm font-medium text-[#002c5f] transition-colors hover:bg-[#002c5f] hover:text-white"
-            >
+            <Button variant="primary" size="sm" onClick={() => navigate('/login')}>
+              <LogIn size={15} />
               로그인
-            </button>
+            </Button>
           ) : null}
         </div>
       </div>

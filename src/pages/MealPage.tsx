@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { CheckCircle2, UtensilsCrossed, XCircle } from 'lucide-react'
 import Header from '../components/layout/Header'
 import { supabase } from '../lib/supabase'
 import {
@@ -9,6 +10,7 @@ import {
   type MealApplication,
   type MealService,
 } from '../services/mealService'
+import { Badge, Button, Card } from '../components/ui/primitives'
 
 export default function MealPage() {
   const [loading, setLoading] = useState(true)
@@ -96,68 +98,84 @@ export default function MealPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f5f7] text-slate-800">
+    <div className="min-h-screen bg-canvas text-slate-800">
       <Header />
 
-      <main className="mx-auto max-w-md px-6 py-16">
-        <div className="rounded-lg border border-slate-200 bg-white p-8">
-          <h1 className="mb-1 text-2xl font-bold tracking-tight text-[#002c5f]">
-            오늘의 식수 신청
-          </h1>
-          <p className="mb-6 text-sm text-slate-500">{today}</p>
-
-          {loading ? (
-            <p className="text-sm text-slate-500">불러오는 중...</p>
-          ) : !service ? (
-            <p className="rounded-md bg-slate-50 px-4 py-3 text-sm text-slate-600">
-              오늘 등록된 식수가 없습니다.
-            </p>
-          ) : (
-            <>
-              <div className="mb-6 flex items-center justify-between rounded-md bg-[#002c5f]/5 px-4 py-3">
-                <span className="text-sm font-medium text-slate-600">현재 신청 상태</span>
-                <span
-                  className={
-                    isApplied
-                      ? 'text-sm font-semibold text-[#002c5f]'
-                      : 'text-sm font-semibold text-slate-400'
-                  }
-                >
-                  {isApplied ? '신청됨' : '미신청'}
-                </span>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={handleApply}
-                  disabled={actionLoading || isApplied}
-                  className="flex-1 rounded-md bg-[#002c5f] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#00234c] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  신청
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={actionLoading || !isApplied}
-                  className="flex-1 rounded-md border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  취소
-                </button>
-              </div>
-
-              {message && (
-                <p className="mt-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-                  {message}
-                </p>
-              )}
-            </>
-          )}
-
-          {error && (
-            <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
-          )}
+      <main className="mx-auto w-full max-w-lg px-6 py-12 lg:py-16">
+        <div className="mb-8">
+          <p className="mb-1 text-sm font-medium text-slate-400">{today}</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">오늘의 식수 신청</h1>
         </div>
+
+        <Card className="overflow-hidden">
+          <div className="flex items-center gap-4 border-b border-line bg-gradient-to-br from-brand to-brand-hover px-8 py-7 text-white">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
+              <UtensilsCrossed size={26} strokeWidth={1.8} />
+            </div>
+            <div>
+              <p className="text-sm text-white/70">중식 신청</p>
+              <p className="text-lg font-semibold">간편하게 신청하세요</p>
+            </div>
+          </div>
+
+          <div className="p-8">
+            {loading ? (
+              <div className="space-y-3">
+                <div className="h-14 animate-pulse rounded-btn bg-slate-100/70" />
+                <div className="h-11 animate-pulse rounded-btn bg-slate-100/70" />
+              </div>
+            ) : !service ? (
+              <p className="rounded-btn bg-slate-50 px-4 py-4 text-center text-sm text-slate-500">
+                오늘 등록된 식수가 없습니다.
+              </p>
+            ) : (
+              <>
+                <div className="mb-6 flex items-center justify-between rounded-btn border border-line bg-canvas px-4 py-4">
+                  <span className="text-sm font-medium text-slate-500">현재 신청 상태</span>
+                  {isApplied ? (
+                    <Badge tone="success">
+                      <CheckCircle2 size={13} />
+                      신청됨
+                    </Badge>
+                  ) : (
+                    <Badge tone="neutral">미신청</Badge>
+                  )}
+                </div>
+
+                <div className="flex gap-3">
+                  <Button
+                    variant="primary"
+                    onClick={handleApply}
+                    disabled={actionLoading || isApplied}
+                    className="flex-1"
+                  >
+                    <CheckCircle2 size={16} />
+                    신청
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={handleCancel}
+                    disabled={actionLoading || !isApplied}
+                    className="flex-1"
+                  >
+                    <XCircle size={16} />
+                    취소
+                  </Button>
+                </div>
+
+                {message && (
+                  <p className="mt-4 rounded-btn bg-green-50 px-3 py-2 text-sm font-medium text-success">
+                    {message}
+                  </p>
+                )}
+              </>
+            )}
+
+            {error && (
+              <p className="mt-4 rounded-btn bg-red-50 px-3 py-2 text-sm text-danger">{error}</p>
+            )}
+          </div>
+        </Card>
       </main>
     </div>
   )

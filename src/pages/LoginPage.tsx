@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { HwashinLogo, OfficeFlowLogo } from '../components/ui/Logo'
+import { Button, Card, inputClass } from '../components/ui/primitives'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -127,110 +129,109 @@ export default function LoginPage() {
 
   if (checkingSession) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f4f5f7]">
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
         <span className="text-sm text-slate-500">불러오는 중...</span>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f4f5f7] px-6">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 flex flex-col items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded bg-[#002c5f]">
-            <span className="text-base font-bold text-white">OF</span>
+    <div className="flex min-h-screen items-center justify-center bg-canvas px-6 py-12">
+      <div className="w-full max-w-[400px]">
+        <div className="mb-8 flex flex-col items-center gap-4 text-center">
+          <OfficeFlowLogo compact />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">다시 오신 것을 환영합니다</h1>
+            <p className="mt-1 text-sm text-slate-500">OfficeFlow 계정으로 로그인하세요</p>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[#002c5f]">로그인</h1>
-          <p className="text-sm text-slate-500">OfficeFlow 계정으로 로그인하세요</p>
         </div>
 
         {info && (
-          <p className="mb-4 rounded-md bg-emerald-50 px-3 py-2 text-center text-sm font-medium text-emerald-700">
+          <p className="mb-4 rounded-btn bg-green-50 px-3 py-2.5 text-center text-sm font-medium text-success">
             {info}
           </p>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-lg border border-slate-200 bg-white p-6"
-        >
-          <div className="mb-4">
-            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-700">
-              이메일
-            </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition-colors focus:border-[#002c5f] focus:ring-1 focus:ring-[#002c5f] disabled:bg-slate-50"
-              placeholder="name@company.com"
-            />
-          </div>
+        <Card className="p-7 shadow-card">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-700">
+                이메일
+              </label>
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+                className={inputClass}
+                placeholder="name@company.com"
+              />
+            </div>
 
-          <div className="mb-5">
-            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-slate-700">
-              비밀번호
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition-colors focus:border-[#002c5f] focus:ring-1 focus:ring-[#002c5f] disabled:bg-slate-50"
-              placeholder="비밀번호를 입력하세요"
-            />
-          </div>
+            <div className="mb-5">
+              <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-slate-700">
+                비밀번호
+              </label>
+              <input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+                className={inputClass}
+                placeholder="비밀번호를 입력하세요"
+              />
+            </div>
 
-          {error && (
-            <p className="mb-4 whitespace-pre-line rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
-              {error}
-            </p>
-          )}
+            {error && (
+              <p className="mb-4 whitespace-pre-line rounded-btn bg-red-50 px-3 py-2 text-sm text-danger">
+                {error}
+              </p>
+            )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex w-full items-center justify-center rounded-md bg-[#002c5f] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#00234c] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {loading ? '로그인 중...' : '로그인'}
-          </button>
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? '로그인 중...' : '로그인'}
+            </Button>
 
-          <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+            <div className="mt-5 flex items-center justify-center gap-3 text-sm">
+              <button
+                type="button"
+                onClick={() => navigate('/signup')}
+                disabled={loading}
+                className="font-medium text-slate-500 transition-colors hover:text-brand disabled:opacity-60"
+              >
+                회원가입
+              </button>
+              <span className="text-slate-300">|</span>
+              <button
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                disabled={loading}
+                className="font-medium text-slate-500 transition-colors hover:text-brand disabled:opacity-60"
+              >
+                비밀번호를 잊으셨나요?
+              </button>
+            </div>
+
             <button
               type="button"
-              onClick={() => navigate('/signup')}
-              disabled={loading}
-              className="font-medium text-slate-500 transition-colors hover:text-[#002c5f] disabled:opacity-60"
+              onClick={handleResend}
+              disabled={loading || resending}
+              className="mt-3 flex w-full items-center justify-center text-sm font-medium text-slate-400 transition-colors hover:text-brand disabled:opacity-60"
             >
-              회원가입
+              {resending ? '재발송 중...' : '인증 메일을 받지 못했나요?'}
             </button>
-            <span className="text-slate-300">|</span>
-            <button
-              type="button"
-              onClick={() => navigate('/forgot-password')}
-              disabled={loading}
-              className="font-medium text-slate-500 transition-colors hover:text-[#002c5f] disabled:opacity-60"
-            >
-              비밀번호를 잊으셨나요?
-            </button>
-          </div>
+          </form>
+        </Card>
 
-          <button
-            type="button"
-            onClick={handleResend}
-            disabled={loading || resending}
-            className="mt-3 flex w-full items-center justify-center text-sm font-medium text-slate-500 transition-colors hover:text-[#002c5f] disabled:opacity-60"
-          >
-            {resending ? '재발송 중...' : '인증 메일을 받지 못했나요?'}
-          </button>
-        </form>
+        <div className="mt-8 flex items-center justify-center opacity-70">
+          <HwashinLogo />
+        </div>
       </div>
     </div>
   )

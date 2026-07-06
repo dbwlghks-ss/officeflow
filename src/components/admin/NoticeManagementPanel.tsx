@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Megaphone, Pencil, Pin, Plus, Trash2 } from 'lucide-react'
 import {
   createNotice,
   deleteNotice,
@@ -8,6 +9,7 @@ import {
   updateNotice,
   type AdminNotice,
 } from '../../services/noticeService'
+import { Badge, Button, Card, inputClass } from '../ui/primitives'
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString('ko-KR', {
@@ -126,25 +128,22 @@ export default function NoticeManagementPanel() {
   }
 
   return (
-    <section className="max-w-3xl rounded-lg border border-slate-200 bg-white">
-      <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+    <Card className="max-w-4xl overflow-hidden">
+      <div className="flex items-center justify-between border-b border-line px-6 py-5">
         <div>
-          <h2 className="text-base font-semibold text-slate-800">공지 관리</h2>
+          <h2 className="text-base font-semibold text-slate-900">공지 관리</h2>
           <p className="mt-0.5 text-sm text-slate-500">사내 공지를 등록하고 관리합니다.</p>
         </div>
         {!editing && (
-          <button
-            type="button"
-            onClick={openNew}
-            className="rounded-md bg-[#002c5f] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#00234c]"
-          >
+          <Button type="button" size="sm" onClick={openNew}>
+            <Plus size={16} />
             새 공지
-          </button>
+          </Button>
         )}
       </div>
 
       {error && (
-        <p className="mx-6 mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <p className="mx-6 mt-4 rounded-btn bg-red-50 px-3 py-2 text-sm text-danger">{error}</p>
       )}
 
       {editing ? (
@@ -162,7 +161,7 @@ export default function NoticeManagementPanel() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               disabled={saving}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition-colors focus:border-[#002c5f] focus:ring-1 focus:ring-[#002c5f] disabled:bg-slate-50"
+              className={inputClass}
               placeholder="공지 제목"
             />
           </div>
@@ -176,100 +175,72 @@ export default function NoticeManagementPanel() {
               onChange={(e) => setContent(e.target.value)}
               disabled={saving}
               rows={6}
-              className="w-full resize-y rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition-colors focus:border-[#002c5f] focus:ring-1 focus:ring-[#002c5f] disabled:bg-slate-50"
+              className={inputClass + ' resize-y'}
               placeholder="공지 내용"
             />
           </div>
           <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving}
-              className="rounded-md bg-[#002c5f] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#00234c] disabled:cursor-not-allowed disabled:opacity-50"
-            >
+            <Button type="button" onClick={handleSave} disabled={saving}>
               {saving ? '저장 중...' : '저장'}
-            </button>
-            <button
-              type="button"
-              onClick={closeForm}
-              disabled={saving}
-              className="rounded-md border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
-            >
+            </Button>
+            <Button type="button" variant="secondary" onClick={closeForm} disabled={saving}>
               취소
-            </button>
+            </Button>
           </div>
         </div>
       ) : loading ? (
-        <p className="px-6 py-6 text-sm text-slate-500">불러오는 중...</p>
+        <div className="space-y-3 p-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-16 animate-pulse rounded-btn bg-slate-100/70" />
+          ))}
+        </div>
       ) : notices.length === 0 ? (
-        <p className="px-6 py-6 text-sm text-slate-600">등록된 공지사항이 없습니다.</p>
+        <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+          <div className="mb-3 grid h-12 w-12 place-items-center rounded-full bg-slate-100 text-slate-400">
+            <Megaphone size={22} />
+          </div>
+          <p className="text-sm font-medium text-slate-600">등록된 공지사항이 없습니다.</p>
+        </div>
       ) : (
-        <ul className="divide-y divide-slate-200">
+        <ul className="divide-y divide-line">
           {notices.map((notice) => (
-            <li key={notice.id} className="px-6 py-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="mb-1 flex flex-wrap items-center gap-2">
-                    {notice.is_pinned && (
-                      <span className="rounded bg-[#002c5f]/10 px-2 py-0.5 text-xs font-semibold text-[#002c5f]">
-                        고정
-                      </span>
-                    )}
-                    <span
-                      className={
-                        notice.is_published
-                          ? 'rounded bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700'
-                          : 'rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500'
-                      }
-                    >
-                      {notice.is_published ? '게시중' : '미게시'}
-                    </span>
-                    <span className="truncate text-sm font-medium text-slate-800">
-                      {notice.title}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400">{formatDate(notice.created_at)}</p>
-                </div>
+            <li key={notice.id} className="px-6 py-4 transition-colors hover:bg-slate-50/40">
+              <div className="mb-1 flex flex-wrap items-center gap-2">
+                {notice.is_pinned && (
+                  <Badge tone="brand">
+                    <Pin size={11} />
+                    고정
+                  </Badge>
+                )}
+                {notice.is_published ? (
+                  <Badge tone="success">게시중</Badge>
+                ) : (
+                  <Badge tone="neutral">미게시</Badge>
+                )}
+                <span className="truncate text-sm font-semibold text-slate-800">{notice.title}</span>
               </div>
+              <p className="text-xs text-slate-400">{formatDate(notice.created_at)}</p>
 
               <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => openEdit(notice)}
-                  disabled={busyId === notice.id}
-                  className="rounded border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
-                >
+                <Button type="button" variant="secondary" size="sm" onClick={() => openEdit(notice)} disabled={busyId === notice.id}>
+                  <Pencil size={13} />
                   수정
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleTogglePinned(notice)}
-                  disabled={busyId === notice.id}
-                  className="rounded border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
-                >
+                </Button>
+                <Button type="button" variant="ghost" size="sm" onClick={() => handleTogglePinned(notice)} disabled={busyId === notice.id}>
                   {notice.is_pinned ? '고정 해제' : '상단 고정'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleTogglePublished(notice)}
-                  disabled={busyId === notice.id}
-                  className="rounded border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
-                >
+                </Button>
+                <Button type="button" variant="ghost" size="sm" onClick={() => handleTogglePublished(notice)} disabled={busyId === notice.id}>
                   {notice.is_published ? '게시 중지' : '게시'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(notice.id)}
-                  disabled={busyId === notice.id}
-                  className="rounded border border-red-200 px-3 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
-                >
+                </Button>
+                <Button type="button" variant="ghost" size="sm" onClick={() => handleDelete(notice.id)} disabled={busyId === notice.id} className="text-danger hover:bg-red-50">
+                  <Trash2 size={13} />
                   삭제
-                </button>
+                </Button>
               </div>
             </li>
           ))}
         </ul>
       )}
-    </section>
+    </Card>
   )
 }
