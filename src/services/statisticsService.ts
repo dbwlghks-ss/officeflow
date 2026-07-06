@@ -33,7 +33,7 @@ export async function getStatistics(): Promise<StatisticsData> {
   const startDateStr = keys[0]
   const startISO = days[0].toISOString()
 
-  const [mealsRes, responsesRes, noticesRes, adminRes, employeeRes] = await Promise.all([
+  const [mealsRes, responsesRes, noticesRes, profilesRes] = await Promise.all([
     supabase
       .from('meal_applications')
       .select('meal_services!inner(service_date)')
@@ -41,13 +41,17 @@ export async function getStatistics(): Promise<StatisticsData> {
       .gte('meal_services.service_date', startDateStr),
     supabase.from('survey_responses').select('created_at').gte('created_at', startISO),
     supabase.from('notices').select('created_at').gte('created_at', startISO),
-    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'admin'),
-    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'employee'),
+    // 이메일 인증 완료 사용자만 집계한다.
+    supabase.rpc('get_confirmed_profiles'),
   ])
 
   const firstError =
-    mealsRes.error || responsesRes.error || noticesRes.error || adminRes.error || employeeRes.error
+    mealsRes.error || responsesRes.error || noticesRes.error || profilesRes.error
   if (firstError) throw firstError
+
+  const confirmedProfiles = (profilesRes.data ?? []) as { role: string }[]
+  const adminCount = confirmedProfiles.filter((p) => p.role === 'admin').length
+  const employeeCount = confirmedProfiles.filter((p) => p.role === 'employee').length
 
   const countByDay = (rowKeys: string[]): number[] =>
     keys.map((key) => rowKeys.filter((rk) => rk === key).length)
@@ -73,8 +77,8 @@ export async function getStatistics(): Promise<StatisticsData> {
     surveyResponses: countByDay(responseKeys),
     notices: countByDay(noticeKeys),
     roles: {
-      admin: adminRes.count ?? 0,
-      employee: employeeRes.count ?? 0,
+      admin: adminCount,
+      employee: employeeCount,
     },
   }
 }

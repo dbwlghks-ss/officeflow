@@ -43,7 +43,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       .select('id, meal_services!inner(service_date)', { count: 'exact', head: true })
       .eq('status', 'applied')
       .eq('meal_services.service_date', today),
-    supabase.from('profiles').select('*', { count: 'exact', head: true }),
+    supabase.rpc('count_confirmed_profiles'),
     supabase.from('notices').select('*', { count: 'exact', head: true }).eq('is_published', true),
     supabase.from('surveys').select('*', { count: 'exact', head: true }).eq('status', 'open'),
     supabase
@@ -71,7 +71,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   return {
     stats: {
       todayMeals: todayMealsRes.count ?? 0,
-      totalEmployees: employeesRes.count ?? 0,
+      totalEmployees: (employeesRes.data as number | null) ?? 0,
       publishedNotices: noticesCountRes.count ?? 0,
       openSurveys: surveysCountRes.count ?? 0,
     },

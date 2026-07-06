@@ -135,7 +135,7 @@ export default function UserManagementPanel() {
                   <td className="px-6 py-3 font-medium text-slate-800">{profile.full_name}</td>
                   <td className="px-6 py-3 text-slate-600">{profile.email}</td>
                   <td className="px-6 py-3 text-slate-600">
-                    {profile.department ?? profile.department_rel?.name ?? '-'}
+                    {profile.department ?? profile.department_name ?? '-'}
                   </td>
                   <td className="px-6 py-3">
                     <span

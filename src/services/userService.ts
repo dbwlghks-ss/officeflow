@@ -10,14 +10,13 @@ export type Profile = {
   is_active: boolean
   position: string | null
   department: string | null
-  department_rel: { name: string } | null
+  department_name: string | null
 }
 
+// 이메일 인증(auth.users.email_confirmed_at)이 완료된 사용자만 반환한다.
+// auth.users 조인이 필요하므로 SECURITY DEFINER RPC 를 통해 조회한다.
 export async function getProfiles(): Promise<Profile[]> {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, full_name, email, role, is_active, position, department, department_rel:departments(name)')
-    .order('full_name', { ascending: true })
+  const { data, error } = await supabase.rpc('get_confirmed_profiles')
 
   if (error) throw error
   return (data ?? []) as unknown as Profile[]
