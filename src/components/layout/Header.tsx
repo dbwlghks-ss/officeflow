@@ -65,13 +65,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-30 h-[72px] border-b border-line bg-surface/80 backdrop-blur-xl">
       <div className="mx-auto flex h-full max-w-[1600px] items-center gap-6 px-6 lg:px-10">
-        <button
-          type="button"
-          onClick={() => navigate('/')}
-          className="rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
-        >
-          <HeaderBrandLockup />
-        </button>
+        <HeaderBrandLockup onOfficeFlowClick={() => navigate('/')} />
 
         <div className="relative mx-auto hidden w-full max-w-md lg:block">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={17} />

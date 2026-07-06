@@ -76,18 +76,34 @@ export function HwashinLogo({ className, header = false }: LogoProps) {
   )
 }
 
-/** Header brand lockup: [official HWASHIN CI] · OfficeFlow */
-export function HeaderBrandLockup() {
+/** Header brand lockup: [official HWASHIN CI] · [OfficeFlow logo PNG] */
+export function HeaderBrandLockup({ onOfficeFlowClick }: { onOfficeFlowClick?: () => void }) {
   return (
-    <div className="flex items-center gap-3">
-      <img
-        src="/hwashin-logo.png"
-        alt="HWASHIN"
-        className="h-[32px] w-auto shrink-0 object-contain"
-      />
-      <span className="text-[15px] font-medium leading-none tracking-tight text-slate-500">
-        OfficeFlow
-      </span>
+    <div className="flex items-center gap-5">
+      <a
+        href="https://www.hwashin.co.kr"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="cursor-pointer shrink-0 transition-opacity duration-200 hover:opacity-90"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img
+          src="/hwashin-logo.png"
+          alt="HWASHIN"
+          className="h-[32px] w-auto object-contain"
+        />
+      </a>
+      <button
+        type="button"
+        onClick={onOfficeFlowClick}
+        className="shrink-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
+      >
+        <img
+          src="/officeflow-logo.png"
+          alt="OfficeFlow"
+          className="h-[26px] w-auto object-contain"
+        />
+      </button>
     </div>
   )
 }
