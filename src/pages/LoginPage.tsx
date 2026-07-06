@@ -1,9 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const signupSuccess = Boolean((location.state as { signupSuccess?: boolean } | null)?.signupSuccess)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -114,6 +116,12 @@ export default function LoginPage() {
           <p className="text-sm text-slate-500">OfficeFlow 계정으로 로그인하세요</p>
         </div>
 
+        {signupSuccess && (
+          <p className="mb-4 rounded-md bg-emerald-50 px-3 py-2 text-center text-sm font-medium text-emerald-700">
+            회원가입이 완료되었습니다.
+          </p>
+        )}
+
         <form
           onSubmit={handleSubmit}
           className="rounded-lg border border-slate-200 bg-white p-6"
@@ -162,6 +170,15 @@ export default function LoginPage() {
             className="flex w-full items-center justify-center rounded-md bg-[#002c5f] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#00234c] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? '로그인 중...' : '로그인'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate('/signup')}
+            disabled={loading}
+            className="mt-3 flex w-full items-center justify-center rounded-md border border-[#002c5f] px-4 py-2.5 text-sm font-medium text-[#002c5f] transition-colors hover:bg-[#002c5f]/5 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            회원가입
           </button>
         </form>
       </div>

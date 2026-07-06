@@ -2,29 +2,36 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
+type AuthUser = { name: string; position: string | null }
+
 export default function Header() {
   const navigate = useNavigate()
-  const [authName, setAuthName] = useState<string | null | undefined>(undefined)
+  const [authUser, setAuthUser] = useState<AuthUser | null | undefined>(undefined)
 
   useEffect(() => {
     let active = true
 
-    async function resolveName(userId: string, fallback: string | null) {
+    async function resolveProfile(userId: string, fallback: string | null) {
       const { data } = await supabase
         .from('profiles')
-        .select('full_name')
+        .select('full_name, position')
         .eq('id', userId)
         .maybeSingle()
-      if (active) setAuthName(data?.full_name ?? fallback ?? '사용자')
+      if (active) {
+        setAuthUser({
+          name: data?.full_name ?? fallback ?? '사용자',
+          position: data?.position ?? null,
+        })
+      }
     }
 
     supabase.auth.getSession().then(({ data }) => {
       if (!active) return
       const user = data.session?.user
       if (user) {
-        resolveName(user.id, user.email ?? null)
+        resolveProfile(user.id, user.email ?? null)
       } else {
-        setAuthName(null)
+        setAuthUser(null)
       }
     })
 
@@ -32,9 +39,9 @@ export default function Header() {
       if (!active) return
       const user = session?.user
       if (user) {
-        resolveName(user.id, user.email ?? null)
+        resolveProfile(user.id, user.email ?? null)
       } else {
-        setAuthName(null)
+        setAuthUser(null)
       }
     })
 
@@ -68,9 +75,14 @@ export default function Header() {
 
         <div className="flex items-center gap-6">
           <time className="hidden text-sm text-slate-500 sm:block">{today}</time>
-          {authName ? (
+          {authUser ? (
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-slate-700">{authName}</span>
+              <span className="text-sm font-medium text-slate-700">
+                {authUser.name}
+                {authUser.position && (
+                  <span className="ml-1.5 text-slate-400">{authUser.position}</span>
+                )}
+              </span>
               <button
                 type="button"
                 onClick={handleLogout}
@@ -79,7 +91,7 @@ export default function Header() {
                 로그아웃
               </button>
             </div>
-          ) : authName === null ? (
+          ) : authUser === null ? (
             <button
               type="button"
               onClick={() => navigate('/login')}

@@ -8,13 +8,15 @@ export type Profile = {
   email: string
   role: ProfileRole
   is_active: boolean
-  department: { name: string } | null
+  position: string | null
+  department: string | null
+  department_rel: { name: string } | null
 }
 
 export async function getProfiles(): Promise<Profile[]> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, full_name, email, role, is_active, department:departments(name)')
+    .select('id, full_name, email, role, is_active, position, department, department_rel:departments(name)')
     .order('full_name', { ascending: true })
 
   if (error) throw error
