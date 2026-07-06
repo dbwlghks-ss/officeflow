@@ -76,10 +76,29 @@ export function HwashinLogo({ className, header = false }: LogoProps) {
   )
 }
 
+/** Official OfficeFlow wordmark — PNG asset, sizing only (no color/image edits). */
+export function OfficeFlowLogoImage({
+  className,
+  size = 'auth',
+}: {
+  className?: string
+  size?: 'header' | 'auth'
+}) {
+  const heightClass = size === 'header' ? 'h-[28px]' : 'h-[32px]'
+
+  return (
+    <img
+      src="/officeflow-logo.png"
+      alt="OfficeFlow"
+      className={`w-auto shrink-0 object-contain ${heightClass}${className ? ` ${className}` : ''}`}
+    />
+  )
+}
+
 /** Header brand lockup: [official HWASHIN CI] · [OfficeFlow logo PNG] */
 export function HeaderBrandLockup({ onOfficeFlowClick }: { onOfficeFlowClick?: () => void }) {
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex items-center gap-3.5">
       <a
         href="https://www.hwashin.co.kr"
         target="_blank"
@@ -98,11 +117,7 @@ export function HeaderBrandLockup({ onOfficeFlowClick }: { onOfficeFlowClick?: (
         onClick={onOfficeFlowClick}
         className="shrink-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
       >
-        <img
-          src="/officeflow-logo.png"
-          alt="OfficeFlow"
-          className="h-[26px] w-auto object-contain"
-        />
+        <OfficeFlowLogoImage size="header" />
       </button>
     </div>
   )

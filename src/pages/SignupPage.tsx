@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MailCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import { HwashinLogo, OfficeFlowLogo } from '../components/ui/Logo'
+import { HwashinLogo, OfficeFlowLogoImage } from '../components/ui/Logo'
 import { Button, Card, inputClass } from '../components/ui/primitives'
 
 const POSITIONS = ['사원', '주임', '대리', '과장', '차장', '부장', '임원'] as const
@@ -85,7 +85,7 @@ export default function SignupPage() {
       <div className="flex min-h-screen items-center justify-center bg-canvas px-6 py-12">
         <div className="w-full max-w-[400px]">
           <div className="mb-8 flex justify-center">
-            <OfficeFlowLogo compact />
+            <OfficeFlowLogoImage />
           </div>
 
           <Card className="p-7 shadow-card">
@@ -115,7 +115,7 @@ export default function SignupPage() {
     <div className="flex min-h-screen items-center justify-center bg-canvas px-6 py-12">
       <div className="w-full max-w-[400px]">
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
-          <OfficeFlowLogo compact />
+          <OfficeFlowLogoImage />
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">회원가입</h1>
             <p className="mt-1 text-sm text-slate-500">OfficeFlow 계정을 생성하세요</p>

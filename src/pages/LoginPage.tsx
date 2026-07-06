@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { HwashinLogo, OfficeFlowLogo } from '../components/ui/Logo'
+import { HwashinLogo, OfficeFlowLogoImage } from '../components/ui/Logo'
 import { Button, Card, inputClass } from '../components/ui/primitives'
 
 export default function LoginPage() {
@@ -139,7 +139,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-canvas px-6 py-12">
       <div className="w-full max-w-[400px]">
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
-          <OfficeFlowLogo compact />
+          <OfficeFlowLogoImage />
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">다시 오신 것을 환영합니다</h1>
             <p className="mt-1 text-sm text-slate-500">OfficeFlow 계정으로 로그인하세요</p>

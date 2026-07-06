@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MailCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import { HwashinLogo, OfficeFlowLogo } from '../components/ui/Logo'
+import { HwashinLogo, OfficeFlowLogoImage } from '../components/ui/Logo'
 import { Button, Card, inputClass } from '../components/ui/primitives'
 
 export default function ForgotPasswordPage() {
@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
       <div className="flex min-h-screen items-center justify-center bg-canvas px-6 py-12">
         <div className="w-full max-w-[400px]">
           <div className="mb-8 flex justify-center">
-            <OfficeFlowLogo compact />
+            <OfficeFlowLogoImage />
           </div>
           <Card className="p-7 shadow-card">
             <div className="flex flex-col items-center rounded-btn bg-green-50 px-4 py-8 text-center">
@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
     <div className="flex min-h-screen items-center justify-center bg-canvas px-6 py-12">
       <div className="w-full max-w-[400px]">
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
-          <OfficeFlowLogo compact />
+          <OfficeFlowLogoImage />
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">비밀번호 찾기</h1>
             <p className="mt-1 text-sm text-slate-500">가입한 이메일로 재설정 링크를 보내드립니다</p>
