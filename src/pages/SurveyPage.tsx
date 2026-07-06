@@ -115,8 +115,12 @@ function SurveyDetail({ survey, onBack }: { survey: Survey; onBack: () => void }
     try {
       await submitSurveyResponse({ surveyId: survey.id, answers: payload })
       setSubmitted(true)
-    } catch {
-      setError('제출에 실패했습니다. 이미 응답했을 수 있습니다.')
+    } catch (err) {
+      const message =
+        err && typeof err === 'object' && 'message' in err && typeof err.message === 'string'
+          ? err.message
+          : '제출에 실패했습니다.'
+      setError(message)
     } finally {
       setSubmitting(false)
     }
