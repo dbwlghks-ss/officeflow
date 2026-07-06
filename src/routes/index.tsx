@@ -122,7 +122,7 @@ function AdminRoute({ children }: { children: ReactNode }) {
   }
 
   if (state === 'no-admin') {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to="/" replace />
   }
 
   return <>{children}</>

@@ -16,7 +16,7 @@ export default function LoginPage() {
     supabase.auth.getSession().then(({ data }) => {
       if (!active) return
       if (data.session) {
-        navigate('/dashboard', { replace: true })
+        navigate('/', { replace: true })
       } else {
         setCheckingSession(false)
       }
@@ -92,7 +92,7 @@ export default function LoginPage() {
       }
     }
 
-    navigate('/dashboard', { replace: true })
+    navigate('/', { replace: true })
   }
 
   if (checkingSession) {
