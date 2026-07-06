@@ -4,10 +4,12 @@ import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import AdminPage from '../pages/AdminPage'
 import DashboardPage from '../pages/DashboardPage'
+import ForgotPasswordPage from '../pages/ForgotPasswordPage'
 import HomePage from '../pages/HomePage'
 import LoginPage from '../pages/LoginPage'
 import MealPage from '../pages/MealPage'
 import NoticePage from '../pages/NoticePage'
+import ResetPasswordPage from '../pages/ResetPasswordPage'
 import SignupPage from '../pages/SignupPage'
 import SurveyPage from '../pages/SurveyPage'
 
@@ -135,6 +137,8 @@ export default function AppRoutes() {
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route
         path="/dashboard"
         element={

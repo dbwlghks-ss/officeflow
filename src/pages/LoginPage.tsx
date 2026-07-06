@@ -202,14 +202,25 @@ export default function LoginPage() {
             {loading ? '로그인 중...' : '로그인'}
           </button>
 
-          <button
-            type="button"
-            onClick={() => navigate('/signup')}
-            disabled={loading}
-            className="mt-3 flex w-full items-center justify-center rounded-md border border-[#002c5f] px-4 py-2.5 text-sm font-medium text-[#002c5f] transition-colors hover:bg-[#002c5f]/5 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            회원가입
-          </button>
+          <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+            <button
+              type="button"
+              onClick={() => navigate('/signup')}
+              disabled={loading}
+              className="font-medium text-slate-500 transition-colors hover:text-[#002c5f] disabled:opacity-60"
+            >
+              회원가입
+            </button>
+            <span className="text-slate-300">|</span>
+            <button
+              type="button"
+              onClick={() => navigate('/forgot-password')}
+              disabled={loading}
+              className="font-medium text-slate-500 transition-colors hover:text-[#002c5f] disabled:opacity-60"
+            >
+              비밀번호를 잊으셨나요?
+            </button>
+          </div>
 
           <button
             type="button"
