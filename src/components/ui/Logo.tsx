@@ -1,5 +1,8 @@
 type LogoProps = { className?: string; header?: boolean }
 
+const OFFICE_WORD_COLOR = '#0C2340'
+const FLOW_WORD_COLOR = '#0A57B5'
+
 /** Official HWASHIN symbol — triple chevron hex mark. */
 function HwashinSymbol({ size = 28 }: { size?: number }) {
   return (
@@ -38,26 +41,60 @@ function HwashinSymbol({ size = 28 }: { size?: number }) {
   )
 }
 
-/**
- * OfficeFlow product logo — rounded gradient mark + wordmark.
- * `compact` renders the mark only (for collapsed contexts).
- */
-export function OfficeFlowLogo({ compact = false }: { compact?: boolean }) {
+function FlowWave({ className }: { className?: string }) {
   return (
-    <div className="flex items-center gap-2.5">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] bg-gradient-to-br from-brand to-brand-hover shadow-[0_6px_16px_-6px_rgba(0,64,152,0.65)]">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <rect x="3" y="4" width="18" height="3.4" rx="1.7" fill="white" />
-          <rect x="3" y="10.3" width="12" height="3.4" rx="1.7" fill="white" opacity="0.85" />
-          <rect x="3" y="16.6" width="7" height="3.4" rx="1.7" fill="white" opacity="0.6" />
-        </svg>
-      </div>
-      {!compact && (
-        <span className="text-[19px] font-bold leading-none tracking-tight text-slate-900">
-          Office<span className="text-brand">Flow</span>
+    <svg
+      viewBox="0 0 18 7"
+      fill="none"
+      aria-hidden="true"
+      className={className}
+    >
+      <path
+        d="M1 5.4C3.4 1.2 6.2 1.2 8.6 5.4 10.6 8.8 13.8 8.8 17 5.4"
+        stroke={FLOW_WORD_COLOR}
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+type OfficeFlowLogoSize = 'sm' | 'md' | 'header' | 'auth'
+
+function resolveOfficeFlowLogoSize(size: OfficeFlowLogoSize): 'sm' | 'md' {
+  return size === 'sm' || size === 'header' ? 'sm' : 'md'
+}
+
+/**
+ * OfficeFlow wordmark — Pretendard Bold text with an SVG wave accent on F.
+ * Matches official logo colors and proportions without raster assets.
+ */
+export function OfficeFlowLogo({
+  className,
+  size = 'md',
+}: {
+  className?: string
+  size?: OfficeFlowLogoSize
+}) {
+  const resolved = resolveOfficeFlowLogoSize(size)
+  const textClass = resolved === 'sm' ? 'text-[22px]' : 'text-[26px]'
+  const waveClass = resolved === 'sm' ? 'mb-px h-[6px] w-[14px]' : 'mb-0.5 h-[7px] w-[16px]'
+
+  return (
+    <span
+      className={`inline-flex shrink-0 select-none items-end font-bold leading-none tracking-[-0.03em] ${textClass}${className ? ` ${className}` : ''}`}
+      aria-label="OfficeFlow"
+    >
+      <span style={{ color: OFFICE_WORD_COLOR }}>Office</span>
+      <span className="inline-flex items-end" style={{ color: FLOW_WORD_COLOR }}>
+        <span className="relative inline-block">
+          <FlowWave className={`absolute bottom-full left-0 ${waveClass}`} />
+          F
         </span>
-      )}
-    </div>
+        <span>low</span>
+      </span>
+    </span>
   )
 }
 
@@ -76,26 +113,7 @@ export function HwashinLogo({ className, header = false }: LogoProps) {
   )
 }
 
-/** Official OfficeFlow wordmark — PNG asset, sizing only (no color/image edits). */
-export function OfficeFlowLogoImage({
-  className,
-  size = 'auth',
-}: {
-  className?: string
-  size?: 'header' | 'auth'
-}) {
-  const heightClass = size === 'header' ? 'h-[28px]' : 'h-[32px]'
-
-  return (
-    <img
-      src="/officeflow-logo.png"
-      alt="OfficeFlow"
-      className={`w-auto shrink-0 object-contain ${heightClass}${className ? ` ${className}` : ''}`}
-    />
-  )
-}
-
-/** Header brand lockup: [official HWASHIN CI] · [OfficeFlow logo PNG] */
+/** Header brand lockup: [official HWASHIN CI] · [OfficeFlow wordmark] */
 export function HeaderBrandLockup({ onOfficeFlowClick }: { onOfficeFlowClick?: () => void }) {
   return (
     <div className="flex items-center gap-2.5">
@@ -117,7 +135,7 @@ export function HeaderBrandLockup({ onOfficeFlowClick }: { onOfficeFlowClick?: (
         onClick={onOfficeFlowClick}
         className="shrink-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
       >
-        <OfficeFlowLogoImage size="header" />
+        <OfficeFlowLogo size="header" />
       </button>
     </div>
   )
