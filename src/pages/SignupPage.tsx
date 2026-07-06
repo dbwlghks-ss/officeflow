@@ -26,6 +26,7 @@ export default function SignupPage() {
   const [department, setDepartment] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -72,9 +73,45 @@ export default function SignupPage() {
       return
     }
 
-    // 자동 로그인 세션이 생성되는 설정일 수 있으므로 로그아웃 후 로그인 화면으로 이동한다.
+    // 자동 로그인 세션이 생성되는 설정일 수 있으므로 로그아웃 후,
+    // 로그인하지 말고 인증 메일 안내 화면을 보여준다.
     await supabase.auth.signOut()
-    navigate('/login', { replace: true, state: { signupSuccess: true } })
+    setSubmittedEmail(email)
+    setLoading(false)
+  }
+
+  if (submittedEmail) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f4f5f7] px-6 py-12">
+        <div className="w-full max-w-sm">
+          <div className="mb-8 flex flex-col items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded bg-[#002c5f]">
+              <span className="text-base font-bold text-white">OF</span>
+            </div>
+            <h1 className="text-2xl font-semibold tracking-tight text-[#002c5f]">가입 신청 완료</h1>
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-white p-6">
+            <div className="rounded-md bg-emerald-50 px-4 py-5 text-center">
+              <p className="text-sm font-semibold text-emerald-700">
+                <span className="break-all">{submittedEmail}</span> 으로 인증 메일을 발송했습니다.
+              </p>
+              <p className="mt-2 text-sm text-emerald-600">
+                메일함(스팸함 포함)을 확인하여 인증을 완료한 후 로그인해주세요.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => navigate('/login')}
+              className="mt-5 flex w-full items-center justify-center rounded-md bg-[#002c5f] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#00234c]"
+            >
+              로그인으로 이동
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

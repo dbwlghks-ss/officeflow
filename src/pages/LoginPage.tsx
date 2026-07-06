@@ -1,16 +1,16 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const location = useLocation()
-  const signupSuccess = Boolean((location.state as { signupSuccess?: boolean } | null)?.signupSuccess)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [checkingSession, setCheckingSession] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
+  const [resending, setResending] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -29,9 +29,32 @@ export default function LoginPage() {
     }
   }, [navigate])
 
+  async function handleResend() {
+    if (!email) {
+      setError('이메일을 입력한 후 다시 시도해 주세요.')
+      return
+    }
+    setResending(true)
+    setError(null)
+    setInfo(null)
+
+    const { error: resendError } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+    })
+
+    if (resendError) {
+      setError(`인증 메일 재발송에 실패했습니다: ${resendError.message}`)
+    } else {
+      setInfo('인증 메일을 다시 발송했습니다.')
+    }
+    setResending(false)
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
+    setInfo(null)
     setLoading(true)
 
     const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -40,7 +63,12 @@ export default function LoginPage() {
     })
 
     if (signInError) {
-      setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+      const code = (signInError as { code?: string }).code
+      if (code === 'email_not_confirmed' || /not confirmed/i.test(signInError.message)) {
+        setError('이메일 인증이 완료되지 않았습니다.\n메일함에서 인증을 완료한 후 로그인해주세요.')
+      } else {
+        setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+      }
       setLoading(false)
       return
     }
@@ -116,9 +144,9 @@ export default function LoginPage() {
           <p className="text-sm text-slate-500">OfficeFlow 계정으로 로그인하세요</p>
         </div>
 
-        {signupSuccess && (
+        {info && (
           <p className="mb-4 rounded-md bg-emerald-50 px-3 py-2 text-center text-sm font-medium text-emerald-700">
-            회원가입이 완료되었습니다.
+            {info}
           </p>
         )}
 
@@ -161,7 +189,9 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+            <p className="mb-4 whitespace-pre-line rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
+              {error}
+            </p>
           )}
 
           <button
@@ -179,6 +209,15 @@ export default function LoginPage() {
             className="mt-3 flex w-full items-center justify-center rounded-md border border-[#002c5f] px-4 py-2.5 text-sm font-medium text-[#002c5f] transition-colors hover:bg-[#002c5f]/5 disabled:cursor-not-allowed disabled:opacity-60"
           >
             회원가입
+          </button>
+
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={loading || resending}
+            className="mt-3 flex w-full items-center justify-center text-sm font-medium text-slate-500 transition-colors hover:text-[#002c5f] disabled:opacity-60"
+          >
+            {resending ? '재발송 중...' : '인증 메일을 받지 못했나요?'}
           </button>
         </form>
       </div>
