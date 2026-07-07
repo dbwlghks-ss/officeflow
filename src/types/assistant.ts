@@ -20,8 +20,12 @@ export type AssistantResponseAction = {
 export type AssistantResponse = {
   title: string
   message?: string
+  /** Secondary helper text (e.g. error guidance). */
+  hint?: string
   lines: string[]
   action?: AssistantResponseAction
+  /** Up to two secondary action buttons when multiple destinations apply. */
+  actions?: AssistantResponseAction[]
   state?: 'loading' | 'ready' | 'error'
 }
 

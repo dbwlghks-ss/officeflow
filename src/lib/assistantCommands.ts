@@ -55,6 +55,14 @@ export const INTENT_OPTIONS = [
   { value: 'updates' as const, label: '최근 업데이트' },
 ]
 
+export const INTENT_BADGE_LABELS: Record<AssistantCommand['intent'], string> = {
+  summary: '오늘 요약',
+  notices: '공지',
+  surveys: '설문',
+  meal: '식수',
+  updates: '업데이트',
+}
+
 function readStorage<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key)

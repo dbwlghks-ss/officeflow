@@ -1,5 +1,11 @@
 import type { AssistantIntent, AssistantResponse } from '../types/assistant'
 import {
+  ASSISTANT_ERROR_HINT,
+  ASSISTANT_ERROR_MESSAGE,
+  ASSISTANT_LOADING_MESSAGE,
+  ASSISTANT_UNAUTHENTICATED_MESSAGE,
+} from './assistantUi'
+import {
   buildUpdateItems,
   fetchAssistantSnapshot,
   type AssistantSnapshot,
@@ -18,6 +24,10 @@ function buildFromSnapshot(intent: AssistantIntent, snapshot: AssistantSnapshot)
           `참여 대기 설문: ${snapshot.surveys.pendingCount}건`,
           `최근 업데이트: ${buildUpdateItems(snapshot).length}건`,
         ],
+        actions: [
+          { label: '공지사항 보기', path: '/notice' },
+          { label: '설문조사 보기', path: '/survey' },
+        ],
         state: 'ready',
       }
 
@@ -34,7 +44,7 @@ function buildFromSnapshot(intent: AssistantIntent, snapshot: AssistantSnapshot)
             ? `읽지 않은 공지가 ${snapshot.notices.unreadCount}건 있습니다.`
             : '읽지 않은 공지가 없습니다.',
         lines,
-        action: { label: '공지사항 보러가기', path: '/notice' },
+        action: { label: '공지사항 보기', path: '/notice' },
         state: 'ready',
       }
     }
@@ -52,7 +62,7 @@ function buildFromSnapshot(intent: AssistantIntent, snapshot: AssistantSnapshot)
             ? `참여해야 할 설문이 ${snapshot.surveys.pendingCount}건 있습니다.`
             : '참여 대기 중인 설문이 없습니다.',
         lines,
-        action: { label: '설문조사 보러가기', path: '/survey' },
+        action: { label: '설문조사 보기', path: '/survey' },
         state: 'ready',
       }
     }
@@ -66,7 +76,7 @@ function buildFromSnapshot(intent: AssistantIntent, snapshot: AssistantSnapshot)
         lines: [`오늘 식수: ${snapshot.meal.statusLabel}`],
         action: snapshot.meal.applied
           ? undefined
-          : { label: '식수 신청하러 가기', path: '/meal' },
+          : { label: '식수 신청하기', path: '/meal' },
         state: 'ready',
       }
 
@@ -94,8 +104,8 @@ function buildFromSnapshot(intent: AssistantIntent, snapshot: AssistantSnapshot)
 
 export function getLoadingAssistantResponse(): AssistantResponse {
   return {
-    title: '확인 중',
-    message: '데이터를 불러오고 있습니다...',
+    title: '업무 확인',
+    message: ASSISTANT_LOADING_MESSAGE,
     lines: [],
     state: 'loading',
   }
@@ -107,34 +117,43 @@ export function getFallbackAssistantResponse(intent: AssistantIntent): Assistant
   const fallbackByIntent: Record<AssistantIntent, AssistantResponse> = {
     summary: {
       title: '오늘 해야 할 일',
-      message: '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
+      message: ASSISTANT_ERROR_MESSAGE,
+      hint: ASSISTANT_ERROR_HINT,
       lines: ['오늘 식수: 확인 불가', '읽지 않은 공지: 확인 불가', '참여 대기 설문: 확인 불가'],
+      actions: [
+        { label: '공지사항 보기', path: '/notice' },
+        { label: '설문조사 보기', path: '/survey' },
+      ],
       state: 'error',
     },
     notices: {
       title: '읽지 않은 공지',
-      message: '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
+      message: ASSISTANT_ERROR_MESSAGE,
+      hint: ASSISTANT_ERROR_HINT,
       lines: [],
-      action: { label: '공지사항에서 직접 확인하기', path: '/notice' },
+      action: { label: '공지사항 보기', path: '/notice' },
       state: 'error',
     },
     surveys: {
       title: '참여 대기 설문',
-      message: '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
+      message: ASSISTANT_ERROR_MESSAGE,
+      hint: ASSISTANT_ERROR_HINT,
       lines: [],
-      action: { label: '설문조사에서 직접 확인하기', path: '/survey' },
+      action: { label: '설문조사 보기', path: '/survey' },
       state: 'error',
     },
     meal: {
       title: '오늘 식수 신청 상태',
-      message: '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
+      message: ASSISTANT_ERROR_MESSAGE,
+      hint: ASSISTANT_ERROR_HINT,
       lines: [],
-      action: { label: '식수 신청에서 직접 확인하기', path: '/meal' },
+      action: { label: '식수 신청 보기', path: '/meal' },
       state: 'error',
     },
     updates: {
       title: '최근 업데이트',
-      message: '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
+      message: ASSISTANT_ERROR_MESSAGE,
+      hint: ASSISTANT_ERROR_HINT,
       lines: updates.slice(0, 3).map((item) => item.title),
       state: 'error',
     },
@@ -146,8 +165,10 @@ export function getFallbackAssistantResponse(intent: AssistantIntent): Assistant
 export function getUnauthenticatedAssistantResponse(intent: AssistantIntent): AssistantResponse {
   return {
     ...getFallbackAssistantResponse(intent),
-    message: '로그인 후 업무 데이터를 확인할 수 있습니다.',
+    message: ASSISTANT_UNAUTHENTICATED_MESSAGE,
+    hint: undefined,
     action: getFallbackAssistantResponse(intent).action,
+    actions: getFallbackAssistantResponse(intent).actions,
     state: 'error',
   }
 }

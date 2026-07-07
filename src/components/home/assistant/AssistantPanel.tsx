@@ -25,6 +25,7 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
   const [customCommands, setCustomCommands] = useState<AssistantCommand[]>(() => loadCustomCommands())
   const [recentIds, setRecentIds] = useState<string[]>(() => loadRecentCommandIds())
   const [response, setResponse] = useState<AssistantResponse | null>(null)
+  const [checkedAt, setCheckedAt] = useState<Date | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const requestSeq = useRef(0)
 
@@ -48,11 +49,15 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
     saveRecentCommandIds(nextRecent)
 
     const seq = ++requestSeq.current
+    setCheckedAt(null)
     setResponse(getLoadingAssistantResponse())
 
     const result = await resolveAssistantResponse(command.intent)
     if (seq !== requestSeq.current) return
     setResponse(result)
+    if (result.state === 'ready' || result.state === 'error') {
+      setCheckedAt(new Date())
+    }
   }
 
   function handleSaveCommand(input: {
@@ -63,6 +68,16 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
     const nextCustom = [...customCommands, createCustomCommand(input)]
     setCustomCommands(nextCustom)
     saveCustomCommands(nextCustom)
+  }
+
+  function handleDeleteCommand(commandId: string) {
+    const nextCustom = customCommands.filter((command) => command.id !== commandId)
+    setCustomCommands(nextCustom)
+    saveCustomCommands(nextCustom)
+
+    const nextRecent = recentIds.filter((id) => id !== commandId)
+    setRecentIds(nextRecent)
+    saveRecentCommandIds(nextRecent)
   }
 
   return (
@@ -91,18 +106,32 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
 
         <div className="mt-3 min-h-0 flex-1 space-y-3 overflow-y-auto scrollbar-slim">
           {recentCommands.length > 0 ? (
-            <CommandList title="최근 사용한 명령" commands={recentCommands} onSelect={handleSelectCommand} />
+            <CommandList
+              title="최근 사용"
+              commands={recentCommands}
+              onSelect={handleSelectCommand}
+              variant="recent"
+            />
           ) : null}
 
-          <CommandList title="기본 명령" commands={allCommands.filter((c) => c.source === 'default')} onSelect={handleSelectCommand} />
+          <CommandList
+            title="기본 명령"
+            commands={allCommands.filter((command) => command.source === 'default')}
+            onSelect={handleSelectCommand}
+          />
 
           {customCommands.length > 0 ? (
-            <CommandList title="저장된 명령" commands={customCommands} onSelect={handleSelectCommand} />
+            <CommandList
+              title="저장된 명령"
+              commands={customCommands}
+              onSelect={handleSelectCommand}
+              onDelete={handleDeleteCommand}
+            />
           ) : null}
         </div>
 
         <div className="shrink-0">
-          <AssistantResponseCard response={response} onAction={onNavigate} />
+          <AssistantResponseCard response={response} checkedAt={checkedAt} onAction={onNavigate} />
         </div>
       </section>
 

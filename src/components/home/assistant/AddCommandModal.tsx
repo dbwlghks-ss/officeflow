@@ -13,6 +13,7 @@ export default function AddCommandModal({ open, onClose, onSave }: AddCommandMod
   const [title, setTitle] = useState('')
   const [prompt, setPrompt] = useState('')
   const [intent, setIntent] = useState<AssistantIntent>('summary')
+  const [showValidation, setShowValidation] = useState(false)
 
   const isValid = title.trim().length > 0 && prompt.trim().length > 0
 
@@ -37,13 +38,17 @@ export default function AddCommandModal({ open, onClose, onSave }: AddCommandMod
       setTitle('')
       setPrompt('')
       setIntent('summary')
+      setShowValidation(false)
     }
   }, [open])
 
   if (!open) return null
 
   function handleSave() {
-    if (!isValid) return
+    if (!isValid) {
+      setShowValidation(true)
+      return
+    }
     onSave({ title: title.trim(), prompt: prompt.trim(), intent })
     onClose()
   }
@@ -75,8 +80,9 @@ export default function AddCommandModal({ open, onClose, onSave }: AddCommandMod
         <h2 id="add-command-title" className="text-lg font-semibold tracking-tight text-slate-900">
           명령 추가
         </h2>
+        <p className="mt-1 text-sm text-slate-500">자주 쓰는 업무 확인 명령을 저장합니다.</p>
 
-        <div className="mt-4 space-y-4">
+        <div className="mt-5 space-y-4">
           <div>
             <label htmlFor="command-title" className="mb-1.5 block text-sm font-medium text-slate-700">
               명령 이름
@@ -116,10 +122,10 @@ export default function AddCommandModal({ open, onClose, onSave }: AddCommandMod
                     type="button"
                     onClick={() => setIntent(option.value)}
                     className={
-                      'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ' +
+                      'rounded-full border px-3 py-1.5 text-xs font-medium transition-all ' +
                       (selected
-                        ? 'border-brand/30 bg-brand-light text-brand'
-                        : 'border-line bg-surface text-slate-600 hover:bg-canvas')
+                        ? 'border-brand/40 bg-brand-light text-brand ring-2 ring-brand/15'
+                        : 'border-line bg-surface text-slate-600 hover:border-slate-300 hover:bg-canvas')
                     }
                   >
                     {option.label}
@@ -128,9 +134,13 @@ export default function AddCommandModal({ open, onClose, onSave }: AddCommandMod
               })}
             </div>
           </div>
+
+          {showValidation && !isValid ? (
+            <p className="text-xs text-danger">명령 이름과 실행 문장을 입력해주세요.</p>
+          ) : null}
         </div>
 
-        <div className="mt-5 flex items-center justify-end gap-2">
+        <div className="mt-6 flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
@@ -142,7 +152,12 @@ export default function AddCommandModal({ open, onClose, onSave }: AddCommandMod
             type="button"
             onClick={handleSave}
             disabled={!isValid}
-            className="rounded-btn bg-brand px-4 py-2 text-sm font-medium text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+            className={
+              'rounded-btn px-4 py-2 text-sm font-medium transition-colors ' +
+              (isValid
+                ? 'bg-brand text-white hover:bg-brand-hover'
+                : 'cursor-not-allowed bg-slate-200 text-slate-400')
+            }
           >
             저장
           </button>
