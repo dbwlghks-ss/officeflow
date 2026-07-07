@@ -83,32 +83,32 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
   return (
     <>
       <section
-        className="flex h-full min-h-[260px] flex-col lg:min-h-[340px] lg:flex-row lg:gap-6"
+        className="flex h-full min-h-0 flex-col lg:flex-row lg:gap-4"
         aria-label="OfficeFlow Assistant"
       >
-        <div className="shrink-0 lg:w-[32%] lg:max-w-[280px]">
+        <div className="shrink-0 lg:w-[30%] lg:max-w-[260px]">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             OfficeFlow Assistant
           </p>
-          <h2 className="mt-2 text-xl font-bold leading-snug tracking-tight text-slate-900 lg:text-2xl">
+          <h2 className="mt-1.5 text-lg font-bold leading-snug tracking-tight text-slate-900 lg:text-xl">
             반복 업무 명령을 빠르게 실행하세요.
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-slate-500">
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-500 lg:text-sm">
             자주 쓰는 업무 명령을 저장하고 클릭 한 번으로 확인하세요.
           </p>
 
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-btn border border-line bg-surface px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-white"
+            className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-btn border border-line bg-surface px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-white"
           >
             <Plus size={15} strokeWidth={1.75} aria-hidden="true" />
             명령 추가
           </button>
         </div>
 
-        <div className="mt-4 flex min-h-0 min-w-0 flex-1 flex-col rounded-[18px] border border-line/60 bg-surface/80 p-3 lg:mt-0 lg:p-4">
-          <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto scrollbar-slim">
+        <div className="mt-3 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[16px] border border-line/60 bg-surface/80 p-2.5 lg:mt-0 lg:p-3">
+          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto scrollbar-slim">
             {recentCommands.length > 0 ? (
               <CommandList
                 title="최근 사용"
@@ -134,8 +134,8 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
             ) : null}
           </div>
 
-          <div className="shrink-0">
-            <AssistantResponseCard response={response} checkedAt={checkedAt} onAction={onNavigate} />
+          <div className="mt-2 max-h-[108px] shrink-0 overflow-y-auto scrollbar-slim">
+            <AssistantResponseCard response={response} checkedAt={checkedAt} onAction={onNavigate} compact />
           </div>
         </div>
       </section>

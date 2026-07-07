@@ -7,6 +7,7 @@ type AssistantResponseCardProps = {
   response: AssistantResponse | null
   checkedAt?: Date | null
   onAction?: (path: string) => void
+  compact?: boolean
 }
 
 function resolveActions(response: AssistantResponse) {
@@ -21,10 +22,15 @@ export default function AssistantResponseCard({
   response,
   checkedAt,
   onAction,
+  compact = false,
 }: AssistantResponseCardProps) {
   if (!response) {
     return (
-      <div className="mt-3 rounded-btn border border-dashed border-line/70 bg-canvas/30 px-3 py-3">
+      <div
+        className={
+          (compact ? 'rounded-btn border border-dashed border-line/70 bg-canvas/30 px-2.5 py-2 ' : 'mt-3 rounded-btn border border-dashed border-line/70 bg-canvas/30 px-3 py-3 ')
+        }
+      >
         <p className="text-xs leading-relaxed text-slate-400">{ASSISTANT_EMPTY_MESSAGE}</p>
       </div>
     )
@@ -37,7 +43,7 @@ export default function AssistantResponseCard({
   return (
     <div
       className={
-        'mt-3 rounded-btn border p-3 ' +
+        (compact ? 'rounded-btn border p-2.5 ' : 'mt-3 rounded-btn border p-3 ') +
         (isError
           ? 'border-danger/20 bg-red-50/30'
           : isLoading
@@ -75,7 +81,12 @@ export default function AssistantResponseCard({
       ) : null}
 
       {response.lines.length > 0 ? (
-        <ul className="mt-2 max-h-28 list-none space-y-1 overflow-y-auto p-0">
+        <ul
+          className={
+            'mt-1.5 list-none space-y-0.5 overflow-y-auto p-0 ' +
+            (compact ? 'max-h-14' : 'max-h-28')
+          }
+        >
           {response.lines.map((line) => (
             <li key={line} className="text-xs leading-relaxed text-slate-600">
               {line.startsWith('- ') ? line : `· ${line}`}

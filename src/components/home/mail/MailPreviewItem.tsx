@@ -6,16 +6,22 @@ import {
 type MailPreviewItemProps = {
   mail: MailPreviewData
   variant?: 'default' | 'accent'
+  compact?: boolean
 }
 
-export default function MailPreviewItem({ mail, variant = 'default' }: MailPreviewItemProps) {
+export default function MailPreviewItem({
+  mail,
+  variant = 'default',
+  compact = false,
+}: MailPreviewItemProps) {
   const badgeClass = MAIL_PROVIDER_BADGE_CLASS[mail.provider]
   const onAccent = variant === 'accent'
 
   return (
     <li
       className={
-        'border-b py-2 last:border-b-0 ' +
+        'border-b last:border-b-0 ' +
+        (compact ? 'py-1.5 ' : 'py-2 ') +
         (onAccent ? 'border-white/40' : 'border-line/60')
       }
     >
@@ -28,8 +34,14 @@ export default function MailPreviewItem({ mail, variant = 'default' }: MailPrevi
         </span>
       </div>
       <p className="mt-0.5 truncate text-xs text-slate-800">{mail.subject}</p>
-      <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-500">{mail.preview}</p>
-      <p className="mt-0.5 text-[11px] font-medium text-slate-400">{mail.timeLabel}</p>
+      {!compact ? (
+        <>
+          <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-500">{mail.preview}</p>
+          <p className="mt-0.5 text-[11px] font-medium text-slate-400">{mail.timeLabel}</p>
+        </>
+      ) : (
+        <p className="mt-0.5 text-[10px] font-medium text-slate-400">{mail.timeLabel}</p>
+      )}
     </li>
   )
 }

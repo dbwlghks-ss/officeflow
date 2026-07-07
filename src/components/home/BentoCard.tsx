@@ -6,6 +6,8 @@ type BentoCardProps = {
   children: ReactNode
   className?: string
   variant?: BentoCardVariant
+  /** Tighter padding for viewport-fit dashboard cards. */
+  fit?: boolean
 }
 
 const VARIANT_CLASS: Record<BentoCardVariant, string> = {
@@ -19,11 +21,13 @@ export default function BentoCard({
   children,
   className = '',
   variant = 'default',
+  fit = false,
 }: BentoCardProps) {
   return (
     <div
       className={
-        'rounded-card border p-5 shadow-soft lg:p-6 ' +
+        'rounded-card border shadow-soft ' +
+        (fit ? 'p-4 ' : 'p-5 lg:p-6 ') +
         VARIANT_CLASS[variant] +
         (className ? ` ${className}` : '')
       }

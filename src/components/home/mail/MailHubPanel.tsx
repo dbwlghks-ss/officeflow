@@ -6,7 +6,7 @@ import AddMailAccountModal from './AddMailAccountModal'
 import MailAccountItem from './MailAccountItem'
 import MailPreviewItem from './MailPreviewItem'
 
-const MAX_MAIL_PREVIEWS = 3
+const MAX_MAIL_PREVIEWS = 2
 
 type MailHubPanelProps = {
   /** Replace with API-driven mail hub data later. */
@@ -32,36 +32,34 @@ export default function MailHubPanel({ data }: MailHubPanelProps) {
 
   return (
     <>
-      <section className="flex min-h-[220px] flex-col" aria-label="Mail Hub">
+      <section className="flex h-full min-h-0 flex-col" aria-label="Mail Hub">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-brand/70">
           Mail Hub
         </p>
-        <h2 className="mt-2 text-lg font-bold leading-snug tracking-tight text-slate-900 lg:text-xl">
+        <h2 className="mt-1.5 text-base font-bold leading-snug tracking-tight text-slate-900 lg:text-lg">
           메일을 한곳에서 확인하세요.
         </h2>
 
-        <div className="mt-4">
-          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500/80">
+        <div className="mt-2 min-h-0 flex-1 overflow-hidden">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500/80">
             연결된 계정
           </p>
-          <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+          <ul className="m-0 flex list-none flex-col gap-1 p-0">
             {accounts.map((account) => (
-              <MailAccountItem key={account.id} account={account} variant="accent" />
+              <MailAccountItem key={account.id} account={account} variant="accent" compact />
             ))}
           </ul>
-        </div>
 
-        <div className="mt-3">
-          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500/80">
+          <p className="mb-1 mt-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500/80">
             최근 메일
           </p>
-          <ul className="m-0 list-none p-0">
+          <ul className="m-0 max-h-[72px] list-none overflow-y-auto p-0 scrollbar-slim">
             {visiblePreviews.map((mail) => (
-              <MailPreviewItem key={mail.id} mail={mail} variant="accent" />
+              <MailPreviewItem key={mail.id} mail={mail} variant="accent" compact />
             ))}
           </ul>
           {hasMorePreviews ? (
-            <p className="mt-1.5 text-center text-xs font-medium text-slate-500/80">
+            <p className="mt-1 text-center text-[11px] font-medium text-slate-500/80">
               전체 메일 보기 →
             </p>
           ) : null}
@@ -70,7 +68,7 @@ export default function MailHubPanel({ data }: MailHubPanelProps) {
         <button
           type="button"
           onClick={openModal}
-          className="mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-btn border border-brand/15 bg-white/70 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-brand/30 hover:bg-white"
+          className="mt-2 inline-flex w-full shrink-0 items-center justify-center gap-1.5 rounded-btn border border-brand/15 bg-white/70 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-brand/30 hover:bg-white"
         >
           <Plus size={15} strokeWidth={1.75} aria-hidden="true" />
           메일 계정 추가

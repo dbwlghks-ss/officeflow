@@ -4,16 +4,22 @@ import type { MailAccountData } from '../../../lib/mailHubMockData'
 type MailAccountItemProps = {
   account: MailAccountData
   variant?: 'default' | 'accent'
+  compact?: boolean
 }
 
-export default function MailAccountItem({ account, variant = 'default' }: MailAccountItemProps) {
+export default function MailAccountItem({
+  account,
+  variant = 'default',
+  compact = false,
+}: MailAccountItemProps) {
   const isPending = account.status === 'pending'
   const onAccent = variant === 'accent'
 
   return (
     <li
       className={
-        'flex items-center gap-2.5 rounded-btn border px-2.5 py-2 ' +
+        'flex items-center gap-2 rounded-btn border ' +
+        (compact ? 'px-2 py-1.5 ' : 'gap-2.5 px-2.5 py-2 ') +
         (onAccent
           ? 'border-white/50 bg-white/55'
           : 'border-line/70 bg-canvas/40')
