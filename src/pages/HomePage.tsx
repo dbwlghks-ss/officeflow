@@ -6,6 +6,7 @@ import BriefBentoBlock from '../components/home/BriefBentoBlock'
 import HomeHeroGreeting from '../components/home/HomeHeroGreeting'
 import OfficeFlowAssistant from '../components/home/OfficeFlowAssistant'
 import QuickActionsPanel from '../components/home/QuickActionsPanel'
+import MailHubPanel from '../components/home/mail/MailHubPanel'
 import RecentUpdates from '../components/home/recent-updates/RecentUpdates'
 
 export default function HomePage() {
@@ -36,9 +37,15 @@ export default function HomePage() {
             </BentoCard>
           </div>
 
-          <div className="lg:col-span-12">
+          <div className="lg:col-span-8">
             <BentoCard>
               <RecentUpdates embedded />
+            </BentoCard>
+          </div>
+
+          <div className="lg:col-span-4">
+            <BentoCard>
+              <MailHubPanel />
             </BentoCard>
           </div>
 
