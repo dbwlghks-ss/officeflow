@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import Header from '../components/layout/Header'
 import HomeHeroBrief from '../components/home/HomeHeroBrief'
+import UnifiedInbox from '../components/home/inbox/UnifiedInbox'
 
 type QuickAction = {
   title: string
@@ -46,6 +47,8 @@ export default function HomePage() {
 
       <main className="mx-auto w-full max-w-[1600px] px-6 py-8 lg:px-10 lg:py-11">
         <HomeHeroBrief />
+
+        <UnifiedInbox />
 
         <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {actions.map((action) => {
