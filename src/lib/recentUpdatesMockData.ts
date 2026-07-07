@@ -63,6 +63,22 @@ export const MOCK_RECENT_UPDATES_SECTIONS: RecentUpdatesSectionData[] = [
         timeLabel: '오늘 14:00',
         occurredAt: '2026-07-07T14:00:00+09:00',
       },
+      {
+        id: 'update-notice-2',
+        source: 'notice',
+        title: '식수 메뉴 변경',
+        description: '내일 점심 메뉴 안내',
+        timeLabel: '1시간 전',
+        occurredAt: '2026-07-07T13:00:00+09:00',
+      },
+      {
+        id: 'update-survey-2',
+        source: 'survey',
+        title: '만족도 조사',
+        description: '응답 대기',
+        timeLabel: '어제',
+        occurredAt: '2026-07-06T16:00:00+09:00',
+      },
     ],
   },
 ]

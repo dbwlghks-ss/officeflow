@@ -1,20 +1,22 @@
-import { ClipboardList, Megaphone, UtensilsCrossed, type LucideIcon } from 'lucide-react'
+import { Calendar, ClipboardList, Megaphone, UtensilsCrossed, type LucideIcon } from 'lucide-react'
 import type { BriefSummaryItem } from '../../lib/homeBriefSummary'
 
 const ICON_BY_ID: Record<BriefSummaryItem['id'], LucideIcon> = {
   meal: UtensilsCrossed,
   notice: Megaphone,
   survey: ClipboardList,
+  schedule: Calendar,
 }
 
 type BriefSummaryListProps = {
   items: BriefSummaryItem[]
+  className?: string
 }
 
-export default function BriefSummaryList({ items }: BriefSummaryListProps) {
+export default function BriefSummaryList({ items, className = '' }: BriefSummaryListProps) {
   return (
     <div
-      className="mt-5 max-w-3xl border-t border-line/70 pt-4"
+      className={`mt-5 border-t border-line/70 pt-4${className ? ` ${className}` : ''}`}
       aria-label="오늘의 업무 요약"
     >
       <ul className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-0">

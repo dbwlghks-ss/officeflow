@@ -3,10 +3,11 @@ export type BriefSummaryData = {
   mealApplied: boolean
   unreadNoticeCount: number
   pendingSurveyCount: number
+  todayScheduleCount: number
 }
 
 export type BriefSummaryItem = {
-  id: 'meal' | 'notice' | 'survey'
+  id: 'meal' | 'notice' | 'survey' | 'schedule'
   label: string
   value: string
   emphasis?: boolean
@@ -18,6 +19,7 @@ export const MOCK_BRIEF_SUMMARY: BriefSummaryData = {
   mealApplied: true,
   unreadNoticeCount: 3,
   pendingSurveyCount: 2,
+  todayScheduleCount: 2,
 }
 
 export function getBriefSummaryData(
@@ -45,6 +47,12 @@ export function toBriefSummaryItems(data: BriefSummaryData): BriefSummaryItem[] 
       label: '참여 대기 설문',
       value: data.pendingSurveyCount > 0 ? `${data.pendingSurveyCount}건` : '없음',
       emphasis: data.pendingSurveyCount > 0,
+    },
+    {
+      id: 'schedule',
+      label: '오늘 일정',
+      value: data.todayScheduleCount > 0 ? `${data.todayScheduleCount}건` : '없음',
+      emphasis: data.todayScheduleCount > 0,
     },
   ]
 }

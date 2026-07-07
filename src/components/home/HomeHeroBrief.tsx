@@ -33,6 +33,7 @@ export default function HomeHeroBrief({ date = new Date(), content, summary }: H
         emoji={resolved.emoji}
         title={resolved.title}
         intro={resolved.intro}
+        className="mt-3"
       />
       <BriefSummaryList items={summaryItems} />
     </section>
