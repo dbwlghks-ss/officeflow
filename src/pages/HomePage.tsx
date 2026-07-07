@@ -4,7 +4,7 @@ import Header from '../components/layout/Header'
 import BentoCard from '../components/home/BentoCard'
 import BriefBentoBlock from '../components/home/BriefBentoBlock'
 import HomeHeroGreeting from '../components/home/HomeHeroGreeting'
-import OfficeFlowAssistant from '../components/home/OfficeFlowAssistant'
+import AssistantPanel from '../components/home/assistant/AssistantPanel'
 import QuickActionsPanel from '../components/home/QuickActionsPanel'
 import MailHubPanel from '../components/home/mail/MailHubPanel'
 import RecentUpdates from '../components/home/recent-updates/RecentUpdates'
@@ -33,7 +33,7 @@ export default function HomePage() {
 
           <div className="lg:col-span-4">
             <BentoCard>
-              <OfficeFlowAssistant />
+              <AssistantPanel onNavigate={navigate} />
             </BentoCard>
           </div>
 
