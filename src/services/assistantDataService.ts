@@ -12,6 +12,8 @@ export type AssistantMealSnapshot = {
 
 export type AssistantNoticesSnapshot = {
   unreadCount: number
+  unreadTitles: string[]
+  /** Latest published notices — used by updates intent only, not unread list. */
   recentTitles: string[]
 }
 
@@ -54,6 +56,7 @@ async function fetchNoticesSnapshot(userId: string): Promise<AssistantNoticesSna
     const summary = await getUnreadNoticeSummary(userId)
     return {
       unreadCount: summary.unreadCount,
+      unreadTitles: summary.unreadNotices.map((notice) => notice.title),
       recentTitles: summary.recentNotices.map((notice) => notice.title),
     }
   } catch (error) {
@@ -61,6 +64,7 @@ async function fetchNoticesSnapshot(userId: string): Promise<AssistantNoticesSna
     const notices = await getNotices()
     return {
       unreadCount: notices.length,
+      unreadTitles: notices.map((notice) => notice.title),
       recentTitles: notices.slice(0, 3).map((notice) => notice.title),
     }
   }

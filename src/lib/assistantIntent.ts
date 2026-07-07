@@ -33,9 +33,9 @@ function buildFromSnapshot(intent: AssistantIntent, snapshot: AssistantSnapshot)
 
     case 'notices': {
       const lines =
-        snapshot.notices.recentTitles.length > 0
-          ? snapshot.notices.recentTitles.map((title) => `- ${title}`)
-          : ['표시할 공지가 없습니다.']
+        snapshot.notices.unreadCount > 0
+          ? snapshot.notices.unreadTitles.map((title) => `- ${title}`)
+          : ['모든 공지를 확인했습니다.']
 
       return {
         title: '읽지 않은 공지',

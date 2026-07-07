@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, ChevronRight, Megaphone, Pin } from 'lucide-react'
 import Header from '../components/layout/Header'
 import { getNotices, type Notice } from '../services/noticeService'
-import { markNoticeAsRead } from '../services/noticeReadService'
+import { markNoticeAsRead, normalizeNoticeId } from '../services/noticeReadService'
 import { Badge, Card } from '../components/ui/primitives'
 
 function formatDate(value: string) {
@@ -39,7 +39,13 @@ export default function NoticePage() {
   useEffect(() => {
     if (!selected) return
 
-    void markNoticeAsRead(selected.id).catch((error) => {
+    const noticeId = normalizeNoticeId(selected.id)
+    if (noticeId === null) {
+      console.error('[notice] invalid notice id:', selected.id)
+      return
+    }
+
+    void markNoticeAsRead(noticeId).catch((error) => {
       console.error('[notice] mark as read failed:', error)
     })
   }, [selected])

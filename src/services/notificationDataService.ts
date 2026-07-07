@@ -1,7 +1,7 @@
 import type { RecentUpdateItemData } from '../lib/recentUpdatesMockData'
 import { getNotificationItems } from '../lib/recentUpdatesMockData'
 import { supabase } from '../lib/supabase'
-import { getUnreadNoticeSummary } from './noticeReadService'
+import { getUnreadNoticeSummary, normalizeNoticeId } from './noticeReadService'
 
 function formatNoticeTimeLabel(iso: string): string {
   const date = new Date(iso)
@@ -21,8 +21,11 @@ function formatNoticeTimeLabel(iso: string): string {
 function unreadNoticesToItems(
   unreadNotices: Awaited<ReturnType<typeof getUnreadNoticeSummary>>['unreadNotices'],
 ): RecentUpdateItemData[] {
-  return unreadNotices.slice(0, 5).map((notice) => ({
-    id: `notice-${notice.id}`,
+  return unreadNotices.slice(0, 5).map((notice) => {
+    const noticeId = normalizeNoticeId(notice.id) ?? notice.id
+
+    return {
+      id: `notice-${noticeId}`,
     source: 'notice',
     title: notice.title,
     description: '읽지 않은 공지',
@@ -31,7 +34,8 @@ function unreadNoticesToItems(
     statusLabel: '미확인',
     actionPath: '/notice',
     isUnread: true,
-  }))
+    }
+  })
 }
 
 /** Live notice items plus existing mock items for other sources. */
