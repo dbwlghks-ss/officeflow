@@ -102,7 +102,14 @@ export default function AdminPage() {
     <div className="flex min-h-screen bg-canvas text-slate-800">
       <aside className="sticky top-0 flex h-screen w-[280px] shrink-0 flex-col border-r border-line bg-surface">
         <div className="flex h-[72px] items-center border-b border-line px-6">
-          <OfficeFlowLogo size="header" />
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            aria-label="OfficeFlow Home"
+            className="block shrink-0 cursor-pointer p-0 leading-none outline-none transition-all duration-200 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand/30 rounded-md"
+          >
+            <OfficeFlowLogo size="header" />
+          </button>
         </div>
 
         <nav className="scrollbar-slim flex-1 overflow-y-auto px-4 py-6">
