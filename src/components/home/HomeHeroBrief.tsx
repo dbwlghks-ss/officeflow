@@ -27,7 +27,7 @@ export default function HomeHeroBrief({ date = new Date(), content, summary }: H
   const summaryItems = toBriefSummaryItems(getBriefSummaryData(summary))
 
   return (
-    <section className="mb-8">
+    <section className="mb-6">
       <HomeHeroGreeting dateLabel={formattedDate} greeting={resolved.greeting} />
       <HomeHeroBriefHeader
         emoji={resolved.emoji}

@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 
 /** Extensible source types — mail, calendar, and ai reserved for future integrations. */
-export type InboxSourceType =
+export type RecentUpdateSourceType =
   | 'notice'
   | 'survey'
   | 'meal'
@@ -10,9 +10,9 @@ export type InboxSourceType =
   | 'calendar'
   | 'ai'
 
-export type InboxItemData = {
+export type RecentUpdateItemData = {
   id: string
-  source: InboxSourceType
+  source: RecentUpdateSourceType
   title: string
   description: string
   timeLabel: string
@@ -20,19 +20,19 @@ export type InboxItemData = {
   occurredAt: string
 }
 
-export type InboxSectionData = {
+export type RecentUpdatesSectionData = {
   id: string
   title: string
-  items: InboxItemData[]
+  items: RecentUpdateItemData[]
 }
 
-export const MOCK_UNIFIED_INBOX_SECTIONS: InboxSectionData[] = [
+export const MOCK_RECENT_UPDATES_SECTIONS: RecentUpdatesSectionData[] = [
   {
     id: 'today',
     title: '오늘',
     items: [
       {
-        id: 'inbox-notice-1',
+        id: 'update-notice-1',
         source: 'notice',
         title: '새 공지',
         description: '사내 안전 수칙 업데이트',
@@ -40,46 +40,45 @@ export const MOCK_UNIFIED_INBOX_SECTIONS: InboxSectionData[] = [
         occurredAt: '2026-07-07T13:54:00+09:00',
       },
       {
-        id: 'inbox-survey-1',
+        id: 'update-survey-1',
         source: 'survey',
         title: '안전교육 설문',
         description: '참여 대기',
-        timeLabel: '',
+        timeLabel: '오늘 마감',
         occurredAt: '2026-07-07T09:00:00+09:00',
       },
       {
-        id: 'inbox-meal-1',
+        id: 'update-meal-1',
         source: 'meal',
         title: '내일 식수 신청',
-        description: '마감 D-1',
-        timeLabel: '',
+        description: '신청 필요',
+        timeLabel: '마감 D-1',
         occurredAt: '2026-07-07T08:30:00+09:00',
       },
       {
-        id: 'inbox-schedule-1',
+        id: 'update-schedule-1',
         source: 'schedule',
         title: '품질회의',
-        description: '오늘 14:00',
-        timeLabel: '',
+        description: '회의실 A',
+        timeLabel: '오늘 14:00',
         occurredAt: '2026-07-07T14:00:00+09:00',
       },
     ],
   },
 ]
 
-export function getUnifiedInboxSections(
-  override?: InboxSectionData[],
-): InboxSectionData[] {
-  return override ?? MOCK_UNIFIED_INBOX_SECTIONS
+export function getRecentUpdatesSections(
+  override?: RecentUpdatesSectionData[],
+): RecentUpdatesSectionData[] {
+  return override ?? MOCK_RECENT_UPDATES_SECTIONS
 }
 
-/** Icon mapping lives in UI layer; source type drives styling and future routing. */
-export type InboxSourceMeta = {
+export type RecentUpdateSourceMeta = {
   label: string
   accentClass: string
 }
 
-export const INBOX_SOURCE_META: Record<InboxSourceType, InboxSourceMeta> = {
+export const RECENT_UPDATE_SOURCE_META: Record<RecentUpdateSourceType, RecentUpdateSourceMeta> = {
   notice: { label: '공지', accentClass: 'bg-brand-light text-brand' },
   survey: { label: '설문', accentClass: 'bg-violet-50 text-violet-600' },
   meal: { label: '식수', accentClass: 'bg-amber-50 text-amber-700' },
@@ -89,4 +88,4 @@ export const INBOX_SOURCE_META: Record<InboxSourceType, InboxSourceMeta> = {
   ai: { label: 'AI', accentClass: 'bg-indigo-50 text-indigo-600' },
 }
 
-export type InboxIconResolver = (source: InboxSourceType) => LucideIcon
+export type RecentUpdateIconResolver = (source: RecentUpdateSourceType) => LucideIcon
