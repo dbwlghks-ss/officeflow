@@ -18,6 +18,12 @@ export type RecentUpdateItemData = {
   timeLabel: string
   /** ISO timestamp for future sorting and grouping. */
   occurredAt: string
+  /** Notification Center status badge label. */
+  statusLabel?: string
+  /** In-app navigation target for notification actions. */
+  actionPath?: string
+  /** Whether the item counts toward the header unread badge. */
+  isUnread?: boolean
 }
 
 export type RecentUpdatesSectionData = {
@@ -38,6 +44,9 @@ export const MOCK_RECENT_UPDATES_SECTIONS: RecentUpdatesSectionData[] = [
         description: '사내 안전 수칙 업데이트',
         timeLabel: '5분 전',
         occurredAt: '2026-07-07T13:54:00+09:00',
+        statusLabel: '미확인',
+        actionPath: '/notice',
+        isUnread: true,
       },
       {
         id: 'update-survey-1',
@@ -46,14 +55,20 @@ export const MOCK_RECENT_UPDATES_SECTIONS: RecentUpdatesSectionData[] = [
         description: '참여 대기',
         timeLabel: '오늘 마감',
         occurredAt: '2026-07-07T09:00:00+09:00',
+        statusLabel: '참여 대기',
+        actionPath: '/survey',
+        isUnread: true,
       },
       {
         id: 'update-meal-1',
         source: 'meal',
-        title: '내일 식수 신청',
-        description: '신청 필요',
-        timeLabel: '마감 D-1',
+        title: '오늘 식수',
+        description: '신청 완료',
+        timeLabel: '오늘',
         occurredAt: '2026-07-07T08:30:00+09:00',
+        statusLabel: '신청 완료',
+        actionPath: '/meal',
+        isUnread: false,
       },
       {
         id: 'update-schedule-1',
@@ -62,6 +77,8 @@ export const MOCK_RECENT_UPDATES_SECTIONS: RecentUpdatesSectionData[] = [
         description: '회의실 A',
         timeLabel: '오늘 14:00',
         occurredAt: '2026-07-07T14:00:00+09:00',
+        statusLabel: '일정',
+        isUnread: false,
       },
       {
         id: 'update-notice-2',
@@ -70,6 +87,9 @@ export const MOCK_RECENT_UPDATES_SECTIONS: RecentUpdatesSectionData[] = [
         description: '내일 점심 메뉴 안내',
         timeLabel: '1시간 전',
         occurredAt: '2026-07-07T13:00:00+09:00',
+        statusLabel: '미확인',
+        actionPath: '/notice',
+        isUnread: true,
       },
       {
         id: 'update-survey-2',
@@ -78,6 +98,9 @@ export const MOCK_RECENT_UPDATES_SECTIONS: RecentUpdatesSectionData[] = [
         description: '응답 대기',
         timeLabel: '어제',
         occurredAt: '2026-07-06T16:00:00+09:00',
+        statusLabel: '응답 대기',
+        actionPath: '/survey',
+        isUnread: true,
       },
     ],
   },
@@ -87,6 +110,29 @@ export function getRecentUpdatesSections(
   override?: RecentUpdatesSectionData[],
 ): RecentUpdatesSectionData[] {
   return override ?? MOCK_RECENT_UPDATES_SECTIONS
+}
+
+export function getNotificationItems(
+  override?: RecentUpdatesSectionData[],
+): RecentUpdateItemData[] {
+  return getRecentUpdatesSections(override).flatMap((section) => section.items)
+}
+
+export function getNotificationUnreadCount(
+  override?: RecentUpdatesSectionData[],
+): number {
+  return getNotificationItems(override).filter((item) => item.isUnread !== false).length
+}
+
+export type NotificationStatusTone = 'brand' | 'neutral' | 'success' | 'warning' | 'danger'
+
+export function getNotificationStatusTone(statusLabel?: string): NotificationStatusTone {
+  if (!statusLabel) return 'neutral'
+  if (statusLabel.includes('완료')) return 'success'
+  if (statusLabel === '일정') return 'neutral'
+  if (statusLabel.includes('미확인')) return 'danger'
+  if (statusLabel.includes('대기') || statusLabel.includes('필요')) return 'warning'
+  return 'neutral'
 }
 
 export type RecentUpdateSourceMeta = {

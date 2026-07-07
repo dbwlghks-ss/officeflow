@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell, LogIn, LogOut, Search, Settings } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { getNotificationUnreadCount } from '../../lib/recentUpdatesMockData'
+import NotificationCenter from '../notifications/NotificationCenter'
 import { HeaderBrandLockup } from '../ui/Logo'
 import { Button } from '../ui/primitives'
 
@@ -10,6 +12,9 @@ type AuthUser = { name: string; position: string | null; role: string | null }
 export default function Header() {
   const navigate = useNavigate()
   const [authUser, setAuthUser] = useState<AuthUser | null | undefined>(undefined)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const notificationRef = useRef<HTMLDivElement>(null)
+  const unreadCount = getNotificationUnreadCount()
 
   useEffect(() => {
     let active = true
@@ -55,6 +60,27 @@ export default function Header() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!notificationsOpen) return
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setNotificationsOpen(false)
+    }
+
+    function handlePointerDown(event: MouseEvent) {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setNotificationsOpen(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('mousedown', handlePointerDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('mousedown', handlePointerDown)
+    }
+  }, [notificationsOpen])
+
   async function handleLogout() {
     await supabase.auth.signOut()
     navigate('/')
@@ -79,14 +105,28 @@ export default function Header() {
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
           {authUser ? (
             <>
-              <button
-                type="button"
-                aria-label="알림"
-                className="relative grid h-10 w-10 place-items-center rounded-full text-slate-500 transition-all duration-200 hover:bg-slate-100 hover:text-slate-700"
-              >
-                <Bell size={19} />
-                <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-danger ring-2 ring-surface" />
-              </button>
+              <div ref={notificationRef} className="relative">
+                <button
+                  type="button"
+                  aria-label="알림"
+                  aria-expanded={notificationsOpen}
+                  onClick={() => setNotificationsOpen((open) => !open)}
+                  className="relative grid h-10 w-10 place-items-center rounded-full text-slate-500 transition-all duration-200 hover:bg-slate-100 hover:text-slate-700"
+                >
+                  <Bell size={19} />
+                  {unreadCount > 0 ? (
+                    <span className="absolute right-1.5 top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold leading-none text-white ring-2 ring-surface">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  ) : null}
+                </button>
+                {notificationsOpen ? (
+                  <NotificationCenter
+                    onClose={() => setNotificationsOpen(false)}
+                    onNavigate={navigate}
+                  />
+                ) : null}
+              </div>
 
               <span className="hidden h-6 w-px bg-line sm:block" />
 

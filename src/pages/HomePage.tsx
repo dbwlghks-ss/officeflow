@@ -7,7 +7,6 @@ import HomeHeroGreeting from '../components/home/HomeHeroGreeting'
 import AssistantPanel from '../components/home/assistant/AssistantPanel'
 import QuickActionsPanel from '../components/home/QuickActionsPanel'
 import MailHubPanel from '../components/home/mail/MailHubPanel'
-import RecentUpdates from '../components/home/recent-updates/RecentUpdates'
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -39,19 +38,13 @@ export default function HomePage() {
 
           <div className="lg:col-span-8">
             <BentoCard>
-              <RecentUpdates embedded />
+              <QuickActionsPanel onNavigate={navigate} />
             </BentoCard>
           </div>
 
           <div className="lg:col-span-4">
             <BentoCard>
               <MailHubPanel />
-            </BentoCard>
-          </div>
-
-          <div className="lg:col-span-12">
-            <BentoCard>
-              <QuickActionsPanel onNavigate={navigate} />
             </BentoCard>
           </div>
         </div>
