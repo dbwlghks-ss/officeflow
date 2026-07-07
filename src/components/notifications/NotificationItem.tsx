@@ -9,9 +9,9 @@ import {
 } from 'lucide-react'
 import {
   getNotificationStatusTone,
-  type RecentUpdateItemData,
   type RecentUpdateSourceType,
 } from '../../lib/recentUpdatesMockData'
+import type { NotificationCenterItem } from '../../services/notificationDataService'
 import { Badge } from '../ui/primitives'
 
 const ICON_BY_SOURCE: Record<RecentUpdateSourceType, LucideIcon> = {
@@ -25,7 +25,7 @@ const ICON_BY_SOURCE: Record<RecentUpdateSourceType, LucideIcon> = {
 }
 
 type NotificationItemProps = {
-  item: RecentUpdateItemData
+  item: NotificationCenterItem
   onAction?: (path: string) => void
 }
 

@@ -1,9 +1,31 @@
-import type { RecentUpdateItemData } from '../lib/recentUpdatesMockData'
-import { getNotificationItems } from '../lib/recentUpdatesMockData'
+import type { RecentUpdateSourceType } from '../lib/recentUpdatesMockData'
 import { supabase } from '../lib/supabase'
+import { fetchAssistantSnapshot } from './assistantDataService'
 import { getUnreadNoticeSummary, normalizeNoticeId } from './noticeReadService'
 
-function formatNoticeTimeLabel(iso: string): string {
+export type NotificationDataSource = 'live' | 'mock'
+
+export type NotificationCenterItem = {
+  id: string
+  source: RecentUpdateSourceType
+  dataSource: NotificationDataSource
+  title: string
+  description: string
+  timeLabel?: string
+  occurredAt: string
+  statusLabel?: string
+  actionPath?: string
+  isUnread?: boolean
+  priority?: 'normal' | 'important' | 'urgent'
+}
+
+export type NotificationCenterData = {
+  items: NotificationCenterItem[]
+  badgeCount: number
+  state: 'ready' | 'error' | 'unauthenticated'
+}
+
+function formatRelativeTimeLabel(iso: string): string {
   const date = new Date(iso)
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()
@@ -20,45 +42,124 @@ function formatNoticeTimeLabel(iso: string): string {
 
 function unreadNoticesToItems(
   unreadNotices: Awaited<ReturnType<typeof getUnreadNoticeSummary>>['unreadNotices'],
-): RecentUpdateItemData[] {
-  return unreadNotices.slice(0, 5).map((notice) => {
+): NotificationCenterItem[] {
+  return unreadNotices.map((notice) => {
     const noticeId = normalizeNoticeId(notice.id) ?? notice.id
 
     return {
       id: `notice-${noticeId}`,
-    source: 'notice',
-    title: notice.title,
-    description: '읽지 않은 공지',
-    timeLabel: formatNoticeTimeLabel(notice.created_at),
-    occurredAt: notice.created_at,
-    statusLabel: '미확인',
-    actionPath: '/notice',
-    isUnread: true,
+      source: 'notice',
+      dataSource: 'live',
+      title: '새 공지',
+      description: notice.title,
+      timeLabel: formatRelativeTimeLabel(notice.created_at),
+      occurredAt: notice.created_at,
+      statusLabel: '미확인',
+      actionPath: '/notice',
+      isUnread: true,
+      priority: 'important',
     }
   })
 }
 
-/** Live notice items plus existing mock items for other sources. */
-export async function getLiveNotificationItems(): Promise<RecentUpdateItemData[]> {
-  const mockNonNoticeItems = getNotificationItems().filter((item) => item.source !== 'notice')
+function pendingSurveysToItems(pendingTitles: string[]): NotificationCenterItem[] {
+  const now = new Date().toISOString()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return getNotificationItems()
-  }
+  return pendingTitles.map((title, index) => ({
+    id: `survey-pending-${index}-${title}`,
+    source: 'survey',
+    dataSource: 'live',
+    title: '참여 대기 설문',
+    description: title,
+    timeLabel: '참여 대기',
+    occurredAt: now,
+    statusLabel: '참여 대기',
+    actionPath: '/survey',
+    isUnread: true,
+    priority: 'normal',
+  }))
+}
 
-  try {
-    const summary = await getUnreadNoticeSummary(user.id)
-    return [...unreadNoticesToItems(summary.unreadNotices), ...mockNonNoticeItems]
-  } catch (error) {
-    console.error('[notification] live notice items failed:', error)
-    return getNotificationItems()
+function mealStatusToItem(
+  applied: boolean,
+  serviceAvailable: boolean,
+): NotificationCenterItem | null {
+  if (!serviceAvailable || applied) return null
+
+  const now = new Date().toISOString()
+  return {
+    id: 'meal-today',
+    source: 'meal',
+    dataSource: 'live',
+    title: '오늘 식수 신청',
+    description: '아직 신청하지 않았습니다.',
+    timeLabel: '오늘',
+    occurredAt: now,
+    statusLabel: '신청 필요',
+    actionPath: '/meal',
+    isUnread: true,
+    priority: 'normal',
   }
 }
 
+function countActionableItems(
+  unreadNoticeCount: number,
+  pendingSurveyCount: number,
+  mealNeedsAction: boolean,
+): number {
+  return unreadNoticeCount + pendingSurveyCount + (mealNeedsAction ? 1 : 0)
+}
+
+export async function fetchNotificationCenterData(): Promise<NotificationCenterData> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { items: [], badgeCount: 0, state: 'unauthenticated' }
+  }
+
+  try {
+    const [noticeSummary, snapshot] = await Promise.all([
+      getUnreadNoticeSummary(user.id),
+      fetchAssistantSnapshot(),
+    ])
+
+    if (!snapshot) {
+      return { items: [], badgeCount: 0, state: 'unauthenticated' }
+    }
+
+    const mealItem = mealStatusToItem(snapshot.meal.applied, snapshot.meal.serviceAvailable)
+    const liveItems: NotificationCenterItem[] = [
+      ...unreadNoticesToItems(noticeSummary.unreadNotices),
+      ...pendingSurveysToItems(snapshot.surveys.pendingTitles),
+      ...(mealItem ? [mealItem] : []),
+    ]
+
+    const badgeCount = countActionableItems(
+      noticeSummary.unreadCount,
+      snapshot.surveys.pendingCount,
+      Boolean(mealItem),
+    )
+
+    return {
+      items: liveItems,
+      badgeCount,
+      state: 'ready',
+    }
+  } catch (error) {
+    console.error('[notification] fetch failed:', error)
+    return { items: [], badgeCount: 0, state: 'error' }
+  }
+}
+
+/** @deprecated Use fetchNotificationCenterData().items */
+export async function getLiveNotificationItems(): Promise<NotificationCenterItem[]> {
+  const data = await fetchNotificationCenterData()
+  return data.items
+}
+
 export async function getLiveNotificationUnreadCount(): Promise<number> {
-  const items = await getLiveNotificationItems()
-  return items.filter((item) => item.isUnread !== false).length
+  const data = await fetchNotificationCenterData()
+  return data.badgeCount
 }
