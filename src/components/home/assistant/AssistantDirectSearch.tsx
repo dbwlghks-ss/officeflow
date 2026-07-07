@@ -13,7 +13,7 @@ export default function AssistantDirectSearch({
 }: AssistantDirectSearchProps) {
   return (
     <form
-      className="mt-2 shrink-0 border-t border-line/60 pt-2"
+      className="shrink-0 border-t border-line/60 pt-2"
       onSubmit={(event) => {
         event.preventDefault()
         onSubmit()

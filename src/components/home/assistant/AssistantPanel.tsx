@@ -1,5 +1,4 @@
 import { useMemo, useRef, useState } from 'react'
-import { Plus, Search } from 'lucide-react'
 import {
   createCustomCommand,
   getAllCommands,
@@ -26,17 +25,17 @@ import {
 import type { AssistantCommand, AssistantResponse, AssistantSavedSearch } from '../../../types/assistant'
 import AddCommandModal from './AddCommandModal'
 import AddSearchModal from './AddSearchModal'
-import AssistantDirectSearch from './AssistantDirectSearch'
 import AssistantResponseCard from './AssistantResponseCard'
-import CommandList from './CommandList'
-import RecentItemsList, { type RecentListEntry } from './RecentItemsList'
-import SavedSearchList from './SavedSearchList'
+import AssistantTabs, { type AssistantTab } from './AssistantTabs'
+import CommandTab from './CommandTab'
+import SearchTab from './SearchTab'
 
 type AssistantPanelProps = {
   onNavigate?: (path: string) => void
 }
 
 export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
+  const [activeTab, setActiveTab] = useState<AssistantTab>('command')
   const [customCommands, setCustomCommands] = useState<AssistantCommand[]>(() => loadCustomCommands())
   const [customSearches, setCustomSearches] = useState<AssistantSavedSearch[]>(() =>
     loadCustomSavedSearches(),
@@ -64,23 +63,18 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
     [allCommands],
   )
 
-  const searchMap = useMemo(
-    () => new Map(allSearches.map((search) => [search.id, search])),
-    [allSearches],
-  )
-
-  const recentEntries = useMemo(() => {
+  const recentCommands = useMemo(() => {
     return recentItems
-      .map((item): RecentListEntry | null => {
-        if (item.type === 'command') {
-          const command = commandMap.get(item.id)
-          return command ? { type: 'command', command } : null
-        }
-        const search = searchMap.get(item.id)
-        return search ? { type: 'search', search } : null
-      })
-      .filter((entry): entry is RecentListEntry => Boolean(entry))
-  }, [recentItems, commandMap, searchMap])
+      .filter((item) => item.type === 'command')
+      .map((item) => commandMap.get(item.id))
+      .filter((command): command is AssistantCommand => Boolean(command))
+      .slice(0, 3)
+  }, [recentItems, commandMap])
+
+  const defaultCommands = useMemo(
+    () => allCommands.filter((command) => command.source === 'default'),
+    [allCommands],
+  )
 
   function recordRecent(entry: { type: 'command' | 'search'; id: string }) {
     const next = pushRecentItem(recentItems, entry)
@@ -178,10 +172,10 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
   return (
     <>
       <section
-        className="flex h-full min-h-0 flex-col lg:flex-row lg:gap-4"
+        className="flex h-full min-h-0 flex-col"
         aria-label="OfficeFlow Assistant"
       >
-        <div className="shrink-0 lg:w-[30%] lg:max-w-[260px]">
+        <div className="shrink-0">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             OfficeFlow Assistant
           </p>
@@ -192,63 +186,36 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
             자주 쓰는 명령과 검색어를 저장해두고 빠르게 확인하세요.
           </p>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setCommandModalOpen(true)}
-              className="inline-flex items-center justify-center gap-1.5 rounded-btn border border-line bg-surface px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-white"
-            >
-              <Plus size={15} strokeWidth={1.75} aria-hidden="true" />
-              명령 추가
-            </button>
-            <button
-              type="button"
-              onClick={() => setSearchModalOpen(true)}
-              className="inline-flex items-center justify-center gap-1.5 rounded-btn border border-line bg-surface px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-white"
-            >
-              <Search size={15} strokeWidth={1.75} aria-hidden="true" />
-              검색어 저장
-            </button>
-          </div>
+          <AssistantTabs active={activeTab} onChange={setActiveTab} />
         </div>
 
-        <div className="mt-3 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[16px] border border-line/60 bg-surface/80 p-2.5 lg:mt-0 lg:p-3">
-          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto scrollbar-slim">
-            {recentEntries.length > 0 ? (
-              <RecentItemsList
-                entries={recentEntries}
+        <div className="mt-3 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[16px] border border-line/60 bg-surface/80 p-2.5 lg:p-3">
+          <div
+            className="min-h-0 flex-1 overflow-y-auto scrollbar-slim"
+            role="tabpanel"
+            aria-label={activeTab === 'command' ? '명령' : '검색'}
+          >
+            {activeTab === 'command' ? (
+              <CommandTab
+                recentCommands={recentCommands}
+                defaultCommands={defaultCommands}
+                customCommands={customCommands}
+                onAddCommand={() => setCommandModalOpen(true)}
                 onSelectCommand={handleSelectCommand}
+                onDeleteCommand={handleDeleteCommand}
+              />
+            ) : (
+              <SearchTab
+                searches={allSearches}
+                directQuery={directQuery}
+                onDirectQueryChange={setDirectQuery}
+                onDirectSearch={handleDirectSearch}
+                onAddSearch={() => setSearchModalOpen(true)}
                 onSelectSearch={handleSelectSearch}
+                onDeleteSearch={handleDeleteSearch}
               />
-            ) : null}
-
-            <CommandList
-              title="기본 명령"
-              commands={allCommands.filter((command) => command.source === 'default')}
-              onSelect={handleSelectCommand}
-            />
-
-            {customCommands.length > 0 ? (
-              <CommandList
-                title="저장된 명령"
-                commands={customCommands}
-                onSelect={handleSelectCommand}
-                onDelete={handleDeleteCommand}
-              />
-            ) : null}
-
-            <SavedSearchList
-              searches={allSearches}
-              onSelect={handleSelectSearch}
-              onDelete={handleDeleteSearch}
-            />
+            )}
           </div>
-
-          <AssistantDirectSearch
-            value={directQuery}
-            onChange={setDirectQuery}
-            onSubmit={handleDirectSearch}
-          />
 
           <div className="mt-2 max-h-[108px] shrink-0 overflow-y-auto scrollbar-slim">
             <AssistantResponseCard response={response} checkedAt={checkedAt} onAction={onNavigate} compact />
