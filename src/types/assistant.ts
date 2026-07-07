@@ -19,8 +19,10 @@ export type AssistantResponseAction = {
 
 export type AssistantResponse = {
   title: string
+  message?: string
   lines: string[]
   action?: AssistantResponseAction
+  state?: 'loading' | 'ready' | 'error'
 }
 
 export type AssistantIntentOption = {

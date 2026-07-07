@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Plus } from 'lucide-react'
 import {
   createCustomCommand,
@@ -8,7 +8,10 @@ import {
   saveCustomCommands,
   saveRecentCommandIds,
 } from '../../../lib/assistantCommands'
-import { resolveAssistantResponse } from '../../../lib/assistantIntent'
+import {
+  getLoadingAssistantResponse,
+  resolveAssistantResponse,
+} from '../../../lib/assistantIntent'
 import type { AssistantCommand, AssistantResponse } from '../../../types/assistant'
 import AddCommandModal from './AddCommandModal'
 import AssistantResponseCard from './AssistantResponseCard'
@@ -23,6 +26,7 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
   const [recentIds, setRecentIds] = useState<string[]>(() => loadRecentCommandIds())
   const [response, setResponse] = useState<AssistantResponse | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const requestSeq = useRef(0)
 
   const allCommands = useMemo(
     () => getAllCommands(customCommands),
@@ -38,11 +42,17 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
     .map((id) => commandMap.get(id))
     .filter((command): command is AssistantCommand => Boolean(command))
 
-  function handleSelectCommand(command: AssistantCommand) {
+  async function handleSelectCommand(command: AssistantCommand) {
     const nextRecent = [command.id, ...recentIds.filter((id) => id !== command.id)].slice(0, 3)
     setRecentIds(nextRecent)
     saveRecentCommandIds(nextRecent)
-    setResponse(resolveAssistantResponse(command.intent))
+
+    const seq = ++requestSeq.current
+    setResponse(getLoadingAssistantResponse())
+
+    const result = await resolveAssistantResponse(command.intent)
+    if (seq !== requestSeq.current) return
+    setResponse(result)
   }
 
   function handleSaveCommand(input: {
@@ -72,7 +82,7 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-btn border border-line bg-surface px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:border-slate-300 hover:bg-canvas"
+            className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-btn border border-line bg-surface px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:border-slate-300 hover:bg-canvas"
           >
             <Plus size={15} strokeWidth={1.75} aria-hidden="true" />
             명령 추가

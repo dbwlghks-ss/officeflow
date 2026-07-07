@@ -9,17 +9,26 @@ type AssistantResponseCardProps = {
 export default function AssistantResponseCard({ response, onAction }: AssistantResponseCardProps) {
   if (!response) return null
 
+  const isLoading = response.state === 'loading'
+
   return (
     <div className="mt-3 rounded-btn border border-line/70 bg-canvas/50 p-3">
       <p className="text-xs font-semibold text-slate-900">{response.title}</p>
-      <ul className="mt-2 max-h-28 list-none space-y-1 overflow-y-auto p-0">
-        {response.lines.map((line) => (
-          <li key={line} className="text-xs leading-relaxed text-slate-600">
-            {line}
-          </li>
-        ))}
-      </ul>
-      {response.action && onAction ? (
+      {response.message ? (
+        <p className={`mt-1 text-xs leading-relaxed ${isLoading ? 'text-slate-400' : 'text-slate-500'}`}>
+          {response.message}
+        </p>
+      ) : null}
+      {response.lines.length > 0 ? (
+        <ul className="mt-2 max-h-28 list-none space-y-1 overflow-y-auto p-0">
+          {response.lines.map((line) => (
+            <li key={line} className="text-xs leading-relaxed text-slate-600">
+              {line}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {response.action && onAction && !isLoading ? (
         <button
           type="button"
           onClick={() => onAction(response.action!.path)}

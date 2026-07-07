@@ -1,59 +1,166 @@
 import type { AssistantIntent, AssistantResponse } from '../types/assistant'
-import { getBriefSummaryData, toBriefSummaryItems } from './homeBriefSummary'
+import {
+  buildUpdateItems,
+  fetchAssistantSnapshot,
+  type AssistantSnapshot,
+} from '../services/assistantDataService'
 import { getRecentUpdatesSections } from './recentUpdatesMockData'
 
-const MOCK_NOTICE_TITLES = [
-  '사내 안전 수칙 업데이트',
-  '식수 메뉴 변경 안내',
-  '7월 사내 교육 일정',
-]
-
-const MOCK_SURVEY_TITLES = ['안전교육 설문', '만족도 조사', '업무 환경 개선 설문']
-
-export function resolveAssistantResponse(intent: AssistantIntent): AssistantResponse {
-  const summary = getBriefSummaryData()
-  const summaryItems = toBriefSummaryItems(summary)
-  const updates = getRecentUpdatesSections().flatMap((section) => section.items)
-
+function buildFromSnapshot(intent: AssistantIntent, snapshot: AssistantSnapshot): AssistantResponse {
   switch (intent) {
     case 'summary':
       return {
-        title: '오늘 확인할 업무',
-        lines: summaryItems.map((item) => `${item.label}: ${item.value}`),
+        title: '오늘 해야 할 일',
+        message: '오늘 확인해야 할 업무를 정리했습니다.',
+        lines: [
+          `오늘 식수: ${snapshot.meal.statusLabel}`,
+          `읽지 않은 공지: ${snapshot.notices.unreadCount}건`,
+          `참여 대기 설문: ${snapshot.surveys.pendingCount}건`,
+          `최근 업데이트: ${buildUpdateItems(snapshot).length}건`,
+        ],
+        state: 'ready',
       }
 
-    case 'notices':
-      return {
-        title: `읽지 않은 공지 ${summary.unreadNoticeCount}건`,
-        lines: MOCK_NOTICE_TITLES.slice(0, 3).map((title, index) => `${index + 1}. ${title}`),
-        action: { label: '공지사항 페이지로 이동', path: '/notice' },
-      }
+    case 'notices': {
+      const lines =
+        snapshot.notices.recentTitles.length > 0
+          ? snapshot.notices.recentTitles.map((title) => `- ${title}`)
+          : ['표시할 공지가 없습니다.']
 
-    case 'surveys':
       return {
-        title: `참여 대기 설문 ${summary.pendingSurveyCount}건`,
-        lines: MOCK_SURVEY_TITLES.slice(0, 3).map((title, index) => `${index + 1}. ${title}`),
-        action: { label: '설문조사 페이지로 이동', path: '/survey' },
+        title: '읽지 않은 공지',
+        message:
+          snapshot.notices.unreadCount > 0
+            ? `읽지 않은 공지가 ${snapshot.notices.unreadCount}건 있습니다.`
+            : '읽지 않은 공지가 없습니다.',
+        lines,
+        action: { label: '공지사항 보러가기', path: '/notice' },
+        state: 'ready',
       }
+    }
+
+    case 'surveys': {
+      const lines =
+        snapshot.surveys.pendingTitles.length > 0
+          ? snapshot.surveys.pendingTitles.map((title) => `- ${title}`)
+          : ['참여 대기 중인 설문이 없습니다.']
+
+      return {
+        title: '참여 대기 설문',
+        message:
+          snapshot.surveys.pendingCount > 0
+            ? `참여해야 할 설문이 ${snapshot.surveys.pendingCount}건 있습니다.`
+            : '참여 대기 중인 설문이 없습니다.',
+        lines,
+        action: { label: '설문조사 보러가기', path: '/survey' },
+        state: 'ready',
+      }
+    }
 
     case 'meal':
       return {
         title: '오늘 식수 신청 상태',
-        lines: [
-          `상태: ${summary.mealStatusLabel}`,
-          summary.mealApplied ? '오늘 점심 식수가 신청되어 있습니다.' : '아직 신청하지 않았습니다.',
-        ],
-        action: { label: '식수 신청 페이지로 이동', path: '/meal' },
+        message: snapshot.meal.applied
+          ? '오늘 식수 신청이 완료되어 있습니다.'
+          : '오늘 식수 신청 내역이 없습니다.',
+        lines: [`오늘 식수: ${snapshot.meal.statusLabel}`],
+        action: snapshot.meal.applied
+          ? undefined
+          : { label: '식수 신청하러 가기', path: '/meal' },
+        state: 'ready',
       }
 
-    case 'updates':
+    case 'updates': {
+      const liveItems = buildUpdateItems(snapshot)
+      const fallbackItems = getRecentUpdatesSections()
+        .flatMap((section) => section.items)
+        .slice(0, 5)
+        .map((item) => {
+          const detail = item.description ? `: ${item.description}` : ''
+          return `${item.title}${detail}`
+        })
+
+      const lines = liveItems.length > 0 ? liveItems : fallbackItems
+
       return {
         title: '최근 업데이트',
-        lines: updates.slice(0, 5).map((item) => {
-          const detail = item.description ? ` — ${item.description}` : ''
-          const time = item.timeLabel ? ` (${item.timeLabel})` : ''
-          return `${item.title}${detail}${time}`
-        }),
+        message: '최근 업무 업데이트를 확인했습니다.',
+        lines: lines.length > 0 ? lines : ['표시할 업데이트가 없습니다.'],
+        state: 'ready',
       }
+    }
+  }
+}
+
+export function getLoadingAssistantResponse(): AssistantResponse {
+  return {
+    title: '확인 중',
+    message: '데이터를 불러오고 있습니다...',
+    lines: [],
+    state: 'loading',
+  }
+}
+
+export function getFallbackAssistantResponse(intent: AssistantIntent): AssistantResponse {
+  const updates = getRecentUpdatesSections().flatMap((section) => section.items)
+
+  const fallbackByIntent: Record<AssistantIntent, AssistantResponse> = {
+    summary: {
+      title: '오늘 해야 할 일',
+      message: '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
+      lines: ['오늘 식수: 확인 불가', '읽지 않은 공지: 확인 불가', '참여 대기 설문: 확인 불가'],
+      state: 'error',
+    },
+    notices: {
+      title: '읽지 않은 공지',
+      message: '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
+      lines: [],
+      action: { label: '공지사항에서 직접 확인하기', path: '/notice' },
+      state: 'error',
+    },
+    surveys: {
+      title: '참여 대기 설문',
+      message: '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
+      lines: [],
+      action: { label: '설문조사에서 직접 확인하기', path: '/survey' },
+      state: 'error',
+    },
+    meal: {
+      title: '오늘 식수 신청 상태',
+      message: '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
+      lines: [],
+      action: { label: '식수 신청에서 직접 확인하기', path: '/meal' },
+      state: 'error',
+    },
+    updates: {
+      title: '최근 업데이트',
+      message: '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
+      lines: updates.slice(0, 3).map((item) => item.title),
+      state: 'error',
+    },
+  }
+
+  return fallbackByIntent[intent]
+}
+
+export function getUnauthenticatedAssistantResponse(intent: AssistantIntent): AssistantResponse {
+  return {
+    ...getFallbackAssistantResponse(intent),
+    message: '로그인 후 업무 데이터를 확인할 수 있습니다.',
+    action: getFallbackAssistantResponse(intent).action,
+    state: 'error',
+  }
+}
+
+export async function resolveAssistantResponse(intent: AssistantIntent): Promise<AssistantResponse> {
+  try {
+    const snapshot = await fetchAssistantSnapshot()
+    if (!snapshot) {
+      return getUnauthenticatedAssistantResponse(intent)
+    }
+    return buildFromSnapshot(intent, snapshot)
+  } catch (error) {
+    console.error('[assistant] resolveAssistantResponse failed:', error)
+    return getFallbackAssistantResponse(intent)
   }
 }
