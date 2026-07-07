@@ -36,8 +36,8 @@ type QuickActionsPanelProps = {
 export default function QuickActionsPanel({ onNavigate }: QuickActionsPanelProps) {
   return (
     <section aria-label="Quick Actions">
-      <h2 className="text-base font-semibold tracking-tight text-slate-900">Quick Actions</h2>
-      <ul className="mt-3 divide-y divide-line/70">
+      <h2 className="text-sm font-semibold tracking-tight text-slate-900">Quick Actions</h2>
+      <ul className="mt-2 divide-y divide-line/70">
         {QUICK_ACTIONS.map((action) => (
           <QuickActionItem
             key={action.path}

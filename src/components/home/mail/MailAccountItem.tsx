@@ -9,7 +9,7 @@ export default function MailAccountItem({ account }: MailAccountItemProps) {
   const isPending = account.status === 'pending'
 
   return (
-    <li className="flex items-center gap-3 rounded-btn border border-line/70 bg-canvas/40 px-3 py-2.5">
+    <li className="flex items-center gap-2.5 rounded-btn border border-line/70 bg-canvas/40 px-2.5 py-2">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface text-slate-500">
         <Mail size={15} strokeWidth={1.75} aria-hidden="true" />
       </div>

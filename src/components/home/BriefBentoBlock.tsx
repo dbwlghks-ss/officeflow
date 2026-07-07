@@ -22,13 +22,13 @@ export default function BriefBentoBlock({
   const summaryItems = toBriefSummaryItems(getBriefSummaryData(summary))
 
   return (
-    <div className="flex h-full flex-col">
+    <div>
       <HomeHeroBriefHeader
         emoji={resolved.emoji}
         title={resolved.title}
         intro={resolved.intro}
       />
-      <BriefSummaryList items={summaryItems} className="mt-auto" />
+      <BriefSummaryList items={summaryItems} className="mt-4" />
     </div>
   )
 }

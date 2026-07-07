@@ -18,10 +18,10 @@ export default function QuickActionItem({
       <button
         type="button"
         onClick={onClick}
-        className="group flex w-full items-center gap-3 rounded-btn px-2 py-3 text-left transition-colors hover:bg-canvas"
+        className="group flex w-full items-center gap-2.5 rounded-btn px-1.5 py-2 text-left transition-colors hover:bg-canvas"
       >
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-canvas text-slate-500">
-          <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-canvas text-slate-500">
+          <Icon size={15} strokeWidth={1.75} aria-hidden="true" />
         </div>
 
         <div className="min-w-0 flex-1">
