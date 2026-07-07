@@ -7,6 +7,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import Header from '../components/layout/Header'
+import HomeHeroBrief from '../components/home/HomeHeroBrief'
 
 type QuickAction = {
   title: string
@@ -39,30 +40,12 @@ const actions: QuickAction[] = [
 export default function HomePage() {
   const navigate = useNavigate()
 
-  const now = new Date()
-  const today = now.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
-  })
-  const hour = now.getHours()
-  const greeting = hour < 12 ? '좋은 아침이에요' : hour < 18 ? '좋은 오후예요' : '좋은 저녁이에요'
-
   return (
     <div className="min-h-screen bg-canvas text-slate-800">
       <Header />
 
       <main className="mx-auto w-full max-w-[1600px] px-6 py-8 lg:px-10 lg:py-11">
-        <section className="mb-8">
-          <p className="mb-1 text-sm font-medium text-slate-400">{today}</p>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            {greeting}.
-          </h1>
-          <p className="mt-2 max-w-xl text-base text-slate-500">
-            사내 업무를 하나로 연결하는 스마트 플랫폼. 무엇을 시작할까요?
-          </p>
-        </section>
+        <HomeHeroBrief />
 
         <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {actions.map((action) => {
