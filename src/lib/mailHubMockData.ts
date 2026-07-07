@@ -11,6 +11,8 @@ export type MailAccountData = {
   unreadCount: number | null
   status: MailAccountStatus
   statusLabel?: string
+  /** Provider webmail URL — opens in a new tab when the account row is clicked. */
+  webmailUrl?: string
 }
 
 export type MailPreviewData = {
@@ -40,6 +42,7 @@ export const MOCK_MAIL_HUB: MailHubData = {
       email: 'sample@gmail.com',
       unreadCount: 3,
       status: 'connected',
+      webmailUrl: 'https://mail.google.com/mail/',
     },
     {
       id: 'mail-naver',
@@ -48,6 +51,7 @@ export const MOCK_MAIL_HUB: MailHubData = {
       email: 'sample@naver.com',
       unreadCount: 1,
       status: 'connected',
+      webmailUrl: 'https://mail.naver.com/',
     },
     {
       id: 'mail-company',
@@ -56,7 +60,7 @@ export const MOCK_MAIL_HUB: MailHubData = {
       email: 'employee@company.com',
       unreadCount: null,
       status: 'pending',
-      statusLabel: '연동 대기',
+      statusLabel: '관리자 설정 필요',
     },
   ],
   previews: [
