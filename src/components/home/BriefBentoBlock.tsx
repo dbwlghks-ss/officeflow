@@ -9,6 +9,7 @@ import {
 } from '../../lib/homeBriefSummary'
 import { formatKoreanTime, KOREAN_CLOCK_TICK_MS } from '../../lib/dateTime'
 import { fetchAssistantSnapshot } from '../../services/assistantDataService'
+import { NOTICE_READ_EVENT } from '../../services/noticeReadService'
 import BriefSummaryList from './BriefSummaryList'
 
 type BriefBentoBlockProps = {
@@ -41,6 +42,32 @@ export default function BriefBentoBlock({
   )
   const requestSeq = useRef(0)
 
+  const loadSnapshot = useRef(async () => {
+    if (summary) return
+
+    const seq = ++requestSeq.current
+    setDisplayMode('loading')
+
+    try {
+      const snapshot = await fetchAssistantSnapshot()
+      if (seq !== requestSeq.current) return
+
+      if (!snapshot) {
+        setSummaryData(null)
+        setDisplayMode('unauthenticated')
+        return
+      }
+
+      setSummaryData(mapSnapshotToBriefSummary(snapshot))
+      setDisplayMode('ready')
+    } catch (error) {
+      console.error('[brief] snapshot fetch failed:', error)
+      if (seq !== requestSeq.current) return
+      setSummaryData(null)
+      setDisplayMode('error')
+    }
+  })
+
   const resolved = { ...getHomeBriefContent(date), ...content }
   const summaryItems = toBriefSummaryItems(
     summaryData ?? {
@@ -68,31 +95,29 @@ export default function BriefBentoBlock({
   }, [])
 
   useEffect(() => {
+    void loadSnapshot.current()
+  }, [summary])
+
+  useEffect(() => {
     if (summary) return
 
-    const seq = ++requestSeq.current
-    setDisplayMode('loading')
+    function handleRefresh() {
+      void loadSnapshot.current()
+    }
 
-    void (async () => {
-      try {
-        const snapshot = await fetchAssistantSnapshot()
-        if (seq !== requestSeq.current) return
+    function handleVisibility() {
+      if (document.visibilityState === 'visible') handleRefresh()
+    }
 
-        if (!snapshot) {
-          setSummaryData(null)
-          setDisplayMode('unauthenticated')
-          return
-        }
+    window.addEventListener(NOTICE_READ_EVENT, handleRefresh)
+    window.addEventListener('focus', handleRefresh)
+    document.addEventListener('visibilitychange', handleVisibility)
 
-        setSummaryData(mapSnapshotToBriefSummary(snapshot))
-        setDisplayMode('ready')
-      } catch (error) {
-        console.error('[brief] snapshot fetch failed:', error)
-        if (seq !== requestSeq.current) return
-        setSummaryData(null)
-        setDisplayMode('error')
-      }
-    })()
+    return () => {
+      window.removeEventListener(NOTICE_READ_EVENT, handleRefresh)
+      window.removeEventListener('focus', handleRefresh)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
   }, [summary])
 
   return (

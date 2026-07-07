@@ -1,14 +1,46 @@
+import { useEffect, useState } from 'react'
 import { Bell } from 'lucide-react'
-import { getNotificationItems } from '../../lib/recentUpdatesMockData'
+import type { RecentUpdateItemData } from '../../lib/recentUpdatesMockData'
+import { getLiveNotificationItems } from '../../services/notificationDataService'
 import NotificationItem from './NotificationItem'
 
 type NotificationCenterProps = {
   onNavigate: (path: string) => void
   onClose: () => void
+  onItemsChange?: (unreadCount: number) => void
 }
 
-export default function NotificationCenter({ onNavigate, onClose }: NotificationCenterProps) {
-  const items = getNotificationItems()
+export default function NotificationCenter({
+  onNavigate,
+  onClose,
+  onItemsChange,
+}: NotificationCenterProps) {
+  const [items, setItems] = useState<RecentUpdateItemData[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+
+    void (async () => {
+      setLoading(true)
+      try {
+        const nextItems = await getLiveNotificationItems()
+        if (!active) return
+        setItems(nextItems)
+        onItemsChange?.(nextItems.filter((item) => item.isUnread !== false).length)
+      } catch (error) {
+        console.error('[notification-center] load failed:', error)
+        if (!active) return
+        setItems([])
+      } finally {
+        if (active) setLoading(false)
+      }
+    })()
+
+    return () => {
+      active = false
+    }
+  }, [onItemsChange])
 
   function handleAction(path: string) {
     onClose()
@@ -26,7 +58,13 @@ export default function NotificationCenter({ onNavigate, onClose }: Notification
         <p className="mt-0.5 text-xs text-slate-500">최근 업무 업데이트를 확인하세요.</p>
       </div>
 
-      {items.length === 0 ? (
+      {loading ? (
+        <div className="space-y-0 px-4 py-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="mb-3 h-14 animate-pulse rounded-btn bg-slate-100/80" />
+          ))}
+        </div>
+      ) : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
           <div className="mb-3 grid h-10 w-10 place-items-center rounded-full bg-canvas text-slate-400">
             <Bell size={18} strokeWidth={1.75} aria-hidden="true" />

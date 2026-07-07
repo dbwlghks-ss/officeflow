@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, ChevronRight, Megaphone, Pin } from 'lucide-react'
 import Header from '../components/layout/Header'
 import { getNotices, type Notice } from '../services/noticeService'
+import { markNoticeAsRead } from '../services/noticeReadService'
 import { Badge, Card } from '../components/ui/primitives'
 
 function formatDate(value: string) {
@@ -34,6 +35,14 @@ export default function NoticePage() {
       active = false
     }
   }, [])
+
+  useEffect(() => {
+    if (!selected) return
+
+    void markNoticeAsRead(selected.id).catch((error) => {
+      console.error('[notice] mark as read failed:', error)
+    })
+  }, [selected])
 
   return (
     <div className="min-h-screen bg-canvas text-slate-800">

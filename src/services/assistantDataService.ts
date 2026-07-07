@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { getTodayDate, getTodayLunchService, getMyApplication } from './mealService'
 import { getNotices } from './noticeService'
+import { getUnreadNoticeSummary } from './noticeReadService'
 import { getOpenSurveys } from './surveyService'
 
 export type AssistantMealSnapshot = {
@@ -49,26 +50,20 @@ async function fetchMealSnapshot(userId: string): Promise<AssistantMealSnapshot>
 }
 
 async function fetchNoticesSnapshot(userId: string): Promise<AssistantNoticesSnapshot> {
-  const notices = await getNotices()
-  const recentTitles = notices.slice(0, 3).map((notice) => notice.title)
-
-  const { data: readRows, error: readError } = await supabase
-    .from('notice_reads')
-    .select('notice_id')
-    .eq('user_id', userId)
-
-  if (readError) {
-    console.error('[assistant] notice_reads query failed:', readError)
+  try {
+    const summary = await getUnreadNoticeSummary(userId)
+    return {
+      unreadCount: summary.unreadCount,
+      recentTitles: summary.recentNotices.map((notice) => notice.title),
+    }
+  } catch (error) {
+    console.error('[assistant] unread notice summary failed:', error)
+    const notices = await getNotices()
     return {
       unreadCount: notices.length,
-      recentTitles,
+      recentTitles: notices.slice(0, 3).map((notice) => notice.title),
     }
   }
-
-  const readIds = new Set((readRows ?? []).map((row) => row.notice_id as number))
-  const unreadCount = notices.filter((notice) => !readIds.has(notice.id)).length
-
-  return { unreadCount, recentTitles }
 }
 
 async function fetchSurveysSnapshot(userId: string): Promise<AssistantSurveysSnapshot> {

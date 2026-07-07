@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell, LogIn, LogOut, Settings } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import { getNotificationUnreadCount } from '../../lib/recentUpdatesMockData'
+import { getLiveNotificationUnreadCount } from '../../services/notificationDataService'
+import { NOTICE_READ_EVENT } from '../../services/noticeReadService'
 import NotificationCenter from '../notifications/NotificationCenter'
 import { HeaderBrandLockup } from '../ui/Logo'
 import { Button } from '../ui/primitives'
@@ -13,8 +14,36 @@ export default function Header() {
   const navigate = useNavigate()
   const [authUser, setAuthUser] = useState<AuthUser | null | undefined>(undefined)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
   const notificationRef = useRef<HTMLDivElement>(null)
-  const unreadCount = getNotificationUnreadCount()
+
+  useEffect(() => {
+    let active = true
+
+    async function refreshUnreadCount() {
+      try {
+        const count = await getLiveNotificationUnreadCount()
+        if (active) setUnreadCount(count)
+      } catch (error) {
+        console.error('[header] notification unread count failed:', error)
+      }
+    }
+
+    void refreshUnreadCount()
+
+    function handleRefresh() {
+      void refreshUnreadCount()
+    }
+
+    window.addEventListener(NOTICE_READ_EVENT, handleRefresh)
+    window.addEventListener('focus', handleRefresh)
+
+    return () => {
+      active = false
+      window.removeEventListener(NOTICE_READ_EVENT, handleRefresh)
+      window.removeEventListener('focus', handleRefresh)
+    }
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -115,6 +144,7 @@ export default function Header() {
                   <NotificationCenter
                     onClose={() => setNotificationsOpen(false)}
                     onNavigate={navigate}
+                    onItemsChange={setUnreadCount}
                   />
                 ) : null}
               </div>
