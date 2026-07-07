@@ -33,3 +33,22 @@ export type AssistantIntentOption = {
   value: AssistantIntent
   label: string
 }
+
+export type AssistantSearchScope = 'all' | 'notices' | 'surveys' | 'mail' | 'users'
+
+export type AssistantSavedSearchSource = 'default' | 'custom'
+
+export type AssistantSavedSearch = {
+  id: string
+  title: string
+  query: string
+  scope: AssistantSearchScope
+  source: AssistantSavedSearchSource
+  createdAt: string
+  lastUsedAt?: string
+}
+
+export type AssistantRecentItem = {
+  type: 'command' | 'search'
+  id: string
+}

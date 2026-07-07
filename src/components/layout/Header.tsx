@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, LogIn, LogOut, Search, Settings } from 'lucide-react'
+import { Bell, LogIn, LogOut, Settings } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getNotificationUnreadCount } from '../../lib/recentUpdatesMockData'
 import NotificationCenter from '../notifications/NotificationCenter'
@@ -90,19 +90,10 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-30 h-[72px] border-b border-line bg-surface/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-full max-w-[1600px] items-center gap-6 px-6 lg:px-10">
+      <div className="mx-auto flex h-full max-w-[1600px] items-center justify-between px-6 lg:px-10">
         <HeaderBrandLockup onOfficeFlowClick={() => navigate('/')} />
 
-        <div className="relative mx-auto hidden w-full max-w-md lg:block">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={17} />
-          <input
-            type="text"
-            placeholder="검색 (식수, 설문, 공지...)"
-            className="h-10 w-full rounded-btn border border-line bg-canvas pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 transition-colors focus:border-brand/40 focus:bg-surface focus:outline-none focus:ring-4 focus:ring-brand/10"
-          />
-        </div>
-
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {authUser ? (
             <>
               <div ref={notificationRef} className="relative">
