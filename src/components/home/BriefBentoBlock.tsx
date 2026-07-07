@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react'
 import { getHomeBriefContent, type HomeBriefContent } from '../../lib/homeBrief'
 import {
   getBriefSummaryData,
   toBriefSummaryItems,
   type BriefSummaryData,
 } from '../../lib/homeBriefSummary'
+import { formatKoreanTime, KOREAN_CLOCK_TICK_MS } from '../../lib/dateTime'
 import BriefSummaryList from './BriefSummaryList'
 
 type BriefBentoBlockProps = {
@@ -17,13 +19,25 @@ export default function BriefBentoBlock({
   content,
   summary,
 }: BriefBentoBlockProps) {
+  const [now, setNow] = useState(() => new Date())
   const resolved = { ...getHomeBriefContent(date), ...content }
   const summaryItems = toBriefSummaryItems(getBriefSummaryData(summary))
+  const timeLabel = formatKoreanTime(now)
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNow(new Date())
+    }, KOREAN_CLOCK_TICK_MS)
+
+    return () => window.clearInterval(intervalId)
+  }, [])
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <p className="text-[11px] font-semibold uppercase tracking-wider text-white/65">
-        {resolved.title}
+        <span>{resolved.title}</span>
+        <span className="mx-1.5 font-normal text-white/35">·</span>
+        <span className="normal-case tracking-normal text-white/55">{timeLabel}</span>
       </p>
       <h2 className="mt-2 text-lg font-bold leading-snug tracking-tight text-white lg:text-xl">
         오늘 업무를 한눈에 확인하세요.
