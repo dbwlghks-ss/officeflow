@@ -82,56 +82,61 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
 
   return (
     <>
-      <section className="flex max-h-[560px] flex-col" aria-label="OfficeFlow Assistant">
-        <div className="shrink-0">
+      <section
+        className="flex h-full min-h-[260px] flex-col lg:min-h-[340px] lg:flex-row lg:gap-6"
+        aria-label="OfficeFlow Assistant"
+      >
+        <div className="shrink-0 lg:w-[32%] lg:max-w-[280px]">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             OfficeFlow Assistant
           </p>
-          <h2 className="mt-2 text-lg font-semibold tracking-tight text-slate-900">
-            자주 쓰는 업무 명령
+          <h2 className="mt-2 text-xl font-bold leading-snug tracking-tight text-slate-900 lg:text-2xl">
+            반복 업무 명령을 빠르게 실행하세요.
           </h2>
-          <p className="mt-1 text-sm leading-relaxed text-slate-500">
-            반복되는 업무 질문을 저장해두고 빠르게 확인하세요.
+          <p className="mt-2 text-sm leading-relaxed text-slate-500">
+            자주 쓰는 업무 명령을 저장하고 클릭 한 번으로 확인하세요.
           </p>
 
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-btn border border-line bg-surface px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:border-slate-300 hover:bg-canvas"
+            className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-btn border border-line bg-surface px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-white"
           >
             <Plus size={15} strokeWidth={1.75} aria-hidden="true" />
             명령 추가
           </button>
         </div>
 
-        <div className="mt-3 min-h-0 flex-1 space-y-3 overflow-y-auto scrollbar-slim">
-          {recentCommands.length > 0 ? (
+        <div className="mt-4 flex min-h-0 min-w-0 flex-1 flex-col rounded-[18px] border border-line/60 bg-surface/80 p-3 lg:mt-0 lg:p-4">
+          <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto scrollbar-slim">
+            {recentCommands.length > 0 ? (
+              <CommandList
+                title="최근 사용"
+                commands={recentCommands}
+                onSelect={handleSelectCommand}
+                variant="recent"
+              />
+            ) : null}
+
             <CommandList
-              title="최근 사용"
-              commands={recentCommands}
+              title="기본 명령"
+              commands={allCommands.filter((command) => command.source === 'default')}
               onSelect={handleSelectCommand}
-              variant="recent"
             />
-          ) : null}
 
-          <CommandList
-            title="기본 명령"
-            commands={allCommands.filter((command) => command.source === 'default')}
-            onSelect={handleSelectCommand}
-          />
+            {customCommands.length > 0 ? (
+              <CommandList
+                title="저장된 명령"
+                commands={customCommands}
+                onSelect={handleSelectCommand}
+                onDelete={handleDeleteCommand}
+              />
+            ) : null}
+          </div>
 
-          {customCommands.length > 0 ? (
-            <CommandList
-              title="저장된 명령"
-              commands={customCommands}
-              onSelect={handleSelectCommand}
-              onDelete={handleDeleteCommand}
-            />
-          ) : null}
-        </div>
-
-        <div className="shrink-0">
-          <AssistantResponseCard response={response} checkedAt={checkedAt} onAction={onNavigate} />
+          <div className="shrink-0">
+            <AssistantResponseCard response={response} checkedAt={checkedAt} onAction={onNavigate} />
+          </div>
         </div>
       </section>
 

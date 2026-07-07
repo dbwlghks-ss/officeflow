@@ -19,31 +19,31 @@ export default function HomePage() {
       <Header />
 
       <main className="mx-auto w-full max-w-[1600px] px-6 py-6 lg:px-10 lg:py-8">
-        <div className="mb-5">
+        <div className="mb-6">
           <HomeHeroGreeting dateLabel={dateLabel} greeting={brief.greeting} />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-start lg:gap-5">
-          <div className="h-fit self-start lg:col-span-8">
-            <BentoCard>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-stretch lg:gap-5">
+          <div className="lg:col-span-4">
+            <BentoCard variant="brand" className="h-full">
               <BriefBentoBlock date={now} />
             </BentoCard>
           </div>
 
-          <div className="h-fit self-start lg:col-span-4">
-            <BentoCard>
+          <div className="lg:col-span-8">
+            <BentoCard variant="muted" className="h-full">
               <AssistantPanel onNavigate={navigate} />
             </BentoCard>
           </div>
 
-          <div className="h-fit self-start lg:col-span-8">
-            <BentoCard compact>
+          <div className="lg:col-span-8">
+            <BentoCard className="h-full">
               <QuickActionsPanel onNavigate={navigate} />
             </BentoCard>
           </div>
 
-          <div className="h-fit self-start lg:col-span-4">
-            <BentoCard compact>
+          <div className="lg:col-span-4">
+            <BentoCard variant="accent" className="flex h-full flex-col">
               <MailHubPanel />
             </BentoCard>
           </div>

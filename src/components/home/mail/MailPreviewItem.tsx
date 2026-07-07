@@ -5,13 +5,20 @@ import {
 
 type MailPreviewItemProps = {
   mail: MailPreviewData
+  variant?: 'default' | 'accent'
 }
 
-export default function MailPreviewItem({ mail }: MailPreviewItemProps) {
+export default function MailPreviewItem({ mail, variant = 'default' }: MailPreviewItemProps) {
   const badgeClass = MAIL_PROVIDER_BADGE_CLASS[mail.provider]
+  const onAccent = variant === 'accent'
 
   return (
-    <li className="border-b border-line/60 py-2 last:border-b-0">
+    <li
+      className={
+        'border-b py-2 last:border-b-0 ' +
+        (onAccent ? 'border-white/40' : 'border-line/60')
+      }
+    >
       <div className="flex items-start justify-between gap-2">
         <p className="truncate text-sm font-semibold text-slate-900">{mail.from}</p>
         <span

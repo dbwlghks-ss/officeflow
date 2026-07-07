@@ -5,7 +5,6 @@ import {
   type BriefSummaryData,
 } from '../../lib/homeBriefSummary'
 import BriefSummaryList from './BriefSummaryList'
-import HomeHeroBriefHeader from './HomeHeroBriefHeader'
 
 type BriefBentoBlockProps = {
   date?: Date
@@ -22,13 +21,19 @@ export default function BriefBentoBlock({
   const summaryItems = toBriefSummaryItems(getBriefSummaryData(summary))
 
   return (
-    <div>
-      <HomeHeroBriefHeader
-        emoji={resolved.emoji}
-        title={resolved.title}
-        intro={resolved.intro}
+    <div className="flex h-full min-h-[260px] flex-col">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-white/65">
+        {resolved.title}
+      </p>
+      <h2 className="mt-3 text-xl font-bold leading-snug tracking-tight text-white lg:text-2xl">
+        오늘 업무를 한눈에 확인하세요.
+      </h2>
+      <BriefSummaryList
+        items={summaryItems}
+        tone="brand"
+        columns={2}
+        className="mt-auto"
       />
-      <BriefSummaryList items={summaryItems} className="mt-4" />
     </div>
   )
 }

@@ -11,38 +11,65 @@ const ICON_BY_ID: Record<BriefSummaryItem['id'], LucideIcon> = {
 type BriefSummaryListProps = {
   items: BriefSummaryItem[]
   className?: string
+  /** Visual tone for Brief bento card backgrounds. */
+  tone?: 'light' | 'brand'
+  /** Column count for summary grid. */
+  columns?: 2 | 4
 }
 
-export default function BriefSummaryList({ items, className = '' }: BriefSummaryListProps) {
+export default function BriefSummaryList({
+  items,
+  className = '',
+  tone = 'light',
+  columns = 4,
+}: BriefSummaryListProps) {
+  const onBrand = tone === 'brand'
+  const colClass = columns === 2 ? 'grid-cols-2' : 'grid-cols-2 lg:grid-cols-4'
+
   return (
     <div
-      className={`border-t border-line/70 pt-4${className ? ` ${className}` : ''}`}
+      className={
+        (onBrand ? 'border-t border-white/20 pt-4' : 'border-t border-line/70 pt-4') +
+        (className ? ` ${className}` : '')
+      }
       aria-label="오늘의 업무 요약"
     >
-      <ul className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+      <ul className={`grid ${colClass} gap-2`}>
         {items.map((item) => {
           const Icon = ICON_BY_ID[item.id]
 
           return (
             <li
               key={item.id}
-              className="rounded-btn border border-line/70 bg-canvas/40 px-3 py-2.5"
+              className={
+                onBrand
+                  ? 'rounded-btn border border-white/15 bg-white/10 px-2.5 py-2 backdrop-blur-[1px]'
+                  : 'rounded-btn border border-line/70 bg-canvas/40 px-3 py-2.5'
+              }
             >
               <div className="flex items-center gap-1.5">
                 <Icon
-                  size={14}
+                  size={13}
                   strokeWidth={1.75}
-                  className="shrink-0 text-slate-400"
+                  className={'shrink-0 ' + (onBrand ? 'text-white/70' : 'text-slate-400')}
                   aria-hidden="true"
                 />
-                <span className="text-xs font-medium text-slate-400">{item.label}</span>
+                <span
+                  className={
+                    'text-[11px] font-medium ' + (onBrand ? 'text-white/70' : 'text-slate-400')
+                  }
+                >
+                  {item.label}
+                </span>
               </div>
               <p
                 className={
-                  'mt-1.5 text-sm tabular-nums tracking-tight ' +
-                  (item.emphasis
-                    ? 'font-semibold text-slate-900'
-                    : 'font-semibold text-slate-700')
+                  'mt-1 text-sm tabular-nums tracking-tight font-semibold ' +
+                  (onBrand
+                    ? 'text-white'
+                    : item.emphasis
+                      ? 'text-slate-900'
+                      : 'text-slate-700')
                 }
               >
                 {item.value}
