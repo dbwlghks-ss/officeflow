@@ -1,43 +1,48 @@
 import type { BriefSummaryData } from './homeBriefSummary'
 
-function formatNoticeSurveyClause(noticeCount: number, surveyCount: number): string {
-  const hasNotice = noticeCount > 0
-  const hasSurvey = surveyCount > 0
-
-  if (hasNotice && hasSurvey) {
-    return `확인할 공지 ${noticeCount}건과 설문 ${surveyCount}건이 있습니다`
-  }
-  if (hasNotice) {
-    return `확인할 공지 ${noticeCount}건이 있습니다`
-  }
-  return `확인할 설문 ${surveyCount}건이 있습니다`
+export type BriefSummaryCopy = {
+  lines: [string] | [string, string]
 }
 
-/** Natural one-line brief from existing summary snapshot data. */
-export function buildBriefSummarySentence(data: BriefSummaryData): string {
+function formatActionLine(
+  noticeCount: number,
+  surveyCount: number,
+  scheduleCount: number,
+): string | null {
+  const parts: string[] = []
+
+  if (noticeCount > 0) parts.push(`공지 ${noticeCount}건`)
+  if (surveyCount > 0) parts.push(`설문 ${surveyCount}건`)
+  if (scheduleCount > 0) parts.push(`일정 ${scheduleCount}건`)
+
+  if (parts.length === 0) return null
+  if (parts.length === 1) return `${parts[0]}을 확인해보세요.`
+  if (parts.length === 2) return `${parts[0]}과 ${parts[1]}을 확인해보세요.`
+
+  return `${parts[0]}, ${parts[1]}, ${parts[2]}을 확인해보세요.`
+}
+
+/** Short, scannable brief copy from existing summary snapshot data. */
+export function buildBriefSummaryCopy(data: BriefSummaryData): BriefSummaryCopy {
   const { mealApplied, unreadNoticeCount, pendingSurveyCount, todayScheduleCount } = data
-  const hasNoticeOrSurvey = unreadNoticeCount > 0 || pendingSurveyCount > 0
+  const actionLine = formatActionLine(
+    unreadNoticeCount,
+    pendingSurveyCount,
+    todayScheduleCount,
+  )
 
-  let sentence: string
-
-  if (!hasNoticeOrSurvey) {
+  if (!actionLine) {
     if (mealApplied) {
-      sentence = '오늘 확인할 공지와 설문은 없습니다. 여유 있게 업무를 시작하세요.'
-    } else {
-      sentence =
-        '오늘 식수 신청이 필요하고, 확인할 공지와 설문은 없습니다. 여유 있게 업무를 시작하세요.'
+      return {
+        lines: ['오늘 확인할 업무는 없습니다.', '여유 있게 하루를 시작하세요.'],
+      }
     }
-  } else {
-    const mealLead = mealApplied
-      ? '오늘 식수는 신청 완료되었고'
-      : '오늘 식수 신청이 필요하고'
 
-    sentence = `${mealLead}, ${formatNoticeSurveyClause(unreadNoticeCount, pendingSurveyCount)}.`
+    return {
+      lines: ['식수 신청이 필요합니다.', '여유 있게 하루를 시작하세요.'],
+    }
   }
 
-  if (todayScheduleCount > 0) {
-    sentence += ` 오늘 일정 ${todayScheduleCount}건도 함께 확인해보세요.`
-  }
-
-  return sentence
+  const mealLine = mealApplied ? '식수 신청 완료.' : '식수 신청이 필요합니다.'
+  return { lines: [mealLine, actionLine] }
 }
