@@ -57,7 +57,7 @@ export default function HomePage() {
         <section className="mb-8">
           <p className="mb-1 text-sm font-medium text-slate-400">{today}</p>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            {greeting}. <span className="text-brand">OfficeFlow</span>
+            {greeting}.
           </h1>
           <p className="mt-2 max-w-xl text-base text-slate-500">
             사내 업무를 하나로 연결하는 스마트 플랫폼. 무엇을 시작할까요?
