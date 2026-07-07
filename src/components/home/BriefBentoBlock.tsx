@@ -5,6 +5,7 @@ import {
   toBriefSummaryItems,
   type BriefSummaryData,
 } from '../../lib/homeBriefSummary'
+import { buildBriefSummarySentence } from '../../lib/briefSummarySentence'
 import { formatKoreanTime, KOREAN_CLOCK_TICK_MS } from '../../lib/dateTime'
 import BriefSummaryList from './BriefSummaryList'
 
@@ -21,7 +22,9 @@ export default function BriefBentoBlock({
 }: BriefBentoBlockProps) {
   const [now, setNow] = useState(() => new Date())
   const resolved = { ...getHomeBriefContent(date), ...content }
-  const summaryItems = toBriefSummaryItems(getBriefSummaryData(summary))
+  const summaryData = getBriefSummaryData(summary)
+  const summaryItems = toBriefSummaryItems(summaryData)
+  const summarySentence = buildBriefSummarySentence(summaryData)
   const timeLabel = formatKoreanTime(now)
 
   useEffect(() => {
@@ -42,11 +45,14 @@ export default function BriefBentoBlock({
       <h2 className="mt-2 text-lg font-bold leading-snug tracking-tight text-white lg:text-xl">
         오늘 업무를 한눈에 확인하세요.
       </h2>
+      <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-white/75 lg:mt-2">
+        {summarySentence}
+      </p>
       <BriefSummaryList
         items={summaryItems}
         tone="brand"
         columns={2}
-        className="mt-3 lg:mt-auto"
+        className="mt-2 lg:mt-auto lg:pt-2.5"
       />
     </div>
   )
