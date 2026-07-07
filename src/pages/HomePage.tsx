@@ -49,11 +49,11 @@ export default function HomePage() {
       <Header />
 
       <main className="mx-auto w-full max-w-[1600px] px-6 py-8 lg:px-10 lg:py-11">
-        <div className="mb-8">
+        <div className="mb-6">
           <HomeHeroGreeting dateLabel={dateLabel} greeting={brief.greeting} />
         </div>
 
-        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-12 lg:items-stretch">
           <div className="lg:col-span-8">
             <BentoCard>
               <BriefBentoBlock date={now} />
@@ -73,7 +73,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <section className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {actions.map((action) => (
             <QuickActionCard
               key={action.title}

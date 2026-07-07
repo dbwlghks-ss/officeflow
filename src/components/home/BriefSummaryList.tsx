@@ -16,38 +16,37 @@ type BriefSummaryListProps = {
 export default function BriefSummaryList({ items, className = '' }: BriefSummaryListProps) {
   return (
     <div
-      className={`mt-5 border-t border-line/70 pt-4${className ? ` ${className}` : ''}`}
+      className={`mt-5 border-t border-line/70 pt-5${className ? ` ${className}` : ''}`}
       aria-label="오늘의 업무 요약"
     >
-      <ul className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-0">
-        {items.map((item, index) => {
+      <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {items.map((item) => {
           const Icon = ICON_BY_ID[item.id]
-          const isLast = index === items.length - 1
 
           return (
-            <li key={item.id} className="flex items-center sm:shrink-0">
-              <div className="flex items-center gap-2 text-sm text-slate-600">
+            <li
+              key={item.id}
+              className="rounded-btn border border-line/70 bg-canvas/40 px-4 py-3.5"
+            >
+              <div className="flex items-center gap-1.5">
                 <Icon
-                  size={15}
+                  size={14}
                   strokeWidth={1.75}
                   className="shrink-0 text-slate-400"
                   aria-hidden="true"
                 />
-                <span className="text-slate-400">{item.label}</span>
-                <span
-                  className={
-                    item.emphasis ? 'font-semibold text-slate-800' : 'font-medium text-slate-600'
-                  }
-                >
-                  {item.value}
-                </span>
+                <span className="text-xs font-medium text-slate-400">{item.label}</span>
               </div>
-              {!isLast ? (
-                <span
-                  aria-hidden="true"
-                  className="mx-4 hidden h-3 w-px bg-line sm:inline-block"
-                />
-              ) : null}
+              <p
+                className={
+                  'mt-2 text-[15px] tabular-nums tracking-tight ' +
+                  (item.emphasis
+                    ? 'font-semibold text-slate-900'
+                    : 'font-semibold text-slate-700')
+                }
+              >
+                {item.value}
+              </p>
             </li>
           )
         })}

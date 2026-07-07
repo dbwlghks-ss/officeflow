@@ -10,16 +10,12 @@ export default function RecentUpdatesSection({ section }: RecentUpdatesSectionPr
 
   return (
     <div>
-      <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
         {section.title}
       </p>
-      <ul className="m-0 list-none p-0">
-        {section.items.map((item, index) => (
-          <RecentUpdateItem
-            key={item.id}
-            item={item}
-            isLast={index === section.items.length - 1}
-          />
+      <ul className="m-0 grid list-none grid-cols-1 gap-x-8 p-0 md:grid-cols-2">
+        {section.items.map((item) => (
+          <RecentUpdateItem key={item.id} item={item} />
         ))}
       </ul>
     </div>

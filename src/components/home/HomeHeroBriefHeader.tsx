@@ -19,7 +19,7 @@ export default function HomeHeroBriefHeader({
         </span>
         <span>{title}</span>
       </p>
-      <p className="mt-1.5 text-base leading-relaxed text-slate-500">{intro}</p>
+      <p className="mt-1 text-sm leading-relaxed text-slate-500">{intro}</p>
     </div>
   )
 }

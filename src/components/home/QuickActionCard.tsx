@@ -19,34 +19,36 @@ export default function QuickActionCard({
     <button
       type="button"
       onClick={onClick}
-      className="group relative flex h-full min-h-[220px] flex-col items-start overflow-hidden rounded-card border border-line bg-surface p-8 text-left shadow-soft transition-all duration-500 ease-out hover:-translate-y-1.5 hover:border-slate-300/80 hover:shadow-[0_8px_32px_-12px_rgba(16,24,40,0.14),0_2px_8px_rgba(16,24,40,0.06)]"
+      className="group relative flex h-full min-h-[168px] flex-col items-start overflow-hidden rounded-card border border-line bg-surface p-6 text-left shadow-soft transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-slate-300/70 hover:shadow-[0_4px_20px_-10px_rgba(16,24,40,0.12)]"
     >
       <div className="flex w-full items-start justify-between gap-3">
-        <div className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-brand-light text-brand transition-transform duration-500 ease-out group-hover:scale-105">
-          <Icon size={28} strokeWidth={1.75} />
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-light text-brand">
+          <Icon size={22} strokeWidth={1.75} />
         </div>
-        {statusLabel ? (
-          <span className="rounded-full bg-canvas px-2.5 py-1 text-xs font-medium text-slate-500">
-            {statusLabel}
-          </span>
-        ) : null}
+        <div className="min-h-[26px] shrink-0">
+          {statusLabel ? (
+            <span className="inline-flex rounded-full bg-canvas px-2.5 py-1 text-xs font-medium text-slate-500">
+              {statusLabel}
+            </span>
+          ) : null}
+        </div>
       </div>
 
-      <h2 className="mt-auto pt-8 text-xl font-bold text-slate-900">{title}</h2>
-      <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{description}</p>
+      <h2 className="mt-5 text-lg font-bold text-slate-900">{title}</h2>
+      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-slate-500">{description}</p>
 
-      <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand transition-colors duration-300 group-hover:text-brand-hover">
+      <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-slate-400 transition-colors group-hover:text-brand">
         바로가기
         <ArrowRight
-          size={16}
-          className="transition-transform duration-500 ease-out group-hover:translate-x-1"
+          size={14}
+          className="transition-transform duration-300 group-hover:translate-x-0.5"
         />
       </span>
 
       <Icon
-        size={160}
+        size={120}
         strokeWidth={1}
-        className="pointer-events-none absolute -bottom-8 -right-6 text-brand/[0.04] transition-transform duration-500 ease-out group-hover:scale-105"
+        className="pointer-events-none absolute -bottom-6 -right-4 text-brand/[0.035]"
       />
     </button>
   )

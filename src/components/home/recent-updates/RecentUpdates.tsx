@@ -19,12 +19,12 @@ export default function RecentUpdates({ sections, embedded = false }: RecentUpda
       className={embedded ? '' : 'max-w-3xl'}
       aria-label="Recent Updates"
     >
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold tracking-tight text-slate-900">Recent Updates</h2>
+      <div className="mb-3">
+        <h2 className="text-base font-semibold tracking-tight text-slate-900">Recent Updates</h2>
         <p className="mt-0.5 text-sm text-slate-500">최근 업무 업데이트를 확인하세요.</p>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-4">
         {resolvedSections.map((section) => (
           <RecentUpdatesSection key={section.id} section={section} />
         ))}
