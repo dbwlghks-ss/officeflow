@@ -2,6 +2,9 @@ type LogoProps = { className?: string; header?: boolean }
 
 type OfficeFlowLogoSize = 'sm' | 'md' | 'header' | 'auth'
 
+const HEADER_LOGO_HEIGHT_CLASS = 'h-[34px]'
+const HEADER_LOGO_DIVIDER_CLASS = 'h-[22px]'
+
 function resolveOfficeFlowLogoSize(size: OfficeFlowLogoSize): 'sm' | 'md' {
   return size === 'sm' || size === 'header' ? 'sm' : 'md'
 }
@@ -15,7 +18,7 @@ export function OfficeFlowLogo({
   size?: OfficeFlowLogoSize
 }) {
   const resolved = resolveOfficeFlowLogoSize(size)
-  const heightClass = resolved === 'sm' ? 'h-[30px]' : 'h-[34px]'
+  const heightClass = resolved === 'sm' ? HEADER_LOGO_HEIGHT_CLASS : 'h-[34px]'
 
   return (
     <img
@@ -79,10 +82,10 @@ export function HwashinLogo({ className, header = false }: LogoProps) {
   )
 }
 
-/** Header brand lockup: [official HWASHIN CI] · [OfficeFlow logo] */
+/** Header brand lockup: [official HWASHIN CI] | [OfficeFlow logo] */
 export function HeaderBrandLockup({ onOfficeFlowClick }: { onOfficeFlowClick?: () => void }) {
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex items-center gap-2">
       <a
         href="https://www.hwashin.co.kr"
         target="_blank"
@@ -93,9 +96,13 @@ export function HeaderBrandLockup({ onOfficeFlowClick }: { onOfficeFlowClick?: (
         <img
           src="/hwashin-logo.png"
           alt="HWASHIN"
-          className="h-[40px] w-auto object-contain"
+          className={`${HEADER_LOGO_HEIGHT_CLASS} w-auto object-contain`}
         />
       </a>
+      <span
+        aria-hidden="true"
+        className={`${HEADER_LOGO_DIVIDER_CLASS} w-px shrink-0 bg-line`}
+      />
       <button
         type="button"
         onClick={onOfficeFlowClick}
