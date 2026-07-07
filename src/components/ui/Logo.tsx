@@ -4,7 +4,7 @@ type OfficeFlowLogoSize = 'sm' | 'md' | 'header' | 'auth'
 
 const HEADER_LOGO_HEIGHT_CLASS = 'h-[34px]'
 const OFFICEFLOW_HEADER_HEIGHT_CLASS = HEADER_LOGO_HEIGHT_CLASS
-const HWASHIN_HEADER_HEIGHT_CLASS = 'h-[30px]'
+const HWASHIN_HEADER_HEIGHT_CLASS = 'h-[29px]'
 const HEADER_LOCKUP_GAP_CLASS = 'gap-[10px]'
 const HEADER_LOCKUP_DIVIDER_CLASS = 'h-[18px] w-px shrink-0 bg-line/90'
 const HWASHIN_LOGO_SRC = '/hwashin-symbol.png'
