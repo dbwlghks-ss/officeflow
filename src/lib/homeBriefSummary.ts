@@ -1,6 +1,9 @@
+import type { AssistantSnapshot } from '../services/assistantDataService'
+
 export type BriefSummaryData = {
   mealStatusLabel: string
   mealApplied: boolean
+  mealServiceAvailable: boolean
   unreadNoticeCount: number
   pendingSurveyCount: number
   todayScheduleCount: number
@@ -13,28 +16,72 @@ export type BriefSummaryItem = {
   emphasis?: boolean
 }
 
-/** Mock snapshot — replace with Supabase-driven data later. */
-export const MOCK_BRIEF_SUMMARY: BriefSummaryData = {
-  mealStatusLabel: '신청 완료',
-  mealApplied: true,
-  unreadNoticeCount: 3,
-  pendingSurveyCount: 2,
-  todayScheduleCount: 2,
+export type BriefDisplayMode = 'loading' | 'ready' | 'error' | 'unauthenticated'
+
+const DEFAULT_BRIEF_SUMMARY: BriefSummaryData = {
+  mealStatusLabel: '확인 중',
+  mealApplied: false,
+  mealServiceAvailable: false,
+  unreadNoticeCount: 0,
+  pendingSurveyCount: 0,
+  todayScheduleCount: 0,
 }
 
+/** Legacy helper for unused HomeHeroBrief — prefer mapSnapshotToBriefSummary. */
 export function getBriefSummaryData(
   override?: Partial<BriefSummaryData>,
 ): BriefSummaryData {
-  return { ...MOCK_BRIEF_SUMMARY, ...override }
+  return { ...DEFAULT_BRIEF_SUMMARY, ...override }
 }
 
-export function toBriefSummaryItems(data: BriefSummaryData): BriefSummaryItem[] {
+export function mapSnapshotToBriefSummary(snapshot: AssistantSnapshot): BriefSummaryData {
+  return {
+    mealStatusLabel: snapshot.meal.statusLabel,
+    mealApplied: snapshot.meal.applied,
+    mealServiceAvailable: snapshot.meal.serviceAvailable,
+    unreadNoticeCount: snapshot.notices.unreadCount,
+    pendingSurveyCount: snapshot.surveys.pendingCount,
+    todayScheduleCount: 0,
+  }
+}
+
+export function toBriefSummaryItems(
+  data: BriefSummaryData,
+  mode: BriefDisplayMode = 'ready',
+): BriefSummaryItem[] {
+  if (mode === 'loading') {
+    return [
+      { id: 'meal', label: '오늘 식수', value: '확인 중' },
+      { id: 'notice', label: '읽지 않은 공지', value: '-' },
+      { id: 'survey', label: '참여 대기 설문', value: '-' },
+      { id: 'schedule', label: '오늘 일정', value: '-' },
+    ]
+  }
+
+  if (mode === 'error') {
+    return [
+      { id: 'meal', label: '오늘 식수', value: '확인 필요' },
+      { id: 'notice', label: '읽지 않은 공지', value: '-' },
+      { id: 'survey', label: '참여 대기 설문', value: '-' },
+      { id: 'schedule', label: '오늘 일정', value: '-' },
+    ]
+  }
+
+  if (mode === 'unauthenticated') {
+    return [
+      { id: 'meal', label: '오늘 식수', value: '로그인 필요' },
+      { id: 'notice', label: '읽지 않은 공지', value: '로그인 필요' },
+      { id: 'survey', label: '참여 대기 설문', value: '로그인 필요' },
+      { id: 'schedule', label: '오늘 일정', value: '-' },
+    ]
+  }
+
   return [
     {
       id: 'meal',
       label: '오늘 식수',
       value: data.mealStatusLabel,
-      emphasis: !data.mealApplied,
+      emphasis: data.mealServiceAvailable && !data.mealApplied,
     },
     {
       id: 'notice',

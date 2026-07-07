@@ -1,17 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { buildBriefSummaryDisplay } from '../../lib/briefSummarySentence'
 import { getHomeBriefContent, type HomeBriefContent } from '../../lib/homeBrief'
 import {
-  getBriefSummaryData,
+  mapSnapshotToBriefSummary,
   toBriefSummaryItems,
+  type BriefDisplayMode,
   type BriefSummaryData,
 } from '../../lib/homeBriefSummary'
-import { buildBriefSummaryCopy } from '../../lib/briefSummarySentence'
 import { formatKoreanTime, KOREAN_CLOCK_TICK_MS } from '../../lib/dateTime'
+import { fetchAssistantSnapshot } from '../../services/assistantDataService'
 import BriefSummaryList from './BriefSummaryList'
 
 type BriefBentoBlockProps = {
   date?: Date
   content?: Partial<HomeBriefContent>
+  /** Optional override for tests — skips live Supabase fetch when provided. */
   summary?: Partial<BriefSummaryData>
 }
 
@@ -21,10 +24,39 @@ export default function BriefBentoBlock({
   summary,
 }: BriefBentoBlockProps) {
   const [now, setNow] = useState(() => new Date())
+  const [displayMode, setDisplayMode] = useState<BriefDisplayMode>(
+    summary ? 'ready' : 'loading',
+  )
+  const [summaryData, setSummaryData] = useState<BriefSummaryData | null>(
+    summary
+      ? {
+          mealStatusLabel: summary.mealStatusLabel ?? '신청 완료',
+          mealApplied: summary.mealApplied ?? true,
+          mealServiceAvailable: summary.mealServiceAvailable ?? true,
+          unreadNoticeCount: summary.unreadNoticeCount ?? 0,
+          pendingSurveyCount: summary.pendingSurveyCount ?? 0,
+          todayScheduleCount: summary.todayScheduleCount ?? 0,
+        }
+      : null,
+  )
+  const requestSeq = useRef(0)
+
   const resolved = { ...getHomeBriefContent(date), ...content }
-  const summaryData = getBriefSummaryData(summary)
-  const summaryItems = toBriefSummaryItems(summaryData)
-  const summaryCopy = buildBriefSummaryCopy(summaryData)
+  const summaryItems = toBriefSummaryItems(
+    summaryData ?? {
+      mealStatusLabel: '',
+      mealApplied: false,
+      mealServiceAvailable: false,
+      unreadNoticeCount: 0,
+      pendingSurveyCount: 0,
+      todayScheduleCount: 0,
+    },
+    displayMode,
+  )
+  const summaryCopy = buildBriefSummaryDisplay(
+    displayMode,
+    summaryData ?? undefined,
+  )
   const timeLabel = formatKoreanTime(now)
 
   useEffect(() => {
@@ -34,6 +66,34 @@ export default function BriefBentoBlock({
 
     return () => window.clearInterval(intervalId)
   }, [])
+
+  useEffect(() => {
+    if (summary) return
+
+    const seq = ++requestSeq.current
+    setDisplayMode('loading')
+
+    void (async () => {
+      try {
+        const snapshot = await fetchAssistantSnapshot()
+        if (seq !== requestSeq.current) return
+
+        if (!snapshot) {
+          setSummaryData(null)
+          setDisplayMode('unauthenticated')
+          return
+        }
+
+        setSummaryData(mapSnapshotToBriefSummary(snapshot))
+        setDisplayMode('ready')
+      } catch (error) {
+        console.error('[brief] snapshot fetch failed:', error)
+        if (seq !== requestSeq.current) return
+        setSummaryData(null)
+        setDisplayMode('error')
+      }
+    })()
+  }, [summary])
 
   return (
     <div className="flex h-full min-h-0 flex-col">

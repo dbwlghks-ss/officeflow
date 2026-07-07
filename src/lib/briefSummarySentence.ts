@@ -1,4 +1,6 @@
-import type { BriefSummaryData } from './homeBriefSummary'
+import type { BriefDisplayMode, BriefSummaryData } from './homeBriefSummary'
+
+export type { BriefDisplayMode }
 
 export type BriefSummaryCopy = {
   lines: [string] | [string, string]
@@ -24,15 +26,26 @@ function formatActionLine(
 
 /** Short, scannable brief copy from existing summary snapshot data. */
 export function buildBriefSummaryCopy(data: BriefSummaryData): BriefSummaryCopy {
-  const { mealApplied, unreadNoticeCount, pendingSurveyCount, todayScheduleCount } = data
+  const {
+    mealApplied,
+    mealServiceAvailable,
+    unreadNoticeCount,
+    pendingSurveyCount,
+    todayScheduleCount,
+  } = data
   const actionLine = formatActionLine(
     unreadNoticeCount,
     pendingSurveyCount,
     todayScheduleCount,
   )
+  const mealLine = mealServiceAvailable
+    ? mealApplied
+      ? '식수 신청 완료.'
+      : '식수 신청이 필요합니다.'
+    : null
 
   if (!actionLine) {
-    if (mealApplied) {
+    if (!mealServiceAvailable || mealApplied) {
       return {
         lines: ['오늘 확인할 업무는 없습니다.', '여유 있게 하루를 시작하세요.'],
       }
@@ -43,6 +56,27 @@ export function buildBriefSummaryCopy(data: BriefSummaryData): BriefSummaryCopy 
     }
   }
 
-  const mealLine = mealApplied ? '식수 신청 완료.' : '식수 신청이 필요합니다.'
+  if (!mealLine) {
+    return { lines: [actionLine] }
+  }
+
   return { lines: [mealLine, actionLine] }
+}
+
+export function buildBriefSummaryDisplay(
+  mode: BriefDisplayMode,
+  data?: BriefSummaryData,
+): BriefSummaryCopy {
+  switch (mode) {
+    case 'loading':
+      return { lines: ['오늘 업무 상태를 확인하고 있습니다.'] }
+    case 'error':
+      return {
+        lines: ['오늘 업무 데이터를 불러오지 못했습니다.', '잠시 후 다시 확인해주세요.'],
+      }
+    case 'unauthenticated':
+      return { lines: ['로그인 후 오늘의 업무 상태를 확인할 수 있습니다.'] }
+    case 'ready':
+      return buildBriefSummaryCopy(data!)
+  }
 }
