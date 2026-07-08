@@ -48,10 +48,46 @@ export const DEFAULT_WEBMAIL_URL: Partial<Record<MailProvider, string>> = {
 
 type LegacyMailAccount = MailAccountData & { providerLabel?: string }
 
+const KNOWN_DOMAIN_LABELS: Record<string, string> = {
+  'gmail.com': 'Gmail',
+  'googlemail.com': 'Gmail',
+  'naver.com': 'Naver',
+  'kakao.com': 'Kakao Mail',
+}
+
+function capitalizeWord(word: string): string {
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+}
+
+export function generateMailAccountLabel(provider: MailProvider, email?: string): string {
+  switch (provider) {
+    case 'gmail':
+      return 'Gmail'
+    case 'naver':
+      return 'Naver'
+    case 'company':
+      return 'Company Mail'
+    case 'custom': {
+      const domain = email?.trim().split('@')[1]?.toLowerCase()
+      if (!domain) return 'Custom Mail'
+      if (KNOWN_DOMAIN_LABELS[domain]) return KNOWN_DOMAIN_LABELS[domain]
+      const base = domain.split('.')[0]
+      if (!base) return 'Custom Mail'
+      if (base === 'company') return 'Company Mail'
+      return `${capitalizeWord(base)} Mail`
+    }
+    default:
+      return 'Custom Mail'
+  }
+}
+
 function normalizeAccount(raw: LegacyMailAccount): MailAccountData {
   return {
     ...raw,
-    label: raw.label ?? raw.providerLabel ?? raw.email,
+    label:
+      raw.label ??
+      raw.providerLabel ??
+      generateMailAccountLabel(raw.provider, raw.email),
     unreadCount: typeof raw.unreadCount === 'number' ? Math.max(0, raw.unreadCount) : 0,
     source: raw.source ?? 'custom',
     createdAt: raw.createdAt ?? new Date().toISOString(),
@@ -89,7 +125,6 @@ export function createMailAccountId(): string {
 
 export type NewMailAccountInput = {
   provider: MailProvider
-  label: string
   email: string
   webmailUrl?: string
   unreadCount: number
@@ -98,11 +133,12 @@ export type NewMailAccountInput = {
 export function createMailAccount(input: NewMailAccountInput): MailAccountData {
   const webmailUrl = input.webmailUrl?.trim() || undefined
   const hasUrl = Boolean(webmailUrl)
+  const label = generateMailAccountLabel(input.provider, input.email)
 
   return {
     id: createMailAccountId(),
     provider: input.provider,
-    label: input.label.trim(),
+    label,
     email: input.email.trim(),
     unreadCount: Math.max(0, input.unreadCount),
     status: hasUrl ? 'connected' : 'pending',

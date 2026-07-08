@@ -23,7 +23,6 @@ const PROVIDER_OPTIONS: { id: MailProvider; label: string }[] = [
 
 const EMPTY_FORM = {
   provider: 'gmail' as MailProvider,
-  label: '',
   email: '',
   webmailUrl: DEFAULT_WEBMAIL_URL.gmail ?? '',
   unreadCount: 0,
@@ -52,7 +51,7 @@ export default function AddMailAccountModal({ open, onClose, onSave }: AddMailAc
 
   if (!open) return null
 
-  const canSave = isValidEmail(form.email) && form.label.trim().length > 0
+  const canSave = isValidEmail(form.email)
 
   function handleProviderChange(provider: MailProvider) {
     const defaultUrl = DEFAULT_WEBMAIL_URL[provider] ?? ''
@@ -60,7 +59,6 @@ export default function AddMailAccountModal({ open, onClose, onSave }: AddMailAc
       ...current,
       provider,
       webmailUrl: defaultUrl,
-      label: current.label || PROVIDER_OPTIONS.find((option) => option.id === provider)?.label || '',
     }))
   }
 
@@ -69,7 +67,6 @@ export default function AddMailAccountModal({ open, onClose, onSave }: AddMailAc
 
     const input: NewMailAccountInput = {
       provider: form.provider,
-      label: form.label.trim(),
       email: form.email.trim(),
       webmailUrl: form.webmailUrl.trim() || undefined,
       unreadCount: Math.max(0, form.unreadCount),
@@ -122,17 +119,6 @@ export default function AddMailAccountModal({ open, onClose, onSave }: AddMailAc
                 </option>
               ))}
             </select>
-          </label>
-
-          <label className="block">
-            <span className="mb-1 block text-xs font-medium text-slate-600">계정 이름</span>
-            <input
-              type="text"
-              value={form.label}
-              onChange={(event) => setForm((current) => ({ ...current, label: event.target.value }))}
-              placeholder="예: 개인 Gmail, 회사 메일"
-              className="h-9 w-full rounded-btn border border-line/70 bg-canvas/50 px-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/10"
-            />
           </label>
 
           <label className="block">
