@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import type { MailAccountData, MailProvider } from '../../../lib/mailHubMockData'
 import {
@@ -227,7 +228,7 @@ export default function AddMailAccountModal({
 
   const titleId = isEdit ? 'edit-mail-account-title' : 'add-mail-account-title'
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         type="button"
@@ -240,6 +241,7 @@ export default function AddMailAccountModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        data-mail-modal="AddMailAccountModal"
         className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-modal border border-line bg-surface p-6 shadow-pop"
       >
         <button
@@ -371,6 +373,7 @@ export default function AddMailAccountModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

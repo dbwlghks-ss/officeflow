@@ -108,7 +108,13 @@ export default function MailHubPanel() {
       </section>
 
       <AddMailAccountModal
-        key={modal.open ? (modal.mode === 'edit' ? modal.account.id : 'add') : 'closed'}
+        key={
+          modal.open
+            ? modal.mode === 'edit'
+              ? `edit-${modal.account.id}`
+              : 'create-mail-account'
+            : 'closed'
+        }
         open={modal.open}
         mode={modal.open ? modal.mode : 'add'}
         account={modal.open && modal.mode === 'edit' ? modal.account : undefined}
