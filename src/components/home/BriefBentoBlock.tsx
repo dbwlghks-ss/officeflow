@@ -1,17 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { BRIEF_EMPTY_SUMMARY, buildBriefActionItems } from '../../lib/briefActions'
 import { buildBriefSummaryDisplay } from '../../lib/briefSummarySentence'
-import { buildBriefActionItems } from '../../lib/briefActions'
 import { getHomeBriefContent, type HomeBriefContent } from '../../lib/homeBrief'
-import {
-  mapSnapshotToBriefSummary,
-  toBriefSummaryItems,
-  type BriefDisplayMode,
-  type BriefSummaryData,
-} from '../../lib/homeBriefSummary'
+import { toBriefSummaryItems, type BriefSummaryData } from '../../lib/homeBriefSummary'
 import { formatKoreanTime, KOREAN_CLOCK_TICK_MS } from '../../lib/dateTime'
-import { ASSISTANT_DATA_UPDATED_EVENT } from '../../lib/assistantDataEvents'
-import { fetchAssistantSnapshot } from '../../services/assistantDataService'
-import { NOTICE_READ_EVENT } from '../../services/noticeReadService'
+import { useHomeBriefSnapshot } from '../../hooks/useHomeBriefSnapshot'
 import BriefActionPanel from './BriefActionPanel'
 import BriefSummaryList from './BriefSummaryList'
 
@@ -30,79 +23,13 @@ export default function BriefBentoBlock({
   summary,
 }: BriefBentoBlockProps) {
   const [now, setNow] = useState(() => new Date())
-  const [displayMode, setDisplayMode] = useState<BriefDisplayMode>(
-    summary ? 'ready' : 'loading',
-  )
-  const [summaryData, setSummaryData] = useState<BriefSummaryData | null>(
-    summary
-      ? {
-          mealStatusLabel: summary.mealStatusLabel ?? '신청 완료',
-          mealApplied: summary.mealApplied ?? true,
-          mealDeclined: summary.mealDeclined ?? false,
-          mealServiceAvailable: summary.mealServiceAvailable ?? true,
-          unreadNoticeCount: summary.unreadNoticeCount ?? 0,
-          pendingSurveyCount: summary.pendingSurveyCount ?? 0,
-          todayScheduleCount: summary.todayScheduleCount ?? 0,
-        }
-      : null,
-  )
-  const requestSeq = useRef(0)
-
-  const loadSnapshot = useRef(async () => {
-    if (summary) return
-
-    const seq = ++requestSeq.current
-    setDisplayMode('loading')
-
-    try {
-      const snapshot = await fetchAssistantSnapshot()
-      if (seq !== requestSeq.current) return
-
-      if (!snapshot) {
-        setSummaryData(null)
-        setDisplayMode('unauthenticated')
-        return
-      }
-
-      setSummaryData(mapSnapshotToBriefSummary(snapshot))
-      setDisplayMode('ready')
-    } catch (error) {
-      console.error('[brief] snapshot fetch failed:', error)
-      if (seq !== requestSeq.current) return
-      setSummaryData(null)
-      setDisplayMode('error')
-    }
-  })
+  const { displayMode, summaryData } = useHomeBriefSnapshot({ summary })
+  const data = summaryData ?? BRIEF_EMPTY_SUMMARY
 
   const resolved = { ...getHomeBriefContent(date), ...content }
-  const summaryItems = toBriefSummaryItems(
-    summaryData ?? {
-      mealStatusLabel: '',
-      mealApplied: false,
-      mealDeclined: false,
-      mealServiceAvailable: false,
-      unreadNoticeCount: 0,
-      pendingSurveyCount: 0,
-      todayScheduleCount: 0,
-    },
-    displayMode,
-  )
-  const actionItems = buildBriefActionItems(
-    summaryData ?? {
-      mealStatusLabel: '',
-      mealApplied: false,
-      mealDeclined: false,
-      mealServiceAvailable: false,
-      unreadNoticeCount: 0,
-      pendingSurveyCount: 0,
-      todayScheduleCount: 0,
-    },
-    displayMode,
-  )
-  const summaryCopy = buildBriefSummaryDisplay(
-    displayMode,
-    summaryData ?? undefined,
-  )
+  const summaryItems = toBriefSummaryItems(data, displayMode)
+  const actionItems = buildBriefActionItems(data, displayMode)
+  const summaryCopy = buildBriefSummaryDisplay(displayMode, summaryData ?? undefined)
   const timeLabel = formatKoreanTime(now)
 
   useEffect(() => {
@@ -112,34 +39,6 @@ export default function BriefBentoBlock({
 
     return () => window.clearInterval(intervalId)
   }, [])
-
-  useEffect(() => {
-    void loadSnapshot.current()
-  }, [summary])
-
-  useEffect(() => {
-    if (summary) return
-
-    function handleRefresh() {
-      void loadSnapshot.current()
-    }
-
-    function handleVisibility() {
-      if (document.visibilityState === 'visible') handleRefresh()
-    }
-
-    window.addEventListener(NOTICE_READ_EVENT, handleRefresh)
-    window.addEventListener(ASSISTANT_DATA_UPDATED_EVENT, handleRefresh)
-    window.addEventListener('focus', handleRefresh)
-    document.addEventListener('visibilitychange', handleVisibility)
-
-    return () => {
-      window.removeEventListener(NOTICE_READ_EVENT, handleRefresh)
-      window.removeEventListener(ASSISTANT_DATA_UPDATED_EVENT, handleRefresh)
-      window.removeEventListener('focus', handleRefresh)
-      document.removeEventListener('visibilitychange', handleVisibility)
-    }
-  }, [summary])
 
   return (
     <div className="flex h-full min-h-0 flex-col">

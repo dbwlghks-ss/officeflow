@@ -8,6 +8,7 @@ import { AssistantWorkspaceProvider } from '../components/home/assistant/Assista
 import AskOfficeFlowHero from '../components/home/assistant/AskOfficeFlowHero'
 import AssistantSavedPanel from '../components/home/assistant/AssistantSavedPanel'
 import QuickActionsPanel from '../components/home/QuickActionsPanel'
+import TodayWorkQueue from '../components/home/TodayWorkQueue'
 import MailHubPanel from '../components/home/mail/MailHubPanel'
 
 /** Matches Header sticky height (`h-[72px]`). */
@@ -44,19 +45,25 @@ export default function HomePage() {
               </BentoCard>
             </div>
 
-            <div className="min-h-0 lg:col-span-4 lg:row-start-1">
+            <div className="min-h-0 lg:col-span-5 lg:row-start-1">
               <BentoCard fit className="flex h-full min-h-0 flex-col overflow-hidden">
-                <QuickActionsPanel onNavigate={navigate} />
+                <TodayWorkQueue onNavigate={navigate} />
               </BentoCard>
             </div>
 
-            <div className="min-h-0 lg:col-span-4 lg:row-start-1">
+            <div className="min-h-0 lg:col-span-3 lg:row-start-1">
               <BentoCard variant="accent" fit className="flex h-full min-h-0 flex-col overflow-hidden">
                 <MailHubPanel />
               </BentoCard>
             </div>
 
-            <div className="min-h-0 lg:col-span-12 lg:row-start-2">
+            <div className="flex min-h-0 flex-col gap-3 lg:col-span-4 lg:row-start-2">
+              <BentoCard variant="muted" fit className="shrink-0">
+                <QuickActionsPanel onNavigate={navigate} />
+              </BentoCard>
+            </div>
+
+            <div className="min-h-0 lg:col-span-8 lg:row-start-2">
               <BentoCard variant="muted" fit className="flex max-h-[240px] min-h-[180px] flex-col overflow-hidden">
                 <AssistantSavedPanel />
               </BentoCard>
