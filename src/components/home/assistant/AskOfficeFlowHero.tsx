@@ -13,6 +13,7 @@ export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps
     setDirectQuery,
     response,
     checkedAt,
+    suggestedQueries,
     handleDirectQuery,
     handleSuggestedQuery,
   } = useAssistantWorkspace()
@@ -42,6 +43,7 @@ export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps
       <div className="mt-3 flex justify-center">
         <AssistantSuggestedChips
           variant="hero"
+          queries={suggestedQueries}
           onSelect={(query) => void handleSuggestedQuery(query)}
         />
       </div>

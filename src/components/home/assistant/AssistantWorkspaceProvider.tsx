@@ -1,9 +1,11 @@
-import { createContext, useContext, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { detectRuleBasedIntent } from '../../../features/assistant/assistantIntent'
 import {
+  ASSISTANT_DATA_UPDATED_EVENT,
   executeRuleBasedIntent,
   getLoadingRuleAssistantResponse,
 } from '../../../features/assistant/assistantExecutor'
+import { buildSuggestedAssistantQueries } from '../../../features/assistant/assistantSuggestedQueries'
 import {
   createCustomCommand,
   getAllCommands,
@@ -27,6 +29,10 @@ import {
   executeAssistantSearch,
   getLoadingSearchResponse,
 } from '../../../services/assistantSearchService'
+import {
+  fetchAssistantSnapshot,
+  type AssistantSnapshot,
+} from '../../../services/assistantDataService'
 import type { AssistantCommand, AssistantResponse, AssistantSavedSearch } from '../../../types/assistant'
 import type { AssistantTab } from './AssistantTabs'
 
@@ -61,6 +67,7 @@ type AssistantWorkspaceContextValue = {
   }) => void
   handleDeleteCommand: (commandId: string) => void
   handleDeleteSearch: (searchId: string) => void
+  suggestedQueries: string[]
 }
 
 const AssistantWorkspaceContext = createContext<AssistantWorkspaceContextValue | null>(null)
@@ -89,7 +96,31 @@ export function AssistantWorkspaceProvider({ children }: AssistantWorkspaceProvi
   const [commandModalOpen, setCommandModalOpen] = useState(false)
   const [searchModalOpen, setSearchModalOpen] = useState(false)
   const [directQuery, setDirectQuery] = useState('')
+  const [snapshot, setSnapshot] = useState<AssistantSnapshot | null>(null)
   const requestSeq = useRef(0)
+
+  const refreshSnapshot = useRef(async () => {
+    const next = await fetchAssistantSnapshot()
+    setSnapshot(next)
+  })
+
+  useEffect(() => {
+    void refreshSnapshot.current()
+
+    function handleAssistantDataUpdated() {
+      void refreshSnapshot.current()
+    }
+
+    window.addEventListener(ASSISTANT_DATA_UPDATED_EVENT, handleAssistantDataUpdated)
+    return () => {
+      window.removeEventListener(ASSISTANT_DATA_UPDATED_EVENT, handleAssistantDataUpdated)
+    }
+  }, [])
+
+  const suggestedQueries = useMemo(
+    () => buildSuggestedAssistantQueries(snapshot),
+    [snapshot],
+  )
 
   const allCommands = useMemo(() => getAllCommands(customCommands), [customCommands])
   const allSearches = useMemo(() => getAllSavedSearches(customSearches), [customSearches])
@@ -131,6 +162,7 @@ export function AssistantWorkspaceProvider({ children }: AssistantWorkspaceProvi
     setResponse(result)
     if (result.state === 'ready' || result.state === 'error') {
       setCheckedAt(new Date())
+      void refreshSnapshot.current()
     }
   }
 
@@ -148,6 +180,7 @@ export function AssistantWorkspaceProvider({ children }: AssistantWorkspaceProvi
     setResponse(result)
     if (result.state === 'ready' || result.state === 'error') {
       setCheckedAt(new Date())
+      void refreshSnapshot.current()
     }
   }
 
@@ -163,6 +196,7 @@ export function AssistantWorkspaceProvider({ children }: AssistantWorkspaceProvi
     setResponse(result)
     if (result.state === 'ready' || result.state === 'error') {
       setCheckedAt(new Date())
+      void refreshSnapshot.current()
     }
   }
 
@@ -250,6 +284,7 @@ export function AssistantWorkspaceProvider({ children }: AssistantWorkspaceProvi
     handleSaveSearch,
     handleDeleteCommand,
     handleDeleteSearch,
+    suggestedQueries,
   }
 
   return (

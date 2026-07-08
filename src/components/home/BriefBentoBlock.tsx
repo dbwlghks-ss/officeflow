@@ -10,6 +10,7 @@ import {
 import { formatKoreanTime, KOREAN_CLOCK_TICK_MS } from '../../lib/dateTime'
 import { fetchAssistantSnapshot } from '../../services/assistantDataService'
 import { NOTICE_READ_EVENT } from '../../services/noticeReadService'
+import { ASSISTANT_DATA_UPDATED_EVENT } from '../../features/assistant/assistantExecutor'
 import BriefSummaryList from './BriefSummaryList'
 
 type BriefBentoBlockProps = {
@@ -110,11 +111,13 @@ export default function BriefBentoBlock({
     }
 
     window.addEventListener(NOTICE_READ_EVENT, handleRefresh)
+    window.addEventListener(ASSISTANT_DATA_UPDATED_EVENT, handleRefresh)
     window.addEventListener('focus', handleRefresh)
     document.addEventListener('visibilitychange', handleVisibility)
 
     return () => {
       window.removeEventListener(NOTICE_READ_EVENT, handleRefresh)
+      window.removeEventListener(ASSISTANT_DATA_UPDATED_EVENT, handleRefresh)
       window.removeEventListener('focus', handleRefresh)
       document.removeEventListener('visibilitychange', handleVisibility)
     }

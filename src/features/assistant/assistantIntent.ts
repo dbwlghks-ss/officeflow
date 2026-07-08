@@ -95,9 +95,15 @@ function looksLikeEmployeeLookup(text: string, nameQuery: string): boolean {
 
 function detectLegacyIntent(text: string): AssistantIntent | null {
   if (/(할\s*일|업무\s*요약|오늘\s*요약|업무\s*상태)/.test(text)) return 'summary'
-  if (/(읽지\s*않|공지)/.test(text)) return 'notices'
-  if (/설문/.test(text)) return 'surveys'
-  if (/(식수\s*상태|식수\s*신청\s*상태|신청\s*상태)/.test(text)) return 'meal'
+  if (/(읽지\s*않|공지\s*뭐|공지\s*보)/.test(text)) return 'notices'
+  if (/(참여.*설문|설문\s*남|설문\s*보|설문\s*있)/.test(text)) return 'surveys'
+  if (
+    /(식수\s*상태|식수\s*신청\s*상태|신청\s*상태|밥\s*신청|식수\s*신청\s*됐|신청\s*했|내\s*식수)/.test(
+      text,
+    )
+  ) {
+    return 'meal'
+  }
   if (/(업데이트|최근\s*변경)/.test(text)) return 'updates'
   return null
 }
@@ -114,6 +120,7 @@ function isCancelMealIntent(text: string): boolean {
 }
 
 function isApplyMealIntent(text: string): boolean {
+  if (/(상태|됐|했어|했나|됐어|알려|확인)/.test(text)) return false
   return includesAny(text, [
     /(식수|밥).*(먹|신청)/,
     /먹는\s*걸로/,
@@ -130,6 +137,7 @@ function isTodayMealMenuIntent(text: string): boolean {
     /오늘\s*뭐\s*나/,
     /점심\s*메뉴/,
     /메뉴\s*뭐/,
+    /식단\s*알려/,
   ])
 }
 
@@ -175,6 +183,5 @@ export const UNKNOWN_INTENT_EXAMPLES = [
 export const SUGGESTED_ASSISTANT_QUERIES = [
   '오늘 밥 뭐야?',
   '오늘 할 일 알려줘',
-  '오늘 식수 먹는 걸로 해줘',
   '직원 연락처 찾기',
 ]

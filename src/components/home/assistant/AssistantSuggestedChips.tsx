@@ -1,19 +1,21 @@
-import { SUGGESTED_ASSISTANT_QUERIES } from '../../../features/assistant/assistantIntent'
-
 type AssistantSuggestedChipsProps = {
+  queries: string[]
   onSelect: (query: string) => void
   variant?: 'default' | 'hero'
 }
 
 export default function AssistantSuggestedChips({
+  queries,
   onSelect,
   variant = 'default',
 }: AssistantSuggestedChipsProps) {
   const onHero = variant === 'hero'
 
+  if (queries.length === 0) return null
+
   return (
     <div className={'flex flex-wrap gap-2 ' + (onHero ? 'justify-center' : '')}>
-      {SUGGESTED_ASSISTANT_QUERIES.map((query) => (
+      {queries.map((query) => (
         <button
           key={query}
           type="button"
