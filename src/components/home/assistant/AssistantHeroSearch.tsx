@@ -20,9 +20,8 @@ export default function AssistantHeroSearch({ value, onChange, onSubmit }: Assis
       </label>
       <div
         className={
-          'flex h-[64px] w-full items-center gap-3 rounded-full border border-slate-200/70 bg-white px-4 ' +
-          'shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition-shadow focus-within:border-brand/25 ' +
-          'focus-within:ring-4 focus-within:ring-blue-500/10 lg:h-[68px] lg:px-5'
+          'flex h-[60px] w-full items-center gap-3 rounded-full border border-line bg-surface px-4 ' +
+          'transition-colors focus-within:border-brand/25 focus-within:ring-4 focus-within:ring-brand/10 lg:h-[64px] lg:px-5'
         }
       >
         <Sparkles

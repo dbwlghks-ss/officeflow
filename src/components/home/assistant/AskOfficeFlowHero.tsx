@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import { useAssistantWorkspace } from './AssistantWorkspaceProvider'
 import AssistantHeroSearch from './AssistantHeroSearch'
-import AssistantHeroLibrary from './AssistantHeroLibrary'
 import AssistantResponseCard from './AssistantResponseCard'
 import AssistantSuggestedChips from './AssistantSuggestedChips'
+import SavedCommandsPopover from './SavedCommandsPopover'
 
 type AskOfficeFlowHeroProps = {
   onNavigate?: (path: string) => void
@@ -19,38 +20,38 @@ export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps
     handleSuggestedQuery,
   } = useAssistantWorkspace()
 
+  const [showSuggested, setShowSuggested] = useState(false)
+
   return (
-    <section
-      className="mx-auto w-full max-w-3xl px-1 lg:max-w-4xl"
-      aria-label="Ask OfficeFlow"
-    >
-      <div className="text-center">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand/80">
-          Ask OfficeFlow
-        </p>
-        <p className="mt-2 text-sm leading-relaxed text-slate-500 lg:text-base">
-          궁금한 업무를 물어보거나, 필요한 일을 바로 요청하세요.
-        </p>
+    <section className="mx-auto w-full max-w-4xl" aria-label="Ask OfficeFlow">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch">
+        <div className="min-w-0 flex-1">
+          <AssistantHeroSearch
+            value={directQuery}
+            onChange={setDirectQuery}
+            onSubmit={() => void handleDirectQuery()}
+          />
+        </div>
+        <SavedCommandsPopover />
       </div>
 
-      <div className="mt-5">
-        <AssistantHeroSearch
-          value={directQuery}
-          onChange={setDirectQuery}
-          onSubmit={() => void handleDirectQuery()}
-        />
+      <div className="mt-2 flex justify-center">
+        <button
+          type="button"
+          onClick={() => setShowSuggested((open) => !open)}
+          className="text-xs font-medium text-slate-400 transition-colors hover:text-brand"
+        >
+          {showSuggested ? '추천 명령 숨기기' : '추천 명령 보기'}
+        </button>
       </div>
 
-      {suggestedQueries.length > 0 ? (
-        <div className="mt-3">
-          <p className="mb-1.5 text-center text-[11px] font-medium text-slate-400">추천 명령</p>
-          <div className="flex justify-center">
-            <AssistantSuggestedChips
-              variant="hero"
-              queries={suggestedQueries}
-              onSelect={(query) => void handleSuggestedQuery(query)}
-            />
-          </div>
+      {showSuggested && suggestedQueries.length > 0 ? (
+        <div className="mt-2 flex justify-center">
+          <AssistantSuggestedChips
+            variant="hero"
+            queries={suggestedQueries.slice(0, 4)}
+            onSelect={(query) => void handleSuggestedQuery(query)}
+          />
         </div>
       ) : null}
 
@@ -65,8 +66,6 @@ export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps
           />
         </div>
       ) : null}
-
-      <AssistantHeroLibrary />
     </section>
   )
 }
