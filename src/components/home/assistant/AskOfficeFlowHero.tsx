@@ -1,6 +1,6 @@
 import { useAssistantWorkspace } from './AssistantWorkspaceProvider'
 import AssistantHeroSearch from './AssistantHeroSearch'
-import AssistantHeroLibrary from './AssistantHeroLibrary'
+import SavedCommandsMenu from './SavedCommandsMenu'
 import AssistantResponseCard from './AssistantResponseCard'
 import AssistantSuggestedChips from './AssistantSuggestedChips'
 
@@ -54,6 +54,8 @@ export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps
         </div>
       ) : null}
 
+      <SavedCommandsMenu />
+
       {response ? (
         <div className="mt-4">
           <AssistantResponseCard
@@ -65,8 +67,6 @@ export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps
           />
         </div>
       ) : null}
-
-      <AssistantHeroLibrary />
     </section>
   )
 }
