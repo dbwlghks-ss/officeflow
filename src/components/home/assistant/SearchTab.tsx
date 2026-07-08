@@ -1,13 +1,9 @@
 import { Plus } from 'lucide-react'
 import type { AssistantSavedSearch } from '../../../types/assistant'
-import AssistantDirectSearch from './AssistantDirectSearch'
 import SavedSearchList from './SavedSearchList'
 
 type SearchTabProps = {
   searches: AssistantSavedSearch[]
-  directQuery: string
-  onDirectQueryChange: (value: string) => void
-  onDirectSearch: () => void
   onAddSearch: () => void
   onSelectSearch: (search: AssistantSavedSearch) => void
   onDeleteSearch: (searchId: string) => void
@@ -15,9 +11,6 @@ type SearchTabProps = {
 
 export default function SearchTab({
   searches,
-  directQuery,
-  onDirectQueryChange,
-  onDirectSearch,
   onAddSearch,
   onSelectSearch,
   onDeleteSearch,
@@ -38,14 +31,6 @@ export default function SearchTab({
         onSelect={onSelectSearch}
         onDelete={onDeleteSearch}
       />
-
-      <div className="mt-auto pt-1">
-        <AssistantDirectSearch
-          value={directQuery}
-          onChange={onDirectQueryChange}
-          onSubmit={onDirectSearch}
-        />
-      </div>
     </div>
   )
 }

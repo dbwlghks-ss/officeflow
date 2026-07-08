@@ -1,4 +1,9 @@
 import { useMemo, useRef, useState } from 'react'
+import { detectRuleBasedIntent } from '../../../features/assistant/assistantIntent'
+import {
+  executeRuleBasedIntent,
+  getLoadingRuleAssistantResponse,
+} from '../../../features/assistant/assistantExecutor'
 import {
   createCustomCommand,
   getAllCommands,
@@ -25,7 +30,9 @@ import {
 import type { AssistantCommand, AssistantResponse, AssistantSavedSearch } from '../../../types/assistant'
 import AddCommandModal from './AddCommandModal'
 import AddSearchModal from './AddSearchModal'
+import AssistantDirectSearch from './AssistantDirectSearch'
 import AssistantResponseCard from './AssistantResponseCard'
+import AssistantSuggestedChips from './AssistantSuggestedChips'
 import AssistantTabs, { type AssistantTab } from './AssistantTabs'
 import CommandTab from './CommandTab'
 import SearchTab from './SearchTab'
@@ -98,6 +105,23 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
     }
   }
 
+  async function runNaturalLanguageQuery(query: string) {
+    const trimmed = query.trim()
+    if (!trimmed) return
+
+    const seq = ++requestSeq.current
+    setCheckedAt(null)
+    setResponse(getLoadingRuleAssistantResponse())
+
+    const intent = detectRuleBasedIntent(trimmed)
+    const result = await executeRuleBasedIntent(intent)
+    if (seq !== requestSeq.current) return
+    setResponse(result)
+    if (result.state === 'ready' || result.state === 'error') {
+      setCheckedAt(new Date())
+    }
+  }
+
   async function handleSelectCommand(command: AssistantCommand) {
     recordRecent({ type: 'command', id: command.id })
 
@@ -118,11 +142,16 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
     await runSearch(search.query, search.scope)
   }
 
-  async function handleDirectSearch() {
-    const trimmed = directQuery.trim()
+  async function handleDirectQuery(query?: string) {
+    const trimmed = (query ?? directQuery).trim()
     if (!trimmed) return
-    await runSearch(trimmed, 'all')
-    setDirectQuery('')
+    setDirectQuery(trimmed)
+    await runNaturalLanguageQuery(trimmed)
+  }
+
+  async function handleSuggestedQuery(query: string) {
+    setDirectQuery(query)
+    await runNaturalLanguageQuery(query)
   }
 
   function handleSaveCommand(input: {
@@ -177,21 +206,38 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
       >
         <div className="shrink-0">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-            OfficeFlow Assistant
+            Ask OfficeFlow
           </p>
           <h2 className="mt-1.5 text-lg font-bold leading-snug tracking-tight text-slate-900 lg:text-xl">
-            반복 업무 명령을 빠르게 실행하세요.
+            무엇을 도와드릴까요?
           </h2>
           <p className="mt-1.5 text-xs leading-relaxed text-slate-500 lg:text-sm">
-            자주 쓰는 명령과 검색어를 저장해두고 빠르게 확인하세요.
+            궁금한 업무를 물어보거나, 필요한 일을 바로 요청하세요. 직원 정보, 오늘 식단, 식수
+            신청 상태를 Assistant에서 바로 확인할 수 있습니다.
           </p>
-
-          <AssistantTabs active={activeTab} onChange={setActiveTab} />
         </div>
 
         <div className="mt-3 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[16px] border border-line/60 bg-surface/80 p-2.5 lg:p-3">
+          <div className="shrink-0 space-y-2">
+            <AssistantDirectSearch
+              value={directQuery}
+              onChange={setDirectQuery}
+              onSubmit={() => void handleDirectQuery()}
+              compact
+            />
+            <AssistantSuggestedChips onSelect={(query) => void handleSuggestedQuery(query)} />
+          </div>
+
+          <div className="mt-2 max-h-[120px] shrink-0 overflow-y-auto scrollbar-slim">
+            <AssistantResponseCard response={response} checkedAt={checkedAt} onAction={onNavigate} compact />
+          </div>
+
+          <div className="mt-2 shrink-0 border-t border-line/50 pt-2">
+            <AssistantTabs active={activeTab} onChange={setActiveTab} />
+          </div>
+
           <div
-            className="min-h-0 flex-1 overflow-y-auto scrollbar-slim"
+            className="mt-2 min-h-0 flex-1 overflow-y-auto scrollbar-slim"
             role="tabpanel"
             aria-label={activeTab === 'command' ? '명령' : '검색'}
           >
@@ -207,18 +253,11 @@ export default function AssistantPanel({ onNavigate }: AssistantPanelProps) {
             ) : (
               <SearchTab
                 searches={allSearches}
-                directQuery={directQuery}
-                onDirectQueryChange={setDirectQuery}
-                onDirectSearch={handleDirectSearch}
                 onAddSearch={() => setSearchModalOpen(true)}
                 onSelectSearch={handleSelectSearch}
                 onDeleteSearch={handleDeleteSearch}
               />
             )}
-          </div>
-
-          <div className="mt-2 max-h-[108px] shrink-0 overflow-y-auto scrollbar-slim">
-            <AssistantResponseCard response={response} checkedAt={checkedAt} onAction={onNavigate} compact />
           </div>
         </div>
       </section>
