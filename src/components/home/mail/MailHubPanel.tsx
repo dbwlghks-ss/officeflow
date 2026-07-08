@@ -65,7 +65,7 @@ export default function MailHubPanel() {
           메일을 한곳에서 확인하세요.
         </h2>
         <p className="mt-1 text-[10px] leading-relaxed text-slate-500/90">
-          현재는 수동 확인 모드입니다. 계정을 클릭해 웹메일을 확인할 수 있습니다.
+          현재는 수동 확인 모드입니다. 계정을 클릭해 메일함을 열 수 있습니다.
         </p>
 
         <div className="mt-2 min-h-0 flex-1 overflow-y-auto scrollbar-slim">
