@@ -42,6 +42,12 @@ export default function MailAccountItem({
     openWebmail(account.webmailUrl)
   }
 
+  const editButtonClass =
+    'grid h-7 w-7 shrink-0 place-items-center rounded-md border transition-colors ' +
+    (onAccent
+      ? 'border-slate-300/90 bg-white text-slate-600 shadow-sm hover:border-brand/40 hover:text-brand'
+      : 'border-line/70 bg-surface text-slate-500 hover:border-brand/25 hover:bg-white hover:text-brand')
+
   return (
     <li className="group list-none">
       {confirmDelete ? (
@@ -63,12 +69,12 @@ export default function MailAccountItem({
           </button>
         </div>
       ) : (
-        <div className={surfaceClass}>
+        <div className={`${surfaceClass} min-w-0`}>
           {canOpen ? (
             <button
               type="button"
               onClick={handleOpen}
-              className="flex min-w-0 flex-1 items-center gap-2 text-left transition-colors hover:opacity-90"
+              className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden text-left transition-colors hover:opacity-90"
               aria-label={`${displayLabel} 메일함 새 탭에서 열기`}
               title="메일함 열기"
             >
@@ -81,6 +87,21 @@ export default function MailAccountItem({
           )}
 
           <div className="flex shrink-0 items-center gap-1">
+            {onEdit ? (
+              <button
+                type="button"
+                aria-label="메일 계정 수정"
+                title="메일 계정 수정"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onEdit(account.id)
+                }}
+                className={editButtonClass}
+              >
+                <Pencil size={13} strokeWidth={1.75} aria-hidden="true" />
+              </button>
+            ) : null}
+
             {hasUnread ? (
               <>
                 <span className="rounded-full bg-brand-light px-2 py-0.5 text-[11px] font-semibold tabular-nums text-brand">
@@ -98,24 +119,9 @@ export default function MailAccountItem({
                   확인 완료
                 </button>
               </>
-            ) : (
+            ) : compact ? null : (
               <span className="px-1 text-[10px] font-medium text-slate-400">확인 완료</span>
             )}
-
-            {onEdit ? (
-              <button
-                type="button"
-                aria-label="메일 계정 수정"
-                title="메일 계정 수정"
-                onClick={(event) => {
-                  event.stopPropagation()
-                  onEdit(account.id)
-                }}
-                className="grid h-6 w-6 place-items-center rounded-md border border-line/60 bg-surface/80 text-slate-500 transition-colors hover:border-brand/25 hover:bg-white hover:text-brand"
-              >
-                <Pencil size={12} strokeWidth={1.75} aria-hidden="true" />
-              </button>
-            ) : null}
 
             {onDelete ? (
               <button
