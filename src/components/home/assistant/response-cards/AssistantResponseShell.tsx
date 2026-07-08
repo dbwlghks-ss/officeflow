@@ -25,17 +25,17 @@ export default function AssistantResponseShell({
     <div
       className={
         (hero
-          ? 'rounded-2xl border p-4 '
+          ? 'rounded-2xl border p-4 shadow-soft '
           : compact
             ? 'rounded-btn border p-2.5 '
             : 'mt-3 rounded-btn border p-3 ') +
         (isError
           ? 'border-danger/20 bg-red-50/30'
           : isLoading
-            ? 'border-line bg-canvas/40'
+            ? 'border-line/60 bg-canvas/40'
             : hero
-              ? 'border-line bg-surface'
-              : 'border-line bg-canvas/50')
+              ? 'border-line/60 bg-white/95'
+              : 'border-line/70 bg-canvas/50')
       }
     >
       <div className="flex items-start justify-between gap-2">

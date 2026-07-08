@@ -1,33 +1,38 @@
 @import 'tailwindcss';
 
 /* ------------------------------------------------------------------ */
-/* OfficeFlow · Enterprise Design System                                 */
+/* OfficeFlow · HWASHIN Design System                                  */
 /* ------------------------------------------------------------------ */
 @theme {
+  /* Brand (HWASHIN CI) */
   --color-brand: #004098;
   --color-brand-hover: #0a57b5;
   --color-brand-light: #eef5ff;
 
-  --color-canvas: #f8f9fb;
+  /* Surfaces */
+  --color-canvas: #f7f9fc;
   --color-surface: #ffffff;
-  --color-line: #e8edf3;
+  --color-line: #e6edf5;
 
+  /* Semantic */
   --color-success: #16a34a;
   --color-warning: #f59e0b;
   --color-danger: #dc2626;
 
+  /* Typography */
   --font-sans: 'Pretendard Variable', Pretendard, system-ui, -apple-system, 'Segoe UI', Roboto,
     'Helvetica Neue', sans-serif;
 
-  --radius-card: 16px;
-  --radius-btn: 12px;
-  --radius-input: 12px;
-  --radius-modal: 20px;
+  /* Radius */
+  --radius-card: 20px;
+  --radius-btn: 14px;
+  --radius-input: 14px;
+  --radius-modal: 24px;
 
-  /* Minimal elevation — border + spacing first */
-  --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.03);
-  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-pop: 0 4px 16px -4px rgba(15, 23, 42, 0.1);
+  /* Soft, premium shadows */
+  --shadow-soft: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 12px 28px -12px rgba(16, 24, 40, 0.12);
+  --shadow-pop: 0 8px 32px -8px rgba(16, 24, 40, 0.18), 0 2px 8px rgba(16, 24, 40, 0.06);
 }
 
 @layer base {
@@ -42,7 +47,7 @@
     margin: 0;
     min-height: 100vh;
     background-color: var(--color-canvas);
-    color: #1e293b;
+    color: #0f172a;
     font-family: var(--font-sans);
     letter-spacing: -0.01em;
   }
@@ -58,80 +63,30 @@
   }
 }
 
+/* Refined focus ring + thin premium scrollbars */
 @layer utilities {
   .scrollbar-slim {
     scrollbar-width: thin;
-    scrollbar-color: #d5dde8 transparent;
+    scrollbar-color: #cdd7e5 transparent;
   }
   .scrollbar-slim::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
   .scrollbar-slim::-webkit-scrollbar-thumb {
-    background-color: #d5dde8;
+    background-color: #cdd7e5;
     border-radius: 9999px;
   }
 
-  /* Softer brief — premium, harmonized with white cards */
+  /* Brief bento — OfficeFlow logo blue gradient surface */
   .brief-surface {
-    background: linear-gradient(145deg, #1a3d7a 0%, #2458a8 52%, #3a6fc4 100%);
-    border-color: rgba(255, 255, 255, 0.12);
+    background:
+      radial-gradient(circle at 85% 15%, rgba(96, 140, 255, 0.28), transparent 32%),
+      linear-gradient(135deg, #0f2e73 0%, #1648b8 48%, #2f63e6 100%);
   }
 
   .home-hero-surface {
-    background: transparent;
-  }
-
-  .home-section-eyebrow {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: #94a3b8;
-  }
-
-  .home-section-title {
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: #0f172a;
-  }
-
-  .home-card {
-    border-radius: var(--radius-card);
-    border: 1px solid var(--color-line);
-    background: var(--color-surface);
-    padding: 16px;
-  }
-
-  .motion-subtle {
-    transition-property: color, background-color, border-color, opacity, transform;
-    transition-duration: 200ms;
-    transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
-  }
-
-  .motion-subtle:hover {
-    transform: scale(1.01);
-  }
-
-  .chip-pill {
-    display: inline-flex;
-    align-items: center;
-    border-radius: 9999px;
-    border: 1px solid var(--color-line);
-    background: var(--color-surface);
-    padding: 4px 10px;
-    font-size: 11px;
-    font-weight: 500;
-    color: #475569;
-    transition: color 200ms ease-out, background-color 200ms ease-out, border-color 200ms ease-out,
-      transform 200ms ease-out;
-  }
-
-  .chip-pill:hover {
-    border-color: rgba(0, 64, 152, 0.2);
-    background: var(--color-brand-light);
-    color: var(--color-brand);
-    transform: scale(1.01);
+    background:
+      radial-gradient(circle at 50% 0%, rgba(32, 85, 219, 0.1), transparent 45%);
   }
 }
