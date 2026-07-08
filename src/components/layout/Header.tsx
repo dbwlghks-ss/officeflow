@@ -6,7 +6,6 @@ import { getLiveNotificationUnreadCount } from '../../services/notificationDataS
 import { ASSISTANT_DATA_UPDATED_EVENT } from '../../lib/assistantDataEvents'
 import { NOTICE_READ_EVENT } from '../../services/noticeReadService'
 import NotificationCenter from '../notifications/NotificationCenter'
-import HeaderCompactSearch from './HeaderCompactSearch'
 import { HeaderBrandLockup } from '../ui/Logo'
 import { Button } from '../ui/primitives'
 
@@ -122,15 +121,11 @@ export default function Header() {
   const initial = authUser?.name?.trim()?.charAt(0) ?? 'U'
 
   return (
-    <header className="sticky top-0 z-30 h-[68px] border-b border-line bg-surface/80 backdrop-blur-xl">
-      <div className="mx-auto grid h-full max-w-[1600px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 px-6 lg:px-10">
+    <header className="sticky top-0 z-30 h-[72px] border-b border-line bg-surface/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-full max-w-[1600px] items-center justify-between px-6 lg:px-10">
         <HeaderBrandLockup onOfficeFlowClick={() => navigate('/')} />
 
-        <div className="hidden justify-self-center px-4 lg:block lg:w-full lg:max-w-md">
-          <HeaderCompactSearch />
-        </div>
-
-        <div className="flex items-center justify-end gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {authUser ? (
             <>
               <div ref={notificationRef} className="relative">
