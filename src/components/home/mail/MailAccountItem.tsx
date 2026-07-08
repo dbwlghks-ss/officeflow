@@ -16,6 +16,24 @@ function openWebmail(url: string) {
   window.open(url, '_blank', 'noopener,noreferrer')
 }
 
+const ICON_BTN_BASE =
+  'grid h-7 w-7 shrink-0 place-items-center rounded-md text-slate-400 transition-colors'
+
+function iconBtnClass(onAccent: boolean, hover: 'default' | 'brand' | 'danger' = 'default') {
+  const hoverClass =
+    hover === 'danger'
+      ? 'hover:bg-danger/8 hover:text-danger'
+      : hover === 'brand'
+        ? onAccent
+          ? 'hover:bg-white/70 hover:text-brand'
+          : 'hover:bg-canvas hover:text-brand'
+        : onAccent
+          ? 'hover:bg-white/60 hover:text-slate-600'
+          : 'hover:bg-canvas/80 hover:text-slate-600'
+
+  return `${ICON_BTN_BASE} ${hoverClass}`
+}
+
 export default function MailAccountItem({
   account,
   variant = 'default',
@@ -32,21 +50,32 @@ export default function MailAccountItem({
   const hasUnread = account.unreadCount > 0
 
   const surfaceClass =
-    'flex items-center gap-1.5 rounded-btn border ' +
+    'flex min-w-0 items-center gap-1.5 rounded-btn border ' +
     (compact ? 'px-2 py-1.5 ' : 'gap-2 px-2.5 py-2 ') +
-    (onAccent ? 'border-white/50 bg-white/55' : 'border-line/70 bg-canvas/40') +
-    (isPending && !canOpen ? ' opacity-60' : '')
+    (onAccent ? 'border-white/50 bg-white/55' : 'border-line/70 bg-canvas/40')
 
   function handleOpen() {
     if (!canOpen || !account.webmailUrl) return
     openWebmail(account.webmailUrl)
   }
 
-  const editButtonClass =
-    'grid h-7 w-7 shrink-0 place-items-center rounded-md border transition-colors ' +
-    (onAccent
-      ? 'border-slate-300/90 bg-white text-slate-600 shadow-sm hover:border-brand/40 hover:text-brand'
-      : 'border-line/70 bg-surface text-slate-500 hover:border-brand/25 hover:bg-white hover:text-brand')
+  const accountBody = (
+    <>
+      <div
+        className={
+          'flex shrink-0 items-center justify-center rounded-lg bg-surface text-slate-500 ' +
+          (compact ? 'h-7 w-7' : 'h-8 w-8')
+        }
+      >
+        <Mail size={compact ? 14 : 15} strokeWidth={1.75} aria-hidden="true" />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-xs font-semibold text-slate-900">{displayLabel}</p>
+        <p className="truncate text-xs text-slate-500">{account.email}</p>
+      </div>
+    </>
+  )
 
   return (
     <li className="group list-none">
@@ -69,24 +98,62 @@ export default function MailAccountItem({
           </button>
         </div>
       ) : (
-        <div className={`${surfaceClass} min-w-0`}>
+        <div className={surfaceClass}>
           {canOpen ? (
             <button
               type="button"
               onClick={handleOpen}
-              className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden text-left transition-colors hover:opacity-90"
+              className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden text-left transition-opacity hover:opacity-90"
               aria-label={`${displayLabel} 메일함 새 탭에서 열기`}
               title="메일함 열기"
             >
-              <AccountMeta account={account} showExternal />
+              {accountBody}
             </button>
           ) : (
-            <div className="flex min-w-0 flex-1 items-center gap-2">
-              <AccountMeta account={account} showExternal={false} />
-            </div>
+            <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">{accountBody}</div>
           )}
 
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="flex shrink-0 items-center gap-0.5 whitespace-nowrap">
+            {isPending ? (
+              <span className="px-1 text-[10px] font-medium text-amber-700/90">
+                {account.statusLabel ?? '관리자 설정 필요'}
+              </span>
+            ) : null}
+
+            {hasUnread ? (
+              <div className="flex items-center gap-0.5 px-0.5">
+                <span className="text-[11px] font-semibold tabular-nums text-brand">
+                  {account.unreadCount}건
+                </span>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    onMarkRead?.(account.id)
+                  }}
+                  className="rounded px-0.5 text-[10px] font-medium text-slate-500 transition-colors hover:text-brand"
+                  title="OfficeFlow에서 확인 완료 처리"
+                >
+                  확인
+                </button>
+              </div>
+            ) : null}
+
+            {canOpen ? (
+              <button
+                type="button"
+                aria-label={`${displayLabel} 메일함 새 탭에서 열기`}
+                title="메일함 열기"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  handleOpen()
+                }}
+                className={iconBtnClass(onAccent, 'brand')}
+              >
+                <ExternalLink size={14} strokeWidth={1.75} aria-hidden="true" />
+              </button>
+            ) : null}
+
             {onEdit ? (
               <button
                 type="button"
@@ -96,32 +163,11 @@ export default function MailAccountItem({
                   event.stopPropagation()
                   onEdit(account.id)
                 }}
-                className={editButtonClass}
+                className={iconBtnClass(onAccent, 'brand')}
               >
-                <Pencil size={13} strokeWidth={1.75} aria-hidden="true" />
+                <Pencil size={14} strokeWidth={1.75} aria-hidden="true" />
               </button>
             ) : null}
-
-            {hasUnread ? (
-              <>
-                <span className="rounded-full bg-brand-light px-2 py-0.5 text-[11px] font-semibold tabular-nums text-brand">
-                  {account.unreadCount}건
-                </span>
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    onMarkRead?.(account.id)
-                  }}
-                  className="rounded-md border border-line/70 bg-surface px-1.5 py-0.5 text-[10px] font-medium text-slate-600 transition-colors hover:border-brand/20 hover:text-brand"
-                  title="OfficeFlow에서 확인 완료 처리"
-                >
-                  확인 완료
-                </button>
-              </>
-            ) : compact ? null : (
-              <span className="px-1 text-[10px] font-medium text-slate-400">확인 완료</span>
-            )}
 
             {onDelete ? (
               <button
@@ -132,54 +178,17 @@ export default function MailAccountItem({
                   event.stopPropagation()
                   setConfirmDelete(true)
                 }}
-                className="grid h-6 w-6 place-items-center rounded-md text-slate-400 opacity-0 transition-opacity hover:bg-white/80 hover:text-danger group-hover:opacity-100"
+                className={
+                  iconBtnClass(onAccent, 'danger') +
+                  ' opacity-0 transition-opacity group-hover:opacity-100'
+                }
               >
-                <Trash2 size={12} strokeWidth={1.75} aria-hidden="true" />
+                <Trash2 size={13} strokeWidth={1.75} aria-hidden="true" />
               </button>
             ) : null}
           </div>
         </div>
       )}
     </li>
-  )
-}
-
-function AccountMeta({
-  account,
-  showExternal,
-}: {
-  account: MailAccountData
-  showExternal: boolean
-}) {
-  const isPending = account.status === 'pending'
-  const displayLabel = getAccountDisplayLabel(account)
-
-  return (
-    <>
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface text-slate-500">
-        <Mail size={15} strokeWidth={1.75} aria-hidden="true" />
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <p className="truncate text-xs font-semibold text-slate-900">{displayLabel}</p>
-          {isPending ? (
-            <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">
-              {account.statusLabel ?? '연동 대기'}
-            </span>
-          ) : null}
-        </div>
-        <p className="truncate text-xs text-slate-500">{account.email}</p>
-      </div>
-
-      {showExternal ? (
-        <ExternalLink
-          size={12}
-          strokeWidth={1.75}
-          className="shrink-0 text-slate-400"
-          aria-hidden="true"
-        />
-      ) : null}
-    </>
   )
 }
