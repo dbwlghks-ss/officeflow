@@ -17,6 +17,62 @@ export type AssistantResponseAction = {
   path: string
 }
 
+export type AssistantResponseKind =
+  | 'employee'
+  | 'meal'
+  | 'meal_action'
+  | 'work_summary'
+  | 'notice'
+  | 'survey'
+  | 'unknown'
+  | 'generic'
+
+export type AssistantEmployeeInfo = {
+  name: string
+  department: string | null
+  position: string | null
+  workEmail: string | null
+  extension: string | null
+  workPhone: string | null
+}
+
+export type AssistantEmployeePayload = {
+  employees: AssistantEmployeeInfo[]
+  query?: string
+  empty?: boolean
+}
+
+export type AssistantMealMenuPayload = {
+  menuDate: string
+  mealType: string
+  cafeteria: string
+  items: string[]
+  note: string | null
+  calories: number | null
+  empty?: boolean
+  unavailable?: boolean
+}
+
+export type AssistantMealActionPayload = {
+  action: 'applied' | 'cancelled' | 'already_applied' | 'error'
+}
+
+export type AssistantWorkSummaryPayload = {
+  variant: 'summary' | 'notices' | 'surveys' | 'meal_status'
+  mealStatusLabel: string
+  mealApplied: boolean
+  mealDeclined: boolean
+  mealServiceAvailable: boolean
+  unreadNoticeCount: number
+  pendingSurveyCount: number
+  noticeTitles?: string[]
+  surveyTitles?: string[]
+}
+
+export type AssistantUnknownPayload = {
+  suggestions: string[]
+}
+
 export type AssistantResponse = {
   title: string
   message?: string
@@ -27,6 +83,12 @@ export type AssistantResponse = {
   /** Up to two secondary action buttons when multiple destinations apply. */
   actions?: AssistantResponseAction[]
   state?: 'loading' | 'ready' | 'error'
+  kind?: AssistantResponseKind
+  employee?: AssistantEmployeePayload
+  mealMenu?: AssistantMealMenuPayload
+  mealAction?: AssistantMealActionPayload
+  workSummary?: AssistantWorkSummaryPayload
+  unknown?: AssistantUnknownPayload
 }
 
 export type AssistantIntentOption = {

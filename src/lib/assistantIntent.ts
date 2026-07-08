@@ -5,6 +5,7 @@ import {
   ASSISTANT_LOADING_MESSAGE,
   ASSISTANT_UNAUTHENTICATED_MESSAGE,
 } from './assistantUi'
+import { toWorkSummaryPayload } from './assistantResponsePayload'
 import {
   buildUpdateItems,
   fetchAssistantSnapshot,
@@ -18,12 +19,9 @@ function buildFromSnapshot(intent: AssistantIntent, snapshot: AssistantSnapshot)
       return {
         title: '오늘 해야 할 일',
         message: '오늘 확인해야 할 업무를 정리했습니다.',
-        lines: [
-          `오늘 식수: ${snapshot.meal.statusLabel}`,
-          `읽지 않은 공지: ${snapshot.notices.unreadCount}건`,
-          `참여 대기 설문: ${snapshot.surveys.pendingCount}건`,
-          `최근 업데이트: ${buildUpdateItems(snapshot).length}건`,
-        ],
+        lines: [],
+        kind: 'work_summary',
+        workSummary: toWorkSummaryPayload(snapshot, 'summary'),
         actions: [
           { label: '공지사항 보기', path: '/notice' },
           { label: '설문조사 보기', path: '/survey' },
@@ -32,36 +30,30 @@ function buildFromSnapshot(intent: AssistantIntent, snapshot: AssistantSnapshot)
       }
 
     case 'notices': {
-      const lines =
-        snapshot.notices.unreadCount > 0
-          ? snapshot.notices.unreadTitles.map((title) => `- ${title}`)
-          : ['모든 공지를 확인했습니다.']
-
       return {
         title: '읽지 않은 공지',
         message:
           snapshot.notices.unreadCount > 0
             ? `읽지 않은 공지가 ${snapshot.notices.unreadCount}건 있습니다.`
             : '읽지 않은 공지가 없습니다.',
-        lines,
+        lines: [],
+        kind: 'notice',
+        workSummary: toWorkSummaryPayload(snapshot, 'notices'),
         action: { label: '공지사항 보기', path: '/notice' },
         state: 'ready',
       }
     }
 
     case 'surveys': {
-      const lines =
-        snapshot.surveys.pendingTitles.length > 0
-          ? snapshot.surveys.pendingTitles.map((title) => `- ${title}`)
-          : ['참여 대기 중인 설문이 없습니다.']
-
       return {
         title: '참여 대기 설문',
         message:
           snapshot.surveys.pendingCount > 0
             ? `참여해야 할 설문이 ${snapshot.surveys.pendingCount}건 있습니다.`
             : '참여 대기 중인 설문이 없습니다.',
-        lines,
+        lines: [],
+        kind: 'survey',
+        workSummary: toWorkSummaryPayload(snapshot, 'surveys'),
         action: { label: '설문조사 보기', path: '/survey' },
         state: 'ready',
       }
@@ -72,9 +64,13 @@ function buildFromSnapshot(intent: AssistantIntent, snapshot: AssistantSnapshot)
         title: '오늘 식수 신청 상태',
         message: snapshot.meal.applied
           ? '오늘 식수 신청이 완료되어 있습니다.'
-          : '오늘 식수 신청 내역이 없습니다.',
-        lines: [`오늘 식수: ${snapshot.meal.statusLabel}`],
-        action: snapshot.meal.applied
+          : snapshot.meal.declined
+            ? '오늘 식수를 안 먹는 것으로 처리했습니다.'
+            : '오늘 식수 신청 내역이 없습니다.',
+        lines: [],
+        kind: 'work_summary',
+        workSummary: toWorkSummaryPayload(snapshot, 'meal_status'),
+        action: snapshot.meal.applied || snapshot.meal.declined
           ? undefined
           : { label: '식수 신청하기', path: '/meal' },
         state: 'ready',
@@ -96,6 +92,7 @@ function buildFromSnapshot(intent: AssistantIntent, snapshot: AssistantSnapshot)
         title: '최근 업데이트',
         message: '최근 업무 업데이트를 확인했습니다.',
         lines: lines.length > 0 ? lines : ['표시할 업데이트가 없습니다.'],
+        kind: 'generic',
         state: 'ready',
       }
     }
@@ -108,6 +105,7 @@ export function getLoadingAssistantResponse(): AssistantResponse {
     message: ASSISTANT_LOADING_MESSAGE,
     lines: [],
     state: 'loading',
+    kind: 'generic',
   }
 }
 
@@ -119,7 +117,17 @@ export function getFallbackAssistantResponse(intent: AssistantIntent): Assistant
       title: '오늘 해야 할 일',
       message: ASSISTANT_ERROR_MESSAGE,
       hint: ASSISTANT_ERROR_HINT,
-      lines: ['오늘 식수: 확인 불가', '읽지 않은 공지: 확인 불가', '참여 대기 설문: 확인 불가'],
+      lines: [],
+      kind: 'work_summary',
+      workSummary: {
+        variant: 'summary',
+        mealStatusLabel: '확인 불가',
+        mealApplied: false,
+        mealDeclined: false,
+        mealServiceAvailable: false,
+        unreadNoticeCount: 0,
+        pendingSurveyCount: 0,
+      },
       actions: [
         { label: '공지사항 보기', path: '/notice' },
         { label: '설문조사 보기', path: '/survey' },
@@ -131,6 +139,7 @@ export function getFallbackAssistantResponse(intent: AssistantIntent): Assistant
       message: ASSISTANT_ERROR_MESSAGE,
       hint: ASSISTANT_ERROR_HINT,
       lines: [],
+      kind: 'notice',
       action: { label: '공지사항 보기', path: '/notice' },
       state: 'error',
     },
@@ -139,6 +148,7 @@ export function getFallbackAssistantResponse(intent: AssistantIntent): Assistant
       message: ASSISTANT_ERROR_MESSAGE,
       hint: ASSISTANT_ERROR_HINT,
       lines: [],
+      kind: 'survey',
       action: { label: '설문조사 보기', path: '/survey' },
       state: 'error',
     },
@@ -147,6 +157,7 @@ export function getFallbackAssistantResponse(intent: AssistantIntent): Assistant
       message: ASSISTANT_ERROR_MESSAGE,
       hint: ASSISTANT_ERROR_HINT,
       lines: [],
+      kind: 'work_summary',
       action: { label: '식수 신청 보기', path: '/meal' },
       state: 'error',
     },
@@ -155,6 +166,7 @@ export function getFallbackAssistantResponse(intent: AssistantIntent): Assistant
       message: ASSISTANT_ERROR_MESSAGE,
       hint: ASSISTANT_ERROR_HINT,
       lines: updates.slice(0, 3).map((item) => item.title),
+      kind: 'generic',
       state: 'error',
     },
   }

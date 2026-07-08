@@ -54,6 +54,7 @@ export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps
             response={response}
             checkedAt={checkedAt}
             onAction={onNavigate}
+            onSuggestedQuery={(query) => void handleSuggestedQuery(query)}
             hero
           />
         </div>

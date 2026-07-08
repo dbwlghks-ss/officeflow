@@ -1,4 +1,9 @@
 import { resolveAssistantResponse } from '../../lib/assistantIntent'
+import {
+  toAssistantEmployeeFromDirectory,
+  toAssistantEmployeeFromProfile,
+  toAssistantMealMenuPayload,
+} from '../../lib/assistantResponsePayload'
 import { ASSISTANT_UNAUTHENTICATED_MESSAGE } from '../../lib/assistantUi'
 import { supabase } from '../../lib/supabase'
 import type { AssistantResponse } from '../../types/assistant'
@@ -35,6 +40,7 @@ export function getLoadingRuleAssistantResponse(): AssistantResponse {
     message: '요청을 확인하고 있습니다.',
     lines: [],
     state: 'loading',
+    kind: 'generic',
   }
 }
 
@@ -42,7 +48,14 @@ export function getUnknownIntentResponse(): AssistantResponse {
   return readyResponse({
     title: '요청을 이해하지 못했습니다',
     message: '아직 이해하지 못한 요청입니다. 아래처럼 질문해보세요.',
-    lines: UNKNOWN_INTENT_EXAMPLES.map((example) => `- ${example}`),
+    lines: [],
+    kind: 'unknown',
+    unknown: {
+      suggestions: [
+        ...UNKNOWN_INTENT_EXAMPLES,
+        '읽지 않은 공지 보여줘',
+      ],
+    },
   })
 }
 
@@ -58,6 +71,7 @@ function unauthenticatedResponse(title: string): AssistantResponse {
     title,
     message: ASSISTANT_UNAUTHENTICATED_MESSAGE,
     lines: ['로그인 후 Assistant에서 업무를 확인하고 처리할 수 있습니다.'],
+    kind: 'generic',
     action: { label: '로그인하기', path: '/login' },
   })
 }
@@ -74,6 +88,8 @@ async function executeGetTodayMeal(): Promise<AssistantResponse> {
     const formatted = formatMealMenuForAssistant(menuResult.menu)
     return readyResponse({
       ...formatted,
+      kind: 'meal',
+      mealMenu: toAssistantMealMenuPayload(menuResult.menu),
       action: { label: '식수 페이지 보기', path: '/meal' },
     })
   }
@@ -82,10 +98,17 @@ async function executeGetTodayMeal(): Promise<AssistantResponse> {
     return readyResponse({
       title: '오늘 점심 메뉴',
       message: '식단 데이터가 아직 연결되지 않았습니다.',
-      lines: [
-        '관리자가 meal_menus 테이블을 적용하면 이곳에서 오늘 식단을 확인할 수 있습니다.',
-        '식수 신청은 식수 페이지에서 계속 이용할 수 있습니다.',
-      ],
+      lines: [],
+      kind: 'meal',
+      mealMenu: {
+        menuDate: '',
+        mealType: 'lunch',
+        cafeteria: '',
+        items: [],
+        note: null,
+        calories: null,
+        unavailable: true,
+      },
       action: { label: '식수 페이지 보기', path: '/meal' },
     })
   }
@@ -95,7 +118,17 @@ async function executeGetTodayMeal(): Promise<AssistantResponse> {
     return readyResponse({
       title: '오늘 점심 메뉴',
       message: '오늘 등록된 식단 정보가 없습니다.',
-      lines: ['관리자에게 오늘 식단 등록을 요청하세요.'],
+      lines: [],
+      kind: 'meal',
+      mealMenu: {
+        menuDate: '',
+        mealType: 'lunch',
+        cafeteria: '',
+        items: [],
+        note: null,
+        calories: null,
+        empty: true,
+      },
       action: { label: '식수 페이지 보기', path: '/meal' },
     })
   }
@@ -103,10 +136,17 @@ async function executeGetTodayMeal(): Promise<AssistantResponse> {
   return readyResponse({
     title: '오늘 점심 메뉴',
     message: '오늘 등록된 식단 정보가 없습니다.',
-    lines: [
-      '오늘 구내식당 운영일이지만 메뉴 항목은 아직 등록되지 않았습니다.',
-      '관리자에게 식단 등록을 요청하세요.',
-    ],
+    lines: [],
+    kind: 'meal',
+    mealMenu: {
+      menuDate: todayService.service_date,
+      mealType: todayService.meal_type,
+      cafeteria: '',
+      items: [],
+      note: null,
+      calories: null,
+      empty: true,
+    },
     action: { label: '식수 페이지 보기', path: '/meal' },
   })
 }
@@ -122,13 +162,17 @@ async function executeApplyTodayMeal(): Promise<AssistantResponse> {
       return readyResponse({
         title: '오늘 식수 신청',
         message: result.message,
-        lines: ['오늘 식수: 신청 완료'],
+        lines: [],
+        kind: 'meal_action',
+        mealAction: { action: 'already_applied' },
       })
     }
     return errorResponse({
       title: '오늘 식수 신청',
       message: result.message,
       lines: [],
+      kind: 'meal_action',
+      mealAction: { action: 'error' },
       action: result.reason === 'no_service' ? { label: '식수 페이지 보기', path: '/meal' } : undefined,
     })
   }
@@ -136,7 +180,9 @@ async function executeApplyTodayMeal(): Promise<AssistantResponse> {
   return readyResponse({
     title: '오늘 식수 신청',
     message: result.message,
-    lines: ['오늘 식수: 신청 완료'],
+    lines: [],
+    kind: 'meal_action',
+    mealAction: { action: 'applied' },
   })
 }
 
@@ -151,6 +197,8 @@ async function executeCancelTodayMeal(): Promise<AssistantResponse> {
       title: '오늘 식수 취소',
       message: result.message,
       lines: [],
+      kind: 'meal_action',
+      mealAction: { action: 'error' },
       action: result.reason === 'no_service' ? { label: '식수 페이지 보기', path: '/meal' } : undefined,
     })
   }
@@ -158,7 +206,9 @@ async function executeCancelTodayMeal(): Promise<AssistantResponse> {
   return readyResponse({
     title: '오늘 식수 취소',
     message: result.message,
-    lines: ['오늘 식수: 미신청'],
+    lines: [],
+    kind: 'meal_action',
+    mealAction: { action: 'cancelled' },
   })
 }
 
@@ -178,30 +228,39 @@ function fieldLabel(field: EmployeeLookupField): string {
 }
 
 function buildEmployeeLookupResponse(
-  name: string,
+  employee: ReturnType<typeof toAssistantEmployeeFromDirectory>,
   field: EmployeeLookupField,
   value: string,
 ): AssistantResponse {
   if (field === 'summary') {
     return readyResponse({
-      title: `${name} 사원 정보`,
-      message: `${name} 사원 정보입니다.`,
-      lines: value.split('\n').map((line) => `- ${line}`),
+      title: `${employee.name} 사원 정보`,
+      message: `${employee.name} 사원 정보입니다.`,
+      lines: [],
+      kind: 'employee',
+      employee: { employees: [employee] },
     })
   }
 
   return readyResponse({
-    title: `${name} ${fieldLabel(field)}`,
-    message: `${name} 사원의 ${fieldLabel(field)} 정보입니다.`,
+    title: `${employee.name} ${fieldLabel(field)}`,
+    message: `${employee.name} 사원의 ${fieldLabel(field)} 정보입니다.`,
     lines: [`${fieldLabel(field)}: ${value}`],
+    kind: 'employee',
+    employee: { employees: [employee] },
   })
 }
 
-function buildMultipleMatchesResponse(nameQuery: string, names: string[]): AssistantResponse {
+function buildMultipleMatchesResponse(
+  nameQuery: string,
+  employees: ReturnType<typeof toAssistantEmployeeFromDirectory>[],
+): AssistantResponse {
   return readyResponse({
     title: '직원 정보 조회',
-    message: `"${nameQuery}" 검색 결과가 ${names.length}건 있습니다. 더 구체적으로 입력해주세요.`,
-    lines: names.slice(0, 3).map((name) => `- ${name}`),
+    message: `"${nameQuery}" 검색 결과가 ${employees.length}건 있습니다. 더 구체적으로 입력해주세요.`,
+    lines: [],
+    kind: 'employee',
+    employee: { employees, query: nameQuery },
   })
 }
 
@@ -219,7 +278,9 @@ async function executeEmployeeLookupFromDirectory(
     return readyResponse({
       title: '직원 정보 조회',
       message: '조회 가능한 직원 정보를 찾지 못했습니다.',
-      lines: ['이름을 확인하거나 다른 표현으로 다시 질문해보세요.'],
+      lines: [],
+      kind: 'employee',
+      employee: { employees: [], empty: true },
     })
   }
 
@@ -229,20 +290,22 @@ async function executeEmployeeLookupFromDirectory(
     return readyResponse({
       title: '직원 정보 조회',
       message: '조회 가능한 직원 정보를 찾지 못했습니다.',
-      lines: ['이름을 확인하거나 다른 표현으로 다시 질문해보세요.'],
+      lines: [],
+      kind: 'employee',
+      employee: { employees: [], empty: true },
     })
   }
 
   if (matches.length > 1) {
     return buildMultipleMatchesResponse(
       nameQuery,
-      matches.map((employee) => employee.name),
+      matches.map((employee) => toAssistantEmployeeFromDirectory(employee)),
     )
   }
 
   const employee = matches[0]
   return buildEmployeeLookupResponse(
-    employee.name,
+    toAssistantEmployeeFromDirectory(employee),
     field,
     formatEmployeeForAssistant(employee, field),
   )
@@ -290,6 +353,8 @@ async function executeEmployeeLookupFromProfiles(
       title: '직원 정보 조회',
       message: '현재 조회 가능한 직원 디렉토리가 설정되어 있지 않습니다.',
       lines: ['관리자에게 employee_directory 설정을 요청하세요.'],
+      kind: 'employee',
+      employee: { employees: [], empty: true },
     })
   }
 
@@ -298,6 +363,8 @@ async function executeEmployeeLookupFromProfiles(
       title: '직원 정보 조회',
       message: '현재 조회 가능한 직원 디렉토리가 설정되어 있지 않습니다.',
       lines: ['관리자에게 employee_directory 설정을 요청하세요.'],
+      kind: 'employee',
+      employee: { employees: [], empty: true },
     })
   }
 
@@ -307,20 +374,23 @@ async function executeEmployeeLookupFromProfiles(
     return readyResponse({
       title: '직원 정보 조회',
       message: '조회 가능한 직원 정보를 찾지 못했습니다.',
-      lines: ['이름을 확인하거나 다른 표현으로 다시 질문해보세요.'],
+      lines: [],
+      kind: 'employee',
+      employee: { employees: [], empty: true },
     })
   }
 
   if (matches.length > 1) {
     return buildMultipleMatchesResponse(
       nameQuery,
-      matches.map((profile) => profile.full_name),
+      matches.map((profile) => toAssistantEmployeeFromProfile(profile)),
     )
   }
 
   const profile = matches[0]
+  const employee = toAssistantEmployeeFromProfile(profile)
   return buildEmployeeLookupResponse(
-    profile.full_name,
+    employee,
     field,
     formatProfileForAssistant(profile, field),
   )
@@ -339,9 +409,11 @@ async function executeEmployeeLookup(
     return readyResponse({
       title: '직원 정보 조회',
       message: '조회할 직원 이름을 함께 입력해주세요.',
-      lines: UNKNOWN_INTENT_EXAMPLES.filter((example) => example.includes('홍길동')).map(
-        (example) => `- ${example}`,
-      ),
+      lines: [],
+      kind: 'unknown',
+      unknown: {
+        suggestions: UNKNOWN_INTENT_EXAMPLES.filter((example) => example.includes('홍길동')),
+      },
     })
   }
 
@@ -376,6 +448,7 @@ export async function executeRuleBasedIntent(intent: DetectedRuleIntent): Promis
       message: '요청을 처리하는 중 문제가 발생했습니다.',
       hint: '잠시 후 다시 시도해주세요.',
       lines: [],
+      kind: 'generic',
     })
   }
 }

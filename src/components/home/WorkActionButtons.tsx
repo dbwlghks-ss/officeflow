@@ -7,6 +7,7 @@ type WorkActionButtonsProps = {
   onNavigate?: (path: string) => void
   variant?: 'brand' | 'default'
   disabled?: boolean
+  onActionComplete?: (message: string) => void
 }
 
 function isSecondaryAction(action: BriefActionButton, actions: BriefActionButton[]): boolean {
@@ -20,6 +21,7 @@ export default function WorkActionButtons({
   onNavigate,
   variant = 'default',
   disabled = false,
+  onActionComplete,
 }: WorkActionButtonsProps) {
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -33,7 +35,9 @@ export default function WorkActionButtons({
     setBusyId(null)
     if (!result.ok && result.reason !== 'already_applied') {
       setError(result.message)
+      return
     }
+    onActionComplete?.(result.message)
   }
 
   async function handleMealCancel(actionId: string) {
@@ -43,7 +47,9 @@ export default function WorkActionButtons({
     setBusyId(null)
     if (!result.ok) {
       setError(result.message)
+      return
     }
+    onActionComplete?.(result.message)
   }
 
   const isBrand = variant === 'brand'
