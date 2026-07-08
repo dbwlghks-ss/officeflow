@@ -12,8 +12,10 @@ export function buildSuggestedAssistantQueries(
   if (snapshot?.meal.serviceAvailable) {
     if (snapshot.meal.applied) {
       dynamic.push('내 식수 신청 상태 알려줘', '오늘 식수 안 먹는 걸로 해줘')
+    } else if (snapshot.meal.declined) {
+      dynamic.push('내 식수 신청 상태 알려줘', '오늘 식수 먹는 걸로 해줘')
     } else {
-      dynamic.push('오늘 식수 먹는 걸로 해줘')
+      dynamic.push('오늘 식수 먹는 걸로 해줘', '오늘 식수 안 먹는 걸로 해줘')
     }
   }
 

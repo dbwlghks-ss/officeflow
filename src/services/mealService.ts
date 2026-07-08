@@ -91,3 +91,16 @@ export async function cancelMeal(mealServiceId: number, userId: string): Promise
 
   if (error) throw error
 }
+
+export async function setMealCancelled(mealServiceId: number, userId: string): Promise<void> {
+  const { error } = await supabase.from('meal_applications').upsert(
+    {
+      meal_service_id: mealServiceId,
+      user_id: userId,
+      status: 'cancelled',
+    },
+    { onConflict: 'meal_service_id,user_id' },
+  )
+
+  if (error) throw error
+}

@@ -5,6 +5,7 @@ import {
   type NotificationCenterItem,
 } from '../../services/notificationDataService'
 import { NOTICE_READ_EVENT } from '../../services/noticeReadService'
+import { ASSISTANT_DATA_UPDATED_EVENT } from '../../lib/assistantDataEvents'
 import NotificationItem from './NotificationItem'
 
 type NotificationCenterProps = {
@@ -55,7 +56,11 @@ export default function NotificationCenter({
     }
 
     window.addEventListener(NOTICE_READ_EVENT, handleNoticeRead)
-    return () => window.removeEventListener(NOTICE_READ_EVENT, handleNoticeRead)
+    window.addEventListener(ASSISTANT_DATA_UPDATED_EVENT, handleNoticeRead)
+    return () => {
+      window.removeEventListener(NOTICE_READ_EVENT, handleNoticeRead)
+      window.removeEventListener(ASSISTANT_DATA_UPDATED_EVENT, handleNoticeRead)
+    }
   }, [])
 
   function handleAction(path: string) {

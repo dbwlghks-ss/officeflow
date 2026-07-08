@@ -28,6 +28,7 @@ function formatActionLine(
 export function buildBriefSummaryCopy(data: BriefSummaryData): BriefSummaryCopy {
   const {
     mealApplied,
+    mealDeclined,
     mealServiceAvailable,
     unreadNoticeCount,
     pendingSurveyCount,
@@ -38,14 +39,17 @@ export function buildBriefSummaryCopy(data: BriefSummaryData): BriefSummaryCopy 
     pendingSurveyCount,
     todayScheduleCount,
   )
+  const mealNeedsAction = mealServiceAvailable && !mealApplied && !mealDeclined
   const mealLine = mealServiceAvailable
     ? mealApplied
       ? '식수 신청 완료.'
-      : '식수 신청이 필요합니다.'
+      : mealDeclined
+        ? '오늘 식수를 안 먹는 것으로 처리했습니다.'
+        : '식수 신청이 필요합니다.'
     : null
 
   if (!actionLine) {
-    if (!mealServiceAvailable || mealApplied) {
+    if (!mealServiceAvailable || mealApplied || mealDeclined) {
       return {
         lines: ['오늘 확인할 업무는 없습니다.', '여유 있게 하루를 시작하세요.'],
       }
@@ -56,7 +60,7 @@ export function buildBriefSummaryCopy(data: BriefSummaryData): BriefSummaryCopy 
     }
   }
 
-  if (!mealLine) {
+  if (!mealLine || (!mealNeedsAction && !mealApplied)) {
     return { lines: [actionLine] }
   }
 

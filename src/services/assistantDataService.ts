@@ -6,6 +6,7 @@ import { getOpenSurveys } from './surveyService'
 
 export type AssistantMealSnapshot = {
   applied: boolean
+  declined: boolean
   statusLabel: string
   serviceAvailable: boolean
 }
@@ -39,14 +40,16 @@ async function getCurrentUserId(): Promise<string | null> {
 async function fetchMealSnapshot(userId: string): Promise<AssistantMealSnapshot> {
   const todayService = await getTodayLunchService()
   if (!todayService) {
-    return { applied: false, statusLabel: '운영 없음', serviceAvailable: false }
+    return { applied: false, declined: false, statusLabel: '운영 없음', serviceAvailable: false }
   }
 
   const application = await getMyApplication(todayService.id, userId)
   const applied = application?.status === 'applied'
+  const declined = application?.status === 'cancelled'
   return {
     applied,
-    statusLabel: applied ? '신청 완료' : '미신청',
+    declined,
+    statusLabel: applied ? '신청 완료' : declined ? '안 먹음' : '미신청',
     serviceAvailable: true,
   }
 }

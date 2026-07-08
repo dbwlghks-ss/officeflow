@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { buildBriefSummaryDisplay } from '../../lib/briefSummarySentence'
+import { buildBriefActionItems } from '../../lib/briefActions'
 import { getHomeBriefContent, type HomeBriefContent } from '../../lib/homeBrief'
 import {
   mapSnapshotToBriefSummary,
@@ -8,14 +9,16 @@ import {
   type BriefSummaryData,
 } from '../../lib/homeBriefSummary'
 import { formatKoreanTime, KOREAN_CLOCK_TICK_MS } from '../../lib/dateTime'
+import { ASSISTANT_DATA_UPDATED_EVENT } from '../../lib/assistantDataEvents'
 import { fetchAssistantSnapshot } from '../../services/assistantDataService'
 import { NOTICE_READ_EVENT } from '../../services/noticeReadService'
-import { ASSISTANT_DATA_UPDATED_EVENT } from '../../features/assistant/assistantExecutor'
+import BriefActionPanel from './BriefActionPanel'
 import BriefSummaryList from './BriefSummaryList'
 
 type BriefBentoBlockProps = {
   date?: Date
   content?: Partial<HomeBriefContent>
+  onNavigate?: (path: string) => void
   /** Optional override for tests — skips live Supabase fetch when provided. */
   summary?: Partial<BriefSummaryData>
 }
@@ -23,6 +26,7 @@ type BriefBentoBlockProps = {
 export default function BriefBentoBlock({
   date = new Date(),
   content,
+  onNavigate,
   summary,
 }: BriefBentoBlockProps) {
   const [now, setNow] = useState(() => new Date())
@@ -34,6 +38,7 @@ export default function BriefBentoBlock({
       ? {
           mealStatusLabel: summary.mealStatusLabel ?? '신청 완료',
           mealApplied: summary.mealApplied ?? true,
+          mealDeclined: summary.mealDeclined ?? false,
           mealServiceAvailable: summary.mealServiceAvailable ?? true,
           unreadNoticeCount: summary.unreadNoticeCount ?? 0,
           pendingSurveyCount: summary.pendingSurveyCount ?? 0,
@@ -74,6 +79,19 @@ export default function BriefBentoBlock({
     summaryData ?? {
       mealStatusLabel: '',
       mealApplied: false,
+      mealDeclined: false,
+      mealServiceAvailable: false,
+      unreadNoticeCount: 0,
+      pendingSurveyCount: 0,
+      todayScheduleCount: 0,
+    },
+    displayMode,
+  )
+  const actionItems = buildBriefActionItems(
+    summaryData ?? {
+      mealStatusLabel: '',
+      mealApplied: false,
+      mealDeclined: false,
       mealServiceAvailable: false,
       unreadNoticeCount: 0,
       pendingSurveyCount: 0,
@@ -138,6 +156,7 @@ export default function BriefBentoBlock({
           <p key={line}>{line}</p>
         ))}
       </div>
+      <BriefActionPanel items={actionItems} onNavigate={onNavigate} />
       <BriefSummaryList
         items={summaryItems}
         tone="brand"

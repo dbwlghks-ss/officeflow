@@ -11,21 +11,15 @@ import {
   formatMealMenuForAssistant,
   getTodayMealMenu,
 } from '../../services/mealMenuService'
+import { applyTodayMeal, cancelTodayMeal } from '../../services/mealActionService'
 import {
-  applyMeal,
-  cancelMeal,
-  getMyApplication,
   getTodayLunchService,
 } from '../../services/mealService'
 import { getProfiles, type Profile } from '../../services/userService'
 import { UNKNOWN_INTENT_EXAMPLES } from './assistantIntent'
 import type { DetectedRuleIntent, EmployeeLookupField } from './assistantTypes'
 
-export const ASSISTANT_DATA_UPDATED_EVENT = 'officeflow:assistant-data-updated'
-
-function notifyAssistantDataUpdated() {
-  window.dispatchEvent(new CustomEvent(ASSISTANT_DATA_UPDATED_EVENT))
-}
+export { ASSISTANT_DATA_UPDATED_EVENT, notifyAssistantDataUpdated } from '../../lib/assistantDataEvents'
 
 function readyResponse(partial: AssistantResponse): AssistantResponse {
   return { ...partial, state: 'ready' }
@@ -118,71 +112,52 @@ async function executeGetTodayMeal(): Promise<AssistantResponse> {
 }
 
 async function executeApplyTodayMeal(): Promise<AssistantResponse> {
-  const userId = await getCurrentUserId()
-  if (!userId) {
-    return unauthenticatedResponse('오늘 식수 신청')
-  }
+  const result = await applyTodayMeal()
 
-  const todayService = await getTodayLunchService()
-  if (!todayService) {
+  if (!result.ok) {
+    if (result.reason === 'unauthenticated') {
+      return unauthenticatedResponse('오늘 식수 신청')
+    }
+    if (result.reason === 'already_applied') {
+      return readyResponse({
+        title: '오늘 식수 신청',
+        message: result.message,
+        lines: ['오늘 식수: 신청 완료'],
+      })
+    }
     return errorResponse({
       title: '오늘 식수 신청',
-      message: '오늘 등록된 점심 식수 서비스가 없습니다.',
-      lines: ['관리자가 오늘 식수를 등록한 뒤 다시 시도해주세요.'],
-      action: { label: '식수 페이지 보기', path: '/meal' },
+      message: result.message,
+      lines: [],
+      action: result.reason === 'no_service' ? { label: '식수 페이지 보기', path: '/meal' } : undefined,
     })
   }
-
-  const existing = await getMyApplication(todayService.id, userId)
-  if (existing?.status === 'applied') {
-    return readyResponse({
-      title: '오늘 식수 신청',
-      message: '이미 오늘 식수 신청이 완료되어 있습니다.',
-      lines: ['오늘 식수: 신청 완료'],
-    })
-  }
-
-  await applyMeal(todayService.id, userId)
-  notifyAssistantDataUpdated()
 
   return readyResponse({
     title: '오늘 식수 신청',
-    message: '오늘 식수 신청을 완료했습니다.',
+    message: result.message,
     lines: ['오늘 식수: 신청 완료'],
   })
 }
 
 async function executeCancelTodayMeal(): Promise<AssistantResponse> {
-  const userId = await getCurrentUserId()
-  if (!userId) {
-    return unauthenticatedResponse('오늘 식수 취소')
-  }
+  const result = await cancelTodayMeal()
 
-  const todayService = await getTodayLunchService()
-  if (!todayService) {
+  if (!result.ok) {
+    if (result.reason === 'unauthenticated') {
+      return unauthenticatedResponse('오늘 식수 취소')
+    }
     return errorResponse({
       title: '오늘 식수 취소',
-      message: '오늘 등록된 점심 식수 서비스가 없습니다.',
+      message: result.message,
       lines: [],
-      action: { label: '식수 페이지 보기', path: '/meal' },
+      action: result.reason === 'no_service' ? { label: '식수 페이지 보기', path: '/meal' } : undefined,
     })
   }
-
-  const existing = await getMyApplication(todayService.id, userId)
-  if (!existing || existing.status !== 'applied') {
-    return readyResponse({
-      title: '오늘 식수 취소',
-      message: '오늘 식수 신청 내역이 없어 취소할 항목이 없습니다.',
-      lines: ['오늘 식수: 미신청'],
-    })
-  }
-
-  await cancelMeal(todayService.id, userId)
-  notifyAssistantDataUpdated()
 
   return readyResponse({
     title: '오늘 식수 취소',
-    message: '오늘 식수를 안 먹는 것으로 처리했습니다.',
+    message: result.message,
     lines: ['오늘 식수: 미신청'],
   })
 }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Bell, LogIn, LogOut, Settings } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getLiveNotificationUnreadCount } from '../../services/notificationDataService'
+import { ASSISTANT_DATA_UPDATED_EVENT } from '../../lib/assistantDataEvents'
 import { NOTICE_READ_EVENT } from '../../services/noticeReadService'
 import NotificationCenter from '../notifications/NotificationCenter'
 import { HeaderBrandLockup } from '../ui/Logo'
@@ -36,11 +37,13 @@ export default function Header() {
     }
 
     window.addEventListener(NOTICE_READ_EVENT, handleRefresh)
+    window.addEventListener(ASSISTANT_DATA_UPDATED_EVENT, handleRefresh)
     window.addEventListener('focus', handleRefresh)
 
     return () => {
       active = false
       window.removeEventListener(NOTICE_READ_EVENT, handleRefresh)
+      window.removeEventListener(ASSISTANT_DATA_UPDATED_EVENT, handleRefresh)
       window.removeEventListener('focus', handleRefresh)
     }
   }, [])

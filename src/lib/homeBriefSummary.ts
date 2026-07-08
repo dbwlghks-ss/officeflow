@@ -3,6 +3,7 @@ import type { AssistantSnapshot } from '../services/assistantDataService'
 export type BriefSummaryData = {
   mealStatusLabel: string
   mealApplied: boolean
+  mealDeclined: boolean
   mealServiceAvailable: boolean
   unreadNoticeCount: number
   pendingSurveyCount: number
@@ -21,6 +22,7 @@ export type BriefDisplayMode = 'loading' | 'ready' | 'error' | 'unauthenticated'
 const DEFAULT_BRIEF_SUMMARY: BriefSummaryData = {
   mealStatusLabel: '확인 중',
   mealApplied: false,
+  mealDeclined: false,
   mealServiceAvailable: false,
   unreadNoticeCount: 0,
   pendingSurveyCount: 0,
@@ -38,6 +40,7 @@ export function mapSnapshotToBriefSummary(snapshot: AssistantSnapshot): BriefSum
   return {
     mealStatusLabel: snapshot.meal.statusLabel,
     mealApplied: snapshot.meal.applied,
+    mealDeclined: snapshot.meal.declined,
     mealServiceAvailable: snapshot.meal.serviceAvailable,
     unreadNoticeCount: snapshot.notices.unreadCount,
     pendingSurveyCount: snapshot.surveys.pendingCount,
@@ -81,7 +84,7 @@ export function toBriefSummaryItems(
       id: 'meal',
       label: '오늘 식수',
       value: data.mealStatusLabel,
-      emphasis: data.mealServiceAvailable && !data.mealApplied,
+      emphasis: data.mealServiceAvailable && !data.mealApplied && !data.mealDeclined,
     },
     {
       id: 'notice',
