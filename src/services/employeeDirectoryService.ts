@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { isMissingTableError, isPermissionError } from '../lib/adminDataErrors'
 import type { EmployeeLookupField } from '../features/assistant/assistantTypes'
 
 export type EmployeeDirectoryEntry = {
@@ -12,20 +13,42 @@ export type EmployeeDirectoryEntry = {
   is_active: boolean
 }
 
+export type EmployeeDirectoryInput = {
+  name: string
+  department?: string
+  position?: string
+  work_email?: string
+  extension?: string
+  work_phone?: string
+  is_active?: boolean
+}
+
 export type EmployeeDirectoryQueryResult =
   | { status: 'ok'; employees: EmployeeDirectoryEntry[] }
   | { status: 'unavailable'; reason: 'missing_table' | 'permission' | 'error' }
   | { status: 'empty' }
 
-function isMissingTableError(error: unknown): boolean {
-  if (!error || typeof error !== 'object') return false
-  const record = error as { code?: string; message?: string }
-  return (
-    record.code === '42P01' ||
-    record.code === 'PGRST205' ||
-    Boolean(record.message?.includes('employee_directory')) ||
-    Boolean(record.message?.includes('does not exist'))
-  )
+function mapEmployeeDirectoryError(error: unknown): EmployeeDirectoryQueryResult {
+  if (isMissingTableError(error, 'employee_directory')) {
+    return { status: 'unavailable', reason: 'missing_table' }
+  }
+  if (isPermissionError(error)) {
+    return { status: 'unavailable', reason: 'permission' }
+  }
+  console.error('[employeeDirectory] query failed:', error)
+  return { status: 'unavailable', reason: 'error' }
+}
+
+function normalizeEmployeeInput(input: EmployeeDirectoryInput) {
+  return {
+    name: input.name.trim(),
+    department: input.department?.trim() || null,
+    position: input.position?.trim() || null,
+    work_email: input.work_email?.trim() || null,
+    extension: input.extension?.trim() || null,
+    work_phone: input.work_phone?.trim() || null,
+    is_active: input.is_active ?? true,
+  }
 }
 
 export async function searchEmployees(query: string): Promise<EmployeeDirectoryQueryResult> {
@@ -44,14 +67,7 @@ export async function searchEmployees(query: string): Promise<EmployeeDirectoryQ
     .limit(10)
 
   if (error) {
-    if (isMissingTableError(error)) {
-      return { status: 'unavailable', reason: 'missing_table' }
-    }
-    if (error.code === '42501' || error.message?.includes('permission')) {
-      return { status: 'unavailable', reason: 'permission' }
-    }
-    console.error('[employeeDirectory] search failed:', error)
-    return { status: 'unavailable', reason: 'error' }
+    return mapEmployeeDirectoryError(error)
   }
 
   const employees = (data ?? []) as EmployeeDirectoryEntry[]
@@ -104,4 +120,56 @@ export function formatEmployeeForAssistant(
         `연락처: ${formatEmployeePhone(employee)}`,
       ].join('\n')
   }
+}
+
+export async function listEmployeesForAdmin(): Promise<EmployeeDirectoryEntry[]> {
+  const { data, error } = await supabase
+    .from('employee_directory')
+    .select('id, name, department, position, work_email, extension, work_phone, is_active')
+    .order('name', { ascending: true })
+
+  if (error) throw error
+  return (data ?? []) as EmployeeDirectoryEntry[]
+}
+
+export async function createEmployee(input: EmployeeDirectoryInput): Promise<EmployeeDirectoryEntry> {
+  const payload = normalizeEmployeeInput(input)
+  const { data, error } = await supabase
+    .from('employee_directory')
+    .insert(payload)
+    .select('id, name, department, position, work_email, extension, work_phone, is_active')
+    .single()
+
+  if (error) throw error
+  return data as EmployeeDirectoryEntry
+}
+
+export async function updateEmployee(
+  id: string,
+  input: EmployeeDirectoryInput,
+): Promise<EmployeeDirectoryEntry> {
+  const payload = normalizeEmployeeInput(input)
+  const { data, error } = await supabase
+    .from('employee_directory')
+    .update({ ...payload, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select('id, name, department, position, work_email, extension, work_phone, is_active')
+    .single()
+
+  if (error) throw error
+  return data as EmployeeDirectoryEntry
+}
+
+export async function deactivateEmployee(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('employee_directory')
+    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .eq('id', id)
+
+  if (error) throw error
+}
+
+export async function deleteEmployee(id: string): Promise<void> {
+  const { error } = await supabase.from('employee_directory').delete().eq('id', id)
+  if (error) throw error
 }
