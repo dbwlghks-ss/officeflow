@@ -6,28 +6,26 @@ type BentoCardProps = {
   children: ReactNode
   className?: string
   variant?: BentoCardVariant
-  /** Tighter padding for viewport-fit dashboard cards. */
+  /** @deprecated All cards use unified padding. */
   fit?: boolean
 }
 
 const VARIANT_CLASS: Record<BentoCardVariant, string> = {
-  default: 'border-line/80 bg-surface',
-  brand: 'brief-surface border-white/15 text-white',
-  muted: 'border-line/50 bg-[#f3f5f7]',
-  accent: 'border-[#bdd6e4]/70 bg-[#e8f3f8]',
+  default: 'border-line bg-surface',
+  brand: 'brief-surface border-white/12 text-white',
+  muted: 'border-line bg-surface',
+  accent: 'border-line bg-surface',
 }
 
 export default function BentoCard({
   children,
   className = '',
   variant = 'default',
-  fit = false,
 }: BentoCardProps) {
   return (
     <div
       className={
-        'rounded-card border shadow-soft ' +
-        (fit ? 'p-4 ' : 'p-5 lg:p-6 ') +
+        'home-card flex h-full min-h-0 flex-col overflow-hidden shadow-none ' +
         VARIANT_CLASS[variant] +
         (className ? ` ${className}` : '')
       }

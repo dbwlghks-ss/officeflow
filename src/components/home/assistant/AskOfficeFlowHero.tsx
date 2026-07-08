@@ -6,9 +6,10 @@ import AssistantSuggestedChips from './AssistantSuggestedChips'
 
 type AskOfficeFlowHeroProps = {
   onNavigate?: (path: string) => void
+  compact?: boolean
 }
 
-export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps) {
+export default function AskOfficeFlowHero({ onNavigate, compact = false }: AskOfficeFlowHeroProps) {
   const {
     directQuery,
     setDirectQuery,
@@ -20,42 +21,43 @@ export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps
   } = useAssistantWorkspace()
 
   return (
-    <section
-      className="mx-auto w-full max-w-3xl px-1 lg:max-w-4xl"
-      aria-label="Ask OfficeFlow"
-    >
-      <div className="text-center">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand/80">
-          Ask OfficeFlow
-        </p>
-        <p className="mt-2 text-sm leading-relaxed text-slate-500 lg:text-base">
-          궁금한 업무를 물어보거나, 필요한 일을 바로 요청하세요.
-        </p>
+    <section className="w-full" aria-label="Ask OfficeFlow">
+      <div className={compact ? 'text-left' : 'text-center'}>
+        <p className="home-section-eyebrow text-brand/70">Ask OfficeFlow</p>
+        {!compact ? (
+          <p className="mt-1 text-xs text-slate-500">업무 질문과 처리를 한곳에서</p>
+        ) : null}
       </div>
 
-      <div className="mt-5">
+      <div className={compact ? 'mt-2' : 'mt-3'}>
         <AssistantHeroSearch
           value={directQuery}
           onChange={setDirectQuery}
           onSubmit={() => void handleDirectQuery()}
+          fullWidth={compact}
         />
       </div>
 
       {suggestedQueries.length > 0 ? (
-        <div className="mt-3">
-          <p className="mb-1.5 text-center text-[11px] font-medium text-slate-400">추천 명령</p>
-          <div className="flex justify-center">
-            <AssistantSuggestedChips
-              variant="hero"
-              queries={suggestedQueries}
-              onSelect={(query) => void handleSuggestedQuery(query)}
-            />
-          </div>
+        <div className={compact ? 'mt-2' : 'mt-2.5'}>
+          <p
+            className={
+              'mb-1 text-[10px] font-medium text-slate-400 ' + (compact ? 'text-left' : 'text-center')
+            }
+          >
+            추천 명령
+          </p>
+          <AssistantSuggestedChips
+            variant={compact ? 'default' : 'hero'}
+            queries={suggestedQueries}
+            maxVisible={4}
+            onSelect={(query) => void handleSuggestedQuery(query)}
+          />
         </div>
       ) : null}
 
       {response ? (
-        <div className="mt-4">
+        <div className="mt-3">
           <AssistantResponseCard
             response={response}
             checkedAt={checkedAt}
@@ -66,7 +68,7 @@ export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps
         </div>
       ) : null}
 
-      <AssistantHeroLibrary />
+      <AssistantHeroLibrary compact={compact} />
     </section>
   )
 }

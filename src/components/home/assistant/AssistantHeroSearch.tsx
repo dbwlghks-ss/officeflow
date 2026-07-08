@@ -1,15 +1,23 @@
-import { ArrowUp, Sparkles } from 'lucide-react'
+import { ArrowUp } from 'lucide-react'
 
 type AssistantHeroSearchProps = {
   value: string
   onChange: (value: string) => void
   onSubmit: () => void
+  fullWidth?: boolean
 }
 
-export default function AssistantHeroSearch({ value, onChange, onSubmit }: AssistantHeroSearchProps) {
+export default function AssistantHeroSearch({
+  value,
+  onChange,
+  onSubmit,
+  fullWidth = false,
+}: AssistantHeroSearchProps) {
   return (
     <form
-      className="w-full"
+      className={
+        'w-full ' + (fullWidth ? '' : 'mx-auto max-w-[85%] lg:max-w-[480px]')
+      }
       onSubmit={(event) => {
         event.preventDefault()
         onSubmit()
@@ -20,37 +28,28 @@ export default function AssistantHeroSearch({ value, onChange, onSubmit }: Assis
       </label>
       <div
         className={
-          'flex h-[64px] w-full items-center gap-3 rounded-full border border-slate-200/70 bg-white px-4 ' +
-          'shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition-shadow focus-within:border-brand/25 ' +
-          'focus-within:ring-4 focus-within:ring-blue-500/10 lg:h-[68px] lg:px-5'
+          'flex h-11 w-full items-center gap-2 rounded-input border border-line bg-surface px-3 ' +
+          'motion-subtle focus-within:border-brand/30 focus-within:ring-2 focus-within:ring-brand/8'
         }
       >
-        <Sparkles
-          size={20}
-          strokeWidth={1.75}
-          className="shrink-0 text-brand/70"
-          aria-hidden="true"
-        />
         <input
           id="assistant-hero-search"
           type="text"
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          placeholder="직원 정보, 오늘 식단, 식수 신청을 물어보세요"
-          className="min-w-0 flex-1 border-0 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none lg:text-base"
+          placeholder="업무를 물어보거나 요청하세요"
+          className="min-w-0 flex-1 border-0 bg-transparent text-sm font-normal text-slate-800 placeholder:text-slate-400 focus:outline-none"
         />
         <button
           type="submit"
           disabled={!value.trim()}
           aria-label="질문 실행"
           className={
-            'inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-sm font-medium text-white ' +
-            'bg-gradient-to-r from-[#1648B8] to-[#2F63E6] transition-opacity hover:opacity-95 ' +
-            'disabled:cursor-not-allowed disabled:opacity-40 lg:px-5'
+            'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-white ' +
+            'motion-subtle hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-40'
           }
         >
-          <span className="hidden sm:inline">실행</span>
-          <ArrowUp size={16} strokeWidth={2} aria-hidden="true" />
+          <ArrowUp size={15} strokeWidth={2} aria-hidden="true" />
         </button>
       </div>
     </form>

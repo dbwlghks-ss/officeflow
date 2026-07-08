@@ -15,16 +15,14 @@ type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 const buttonBase =
-  'inline-flex items-center justify-center gap-2 rounded-btn font-semibold whitespace-nowrap transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+  'inline-flex items-center justify-center gap-2 rounded-btn font-medium whitespace-nowrap motion-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
 
 const buttonVariants: Record<ButtonVariant, string> = {
-  primary:
-    'bg-brand text-white shadow-[0_6px_16px_-8px_rgba(0,64,152,0.8)] hover:bg-brand-hover active:scale-[0.98]',
-  secondary:
-    'border border-line bg-surface text-slate-700 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98]',
-  ghost: 'text-slate-600 hover:bg-slate-100 active:scale-[0.98]',
-  danger: 'bg-danger text-white hover:bg-red-700 active:scale-[0.98]',
-  success: 'bg-success text-white hover:bg-green-700 active:scale-[0.98]',
+  primary: 'bg-brand text-white hover:bg-brand-hover',
+  secondary: 'border border-line bg-surface text-slate-700 hover:bg-slate-50',
+  ghost: 'text-slate-600 hover:bg-slate-100',
+  danger: 'bg-danger text-white hover:bg-red-700',
+  success: 'bg-success text-white hover:bg-green-700',
 }
 
 const buttonSizes: Record<ButtonSize, string> = {
@@ -61,7 +59,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'rounded-card border border-line bg-surface shadow-soft',
+        'rounded-card border border-line bg-surface',
         className,
       )}
       {...props}

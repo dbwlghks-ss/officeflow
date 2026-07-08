@@ -9,8 +9,8 @@ import AskOfficeFlowHero from '../components/home/assistant/AskOfficeFlowHero'
 import TodayWorkQueue from '../components/home/TodayWorkQueue'
 import MailHubPanel from '../components/home/mail/MailHubPanel'
 
-/** Matches Header sticky height (`h-[72px]`). */
-const HEADER_HEIGHT_PX = 72
+/** Matches Header sticky height (`h-[64px]`). */
+const HEADER_HEIGHT_PX = 64
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -24,33 +24,35 @@ export default function HomePage() {
 
       <AssistantWorkspaceProvider>
         <main
-          className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col overflow-y-auto px-6 py-4 lg:max-h-[calc(100dvh-var(--header-h))] lg:min-h-0 lg:px-8 lg:py-5"
+          className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col overflow-y-auto px-6 py-3 lg:max-h-[calc(100dvh-var(--header-h))] lg:min-h-0 lg:px-8 lg:py-4"
           style={{ ['--header-h' as string]: `${HEADER_HEIGHT_PX}px` }}
         >
-          <div className="home-hero-surface shrink-0 rounded-[28px] px-2 pb-6 pt-2 lg:px-4 lg:pb-7">
-            <div className="mx-auto max-w-3xl text-center lg:max-w-4xl">
-              <HomeHeroGreeting dateLabel={dateLabel} greeting={brief.greeting} />
-            </div>
-            <div className="mt-5 lg:mt-6">
-              <AskOfficeFlowHero onNavigate={navigate} />
+          <div className="home-hero-surface shrink-0">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-start lg:gap-6">
+              <div className="lg:col-span-4">
+                <HomeHeroGreeting dateLabel={dateLabel} greeting={brief.greeting} compact />
+              </div>
+              <div className="lg:col-span-8">
+                <AskOfficeFlowHero onNavigate={navigate} compact />
+              </div>
             </div>
           </div>
 
-          <div className="mt-4 grid min-h-0 flex-1 grid-cols-1 gap-3 lg:mt-5 lg:grid-cols-12 lg:gap-4">
-            <div className="min-h-[280px] lg:col-span-4 lg:min-h-0">
-              <BentoCard variant="brand" fit className="flex h-full min-h-0 flex-col overflow-hidden">
+          <div className="mt-4 grid flex-1 grid-cols-1 gap-4 lg:mt-4 lg:grid-cols-12 lg:items-stretch">
+            <div className="min-h-[300px] lg:col-span-4 lg:min-h-[340px]">
+              <BentoCard variant="brand" className="h-full">
                 <BriefBentoBlock date={now} onNavigate={navigate} />
               </BentoCard>
             </div>
 
-            <div className="min-h-[320px] lg:col-span-5 lg:min-h-0">
-              <BentoCard fit className="flex h-full min-h-0 flex-col overflow-hidden">
+            <div className="min-h-[300px] lg:col-span-5 lg:min-h-[340px]">
+              <BentoCard className="h-full">
                 <TodayWorkQueue onNavigate={navigate} />
               </BentoCard>
             </div>
 
-            <div className="min-h-[280px] lg:col-span-3 lg:min-h-0">
-              <BentoCard variant="accent" fit className="flex h-full min-h-0 flex-col overflow-hidden">
+            <div className="min-h-[300px] lg:col-span-3 lg:min-h-[340px]">
+              <BentoCard className="h-full">
                 <MailHubPanel />
               </BentoCard>
             </div>

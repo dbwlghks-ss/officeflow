@@ -2,11 +2,11 @@ type LogoProps = { className?: string; header?: boolean }
 
 type OfficeFlowLogoSize = 'sm' | 'md' | 'header' | 'auth'
 
-const HEADER_LOGO_HEIGHT_CLASS = 'h-[34px]'
+const HEADER_LOGO_HEIGHT_CLASS = 'h-[30px]'
 const OFFICEFLOW_HEADER_HEIGHT_CLASS = HEADER_LOGO_HEIGHT_CLASS
-const HWASHIN_HEADER_HEIGHT_CLASS = 'h-[29px]'
-const HEADER_LOCKUP_GAP_CLASS = 'gap-[10px]'
-const HEADER_LOCKUP_DIVIDER_CLASS = 'h-[18px] w-px shrink-0 bg-line/90'
+const HWASHIN_HEADER_HEIGHT_CLASS = 'h-[26px]'
+const HEADER_LOCKUP_GAP_CLASS = 'gap-7'
+const HEADER_LOCKUP_DIVIDER_CLASS = 'h-4 w-px shrink-0 bg-line'
 const HWASHIN_LOGO_SRC = '/hwashin-symbol.png'
 
 function resolveOfficeFlowLogoSize(size: OfficeFlowLogoSize): 'sm' | 'md' {
@@ -54,23 +54,23 @@ export function HwashinLogo({ className, header = false }: LogoProps) {
 /** Header brand lockup: [HWASHIN CI] | [OfficeFlow logo] */
 export function HeaderBrandLockup({ onOfficeFlowClick }: { onOfficeFlowClick?: () => void }) {
   return (
-    <div className={`inline-flex items-end ${HEADER_LOCKUP_GAP_CLASS}`}>
+    <div className={`inline-flex items-center ${HEADER_LOCKUP_GAP_CLASS}`}>
       <a
         href="https://www.hwashin.co.kr"
         target="_blank"
         rel="noopener noreferrer"
-        className="block shrink-0 cursor-pointer p-0 leading-none transition-opacity duration-200 hover:opacity-90"
+        className="block shrink-0 cursor-pointer p-0 leading-none motion-subtle hover:opacity-90"
         onClick={(e) => e.stopPropagation()}
       >
-        <HwashinLogoImage className={`${HWASHIN_HEADER_HEIGHT_CLASS} block max-h-none`} />
+        <HwashinLogoImage className={`${HWASHIN_HEADER_HEIGHT_CLASS} block`} />
       </a>
-      <span aria-hidden="true" className={`${HEADER_LOCKUP_DIVIDER_CLASS} self-center`} />
+      <span aria-hidden="true" className={HEADER_LOCKUP_DIVIDER_CLASS} />
       <button
         type="button"
         onClick={onOfficeFlowClick}
         className="block shrink-0 p-0 leading-none outline-none focus-visible:ring-2 focus-visible:ring-brand/30 rounded-md"
       >
-        <OfficeFlowLogo size="header" className="block object-left-bottom" />
+        <OfficeFlowLogo size="header" className="block" />
       </button>
     </div>
   )

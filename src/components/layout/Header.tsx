@@ -121,8 +121,8 @@ export default function Header() {
   const initial = authUser?.name?.trim()?.charAt(0) ?? 'U'
 
   return (
-    <header className="sticky top-0 z-30 h-[72px] border-b border-line bg-surface/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-full max-w-[1600px] items-center justify-between px-6 lg:px-10">
+    <header className="sticky top-0 z-30 h-16 border-b border-line bg-surface/90 backdrop-blur-md">
+      <div className="mx-auto flex h-full max-w-[1440px] items-center justify-between px-6 lg:px-8">
         <HeaderBrandLockup onOfficeFlowClick={() => navigate('/')} />
 
         <div className="flex items-center gap-2 sm:gap-3">
@@ -134,7 +134,7 @@ export default function Header() {
                   aria-label="알림"
                   aria-expanded={notificationsOpen}
                   onClick={() => setNotificationsOpen((open) => !open)}
-                  className="relative grid h-10 w-10 place-items-center rounded-full text-slate-500 transition-all duration-200 hover:bg-slate-100 hover:text-slate-700"
+                  className="relative grid h-9 w-9 place-items-center rounded-full text-slate-500 motion-subtle hover:bg-slate-100 hover:text-slate-700"
                 >
                   <Bell size={19} />
                   {unreadCount > 0 ? (
@@ -155,11 +155,11 @@ export default function Header() {
               <span className="hidden h-6 w-px bg-line sm:block" />
 
               <div className="flex items-center gap-2.5 pl-0.5">
-                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-light text-sm font-bold text-brand">
+                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-light text-sm font-semibold text-brand">
                   {initial}
                 </div>
                 <div className="hidden text-left leading-tight sm:block">
-                  <span className="block text-sm font-semibold text-slate-800">{authUser.name}</span>
+                  <span className="block text-sm font-medium text-slate-800">{authUser.name}</span>
                   <span className="block text-xs text-slate-400">{authUser.position ?? '임직원'}</span>
                 </div>
               </div>

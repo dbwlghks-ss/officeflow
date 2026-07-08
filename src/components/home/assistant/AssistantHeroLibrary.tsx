@@ -10,6 +10,7 @@ const VISIBLE_LIMIT = 4
 
 type AssistantHeroLibraryProps = {
   className?: string
+  compact?: boolean
 }
 
 function CommandChip({
@@ -20,11 +21,7 @@ function CommandChip({
   onSelect: (command: AssistantCommand) => void
 }) {
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(command)}
-      className="rounded-full border border-slate-200/80 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-600 shadow-sm transition-colors hover:border-brand/25 hover:bg-brand-light/30 hover:text-brand"
-    >
+    <button type="button" onClick={() => onSelect(command)} className="chip-pill">
       {command.title}
     </button>
   )
@@ -38,20 +35,19 @@ function SearchChip({
   onSelect: (search: AssistantSavedSearch) => void
 }) {
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(search)}
-      className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white py-1 pl-2 pr-2.5 text-[11px] font-medium text-slate-600 shadow-sm transition-colors hover:border-brand/25 hover:bg-brand-light/30 hover:text-brand"
-    >
+    <button type="button" onClick={() => onSelect(search)} className="chip-pill gap-1">
       <span>{search.title}</span>
-      <span className="rounded-full bg-slate-100 px-1.5 py-px text-[9px] font-medium text-slate-400">
+      <span className="text-[9px] font-medium text-slate-400">
         {SEARCH_SCOPE_LABELS[search.scope]}
       </span>
     </button>
   )
 }
 
-export default function AssistantHeroLibrary({ className = '' }: AssistantHeroLibraryProps) {
+export default function AssistantHeroLibrary({
+  className = '',
+  compact = false,
+}: AssistantHeroLibraryProps) {
   const {
     defaultCommands,
     customCommands,
@@ -79,78 +75,70 @@ export default function AssistantHeroLibrary({ className = '' }: AssistantHeroLi
     : savedCommands.slice(0, VISIBLE_LIMIT)
   const visibleSearches = searchesExpanded ? allSearches : allSearches.slice(0, VISIBLE_LIMIT)
 
+  const align = compact ? 'justify-start' : 'justify-center'
+
   return (
     <>
-      <div className={'mt-4 space-y-3 border-t border-line/50 pt-4 ' + className}>
+      <div className={'mt-3 space-y-2 border-t border-line/60 pt-3 ' + className}>
         <div>
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] font-medium text-slate-400">저장 명령</p>
+            <p className="text-[10px] font-medium text-slate-400">저장 명령</p>
             <button
               type="button"
               onClick={() => setCommandModalOpen(true)}
-              className="inline-flex items-center gap-0.5 text-[11px] font-medium text-slate-500 transition-colors hover:text-brand"
+              className="inline-flex items-center gap-0.5 text-[10px] font-medium text-slate-500 motion-subtle hover:text-brand"
             >
-              <Plus size={12} aria-hidden="true" />
+              <Plus size={11} aria-hidden="true" />
               추가
             </button>
           </div>
-          <div className="mt-1.5 flex flex-wrap justify-center gap-1.5">
+          <div className={'mt-1 flex flex-wrap gap-1.5 ' + align}>
             {visibleCommands.map((command) => (
               <CommandChip key={command.id} command={command} onSelect={handleSelectCommand} />
             ))}
-          </div>
-          {savedCommands.length > VISIBLE_LIMIT ? (
-            <button
-              type="button"
-              onClick={() => setCommandsExpanded((open) => !open)}
-              className="mt-1.5 text-[11px] font-medium text-slate-400 transition-colors hover:text-brand"
-            >
-              {commandsExpanded ? '접기' : `더 보기 (${savedCommands.length - VISIBLE_LIMIT})`}
-            </button>
-          ) : null}
-        </div>
-
-        {allSearches.length > 0 ? (
-          <div>
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-[11px] font-medium text-slate-400">저장 검색</p>
+            {savedCommands.length > VISIBLE_LIMIT ? (
               <button
                 type="button"
-                onClick={() => setSearchModalOpen(true)}
-                className="inline-flex items-center gap-0.5 text-[11px] font-medium text-slate-500 transition-colors hover:text-brand"
+                onClick={() => setCommandsExpanded((open) => !open)}
+                className="chip-pill text-slate-400"
+                aria-label={commandsExpanded ? '저장 명령 접기' : '저장 명령 더 보기'}
               >
-                <Plus size={12} aria-hidden="true" />
-                추가
-              </button>
-            </div>
-            <div className="mt-1.5 flex flex-wrap justify-center gap-1.5">
-              {visibleSearches.map((search) => (
-                <SearchChip key={search.id} search={search} onSelect={handleSelectSearch} />
-              ))}
-            </div>
-            {allSearches.length > VISIBLE_LIMIT ? (
-              <button
-                type="button"
-                onClick={() => setSearchesExpanded((open) => !open)}
-                className="mt-1.5 text-[11px] font-medium text-slate-400 transition-colors hover:text-brand"
-              >
-                {searchesExpanded ? '접기' : `더 보기 (${allSearches.length - VISIBLE_LIMIT})`}
+                {commandsExpanded ? '접기' : '···'}
               </button>
             ) : null}
           </div>
-        ) : (
+        </div>
+
+        <div>
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] font-medium text-slate-400">저장 검색</p>
+            <p className="text-[10px] font-medium text-slate-400">저장 검색</p>
             <button
               type="button"
               onClick={() => setSearchModalOpen(true)}
-              className="inline-flex items-center gap-0.5 text-[11px] font-medium text-slate-500 transition-colors hover:text-brand"
+              className="inline-flex items-center gap-0.5 text-[10px] font-medium text-slate-500 motion-subtle hover:text-brand"
             >
-              <Plus size={12} aria-hidden="true" />
-              검색어 저장
+              <Plus size={11} aria-hidden="true" />
+              {allSearches.length > 0 ? '추가' : '검색어 저장'}
             </button>
           </div>
-        )}
+          {allSearches.length > 0 ? (
+            <div className={'mt-1 flex flex-wrap gap-1.5 ' + align}>
+              {visibleSearches.map((search) => (
+                <SearchChip key={search.id} search={search} onSelect={handleSelectSearch} />
+              ))}
+              {allSearches.length > VISIBLE_LIMIT ? (
+                <button
+                  type="button"
+                  onClick={() => setSearchesExpanded((open) => !open)}
+                  className="chip-pill text-slate-400"
+                  aria-label={searchesExpanded ? '저장 검색 접기' : '저장 검색 더 보기'}
+                >
+                  {searchesExpanded ? '접기' : '···'}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <AddCommandModal

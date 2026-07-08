@@ -2,7 +2,7 @@ import type { AssistantSnapshot } from '../../services/assistantDataService'
 
 const BASE_QUERIES = ['오늘 밥 뭐야?', '오늘 할 일 알려줘', '직원 연락처 찾기']
 
-const MAX_SUGGESTED_QUERIES = 6
+const MAX_SUGGESTED_QUERIES = 4
 
 export function buildSuggestedAssistantQueries(
   snapshot: AssistantSnapshot | null,
