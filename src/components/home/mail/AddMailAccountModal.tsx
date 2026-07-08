@@ -3,8 +3,12 @@ import { X } from 'lucide-react'
 import type { MailProvider } from '../../../lib/mailHubMockData'
 import {
   DEFAULT_WEBMAIL_URL,
+  PROVIDER_EMAIL_DOMAIN,
   createMailAccount,
-  isValidEmail,
+  emailInputForProviderChange,
+  extractEmailLocalPart,
+  resolveMailAccountEmail,
+  usesLocalPartEmailInput,
   type NewMailAccountInput,
 } from '../../../lib/mailHubStorage'
 
@@ -27,13 +31,42 @@ const EMPTY_FORM = {
   webmailUrl: DEFAULT_WEBMAIL_URL.gmail ?? '',
 }
 
+const FULL_EMAIL_PLACEHOLDER: Partial<Record<MailProvider, string>> = {
+  company: 'employee@company.com',
+  custom: 'example@domain.com',
+}
+
+function parseLocalPartInput(provider: MailProvider, value: string): { localPart: string; error: string | null } {
+  const domain = PROVIDER_EMAIL_DOMAIN[provider]
+  if (!domain) return { localPart: value, error: null }
+
+  if (!value.includes('@')) {
+    return { localPart: value, error: null }
+  }
+
+  const lower = value.toLowerCase()
+  if (lower.endsWith(`@${domain}`)) {
+    return { localPart: value.slice(0, -(domain.length + 1)), error: null }
+  }
+
+  return {
+    localPart: extractEmailLocalPart(value),
+    error:
+      provider === 'gmail'
+        ? 'Gmail 계정은 @gmail.com 주소만 사용할 수 있습니다.'
+        : 'Naver 계정은 @naver.com 주소만 사용할 수 있습니다.',
+  }
+}
+
 export default function AddMailAccountModal({ open, onClose, onSave }: AddMailAccountModalProps) {
   const [form, setForm] = useState(EMPTY_FORM)
+  const [emailError, setEmailError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!open) return
 
     setForm(EMPTY_FORM)
+    setEmailError(null)
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') onClose()
@@ -50,29 +83,49 @@ export default function AddMailAccountModal({ open, onClose, onSave }: AddMailAc
 
   if (!open) return null
 
-  const canSave = isValidEmail(form.email)
+  const resolvedEmail = resolveMailAccountEmail(form.provider, form.email)
+  const canSave = resolvedEmail.valid && !emailError
 
   function handleProviderChange(provider: MailProvider) {
     const defaultUrl = DEFAULT_WEBMAIL_URL[provider] ?? ''
     setForm((current) => ({
       ...current,
       provider,
+      email: emailInputForProviderChange(current.provider, provider, current.email),
       webmailUrl: defaultUrl,
     }))
+    setEmailError(null)
+  }
+
+  function handleEmailChange(value: string) {
+    if (usesLocalPartEmailInput(form.provider)) {
+      const { localPart, error } = parseLocalPartInput(form.provider, value)
+      setForm((current) => ({ ...current, email: localPart }))
+      setEmailError(error)
+      return
+    }
+
+    setForm((current) => ({ ...current, email: value }))
+    setEmailError(null)
   }
 
   function handleSave() {
-    if (!canSave) return
+    if (!canSave || !resolvedEmail.valid) return
 
     const input: NewMailAccountInput = {
       provider: form.provider,
-      email: form.email.trim(),
+      email: resolvedEmail.email,
       webmailUrl: form.webmailUrl.trim() || undefined,
     }
 
     onSave(createMailAccount(input))
     onClose()
   }
+
+  const usesLocalPart = usesLocalPartEmailInput(form.provider)
+  const providerDomain = PROVIDER_EMAIL_DOMAIN[form.provider]
+  const displayError =
+    emailError ?? (resolvedEmail.valid ? null : form.email.trim() ? resolvedEmail.error : null)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -121,13 +174,42 @@ export default function AddMailAccountModal({ open, onClose, onSave }: AddMailAc
 
           <label className="block">
             <span className="mb-1 block text-xs font-medium text-slate-600">이메일 주소</span>
-            <input
-              type="email"
-              value={form.email}
-              onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
-              placeholder="example@gmail.com"
-              className="h-9 w-full rounded-btn border border-line/70 bg-canvas/50 px-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/10"
-            />
+            {usesLocalPart && providerDomain ? (
+              <div
+                className={
+                  'flex h-9 items-center overflow-hidden rounded-btn border bg-canvas/50 ' +
+                  (displayError
+                    ? 'border-danger/40 focus-within:border-danger/40 focus-within:ring-2 focus-within:ring-danger/10'
+                    : 'border-line/70 focus-within:border-brand/30 focus-within:ring-2 focus-within:ring-brand/10')
+                }
+              >
+                <input
+                  type="text"
+                  value={form.email}
+                  onChange={(event) => handleEmailChange(event.target.value)}
+                  placeholder="example"
+                  autoComplete="username"
+                  className="min-w-0 flex-1 bg-transparent px-3 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
+                />
+                <span className="shrink-0 pr-3 text-sm text-slate-400">@{providerDomain}</span>
+              </div>
+            ) : (
+              <input
+                type="email"
+                value={form.email}
+                onChange={(event) => handleEmailChange(event.target.value)}
+                placeholder={FULL_EMAIL_PLACEHOLDER[form.provider] ?? 'example@domain.com'}
+                className={
+                  'h-9 w-full rounded-btn border bg-canvas/50 px-3 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 ' +
+                  (displayError
+                    ? 'border-danger/40 focus:border-danger/40 focus:ring-danger/10'
+                    : 'border-line/70 focus:border-brand/30 focus:ring-brand/10')
+                }
+              />
+            )}
+            {displayError ? (
+              <p className="mt-1 text-xs text-danger">{displayError}</p>
+            ) : null}
           </label>
 
           <label className="block">

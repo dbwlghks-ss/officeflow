@@ -46,6 +46,102 @@ export const DEFAULT_WEBMAIL_URL: Partial<Record<MailProvider, string>> = {
   naver: 'https://mail.naver.com/',
 }
 
+export const PROVIDER_EMAIL_DOMAIN: Partial<Record<MailProvider, string>> = {
+  gmail: 'gmail.com',
+  naver: 'naver.com',
+}
+
+export function usesLocalPartEmailInput(provider: MailProvider): boolean {
+  return provider === 'gmail' || provider === 'naver'
+}
+
+export function extractEmailLocalPart(value: string): string {
+  const trimmed = value.trim()
+  if (!trimmed.includes('@')) return trimmed
+  return trimmed.split('@')[0] ?? ''
+}
+
+export function emailInputForProviderChange(
+  currentProvider: MailProvider,
+  nextProvider: MailProvider,
+  email: string,
+): string {
+  const trimmed = email.trim()
+  if (!trimmed) return ''
+
+  const currentUsesLocal = usesLocalPartEmailInput(currentProvider)
+  const nextUsesLocal = usesLocalPartEmailInput(nextProvider)
+
+  if (currentUsesLocal && nextUsesLocal) {
+    const domain = PROVIDER_EMAIL_DOMAIN[currentProvider]
+    if (domain && trimmed.toLowerCase().endsWith(`@${domain}`)) {
+      return trimmed.slice(0, -(domain.length + 1))
+    }
+    return extractEmailLocalPart(trimmed)
+  }
+
+  if (currentUsesLocal && !nextUsesLocal) {
+    const resolved = resolveMailAccountEmail(currentProvider, trimmed)
+    return resolved.valid ? resolved.email : trimmed
+  }
+
+  if (!currentUsesLocal && nextUsesLocal) {
+    return extractEmailLocalPart(trimmed)
+  }
+
+  return trimmed
+}
+
+export type MailAccountEmailValidation =
+  | { valid: true; email: string }
+  | { valid: false; error: string }
+
+export function resolveMailAccountEmail(
+  provider: MailProvider,
+  input: string,
+): MailAccountEmailValidation {
+  const trimmed = input.trim()
+  const domain = PROVIDER_EMAIL_DOMAIN[provider]
+
+  if (domain) {
+    if (!trimmed) {
+      return { valid: false, error: `${provider === 'gmail' ? 'Gmail' : 'Naver'} 아이디를 입력해 주세요.` }
+    }
+
+    if (trimmed.includes('@')) {
+      const lower = trimmed.toLowerCase()
+      if (!isValidEmail(lower) || !lower.endsWith(`@${domain}`)) {
+        return {
+          valid: false,
+          error:
+            provider === 'gmail'
+              ? 'Gmail 계정은 @gmail.com 주소만 사용할 수 있습니다.'
+              : 'Naver 계정은 @naver.com 주소만 사용할 수 있습니다.',
+        }
+      }
+      return { valid: true, email: lower }
+    }
+
+    if (!/^[^\s@]+$/.test(trimmed)) {
+      return {
+        valid: false,
+        error:
+          provider === 'gmail'
+            ? 'Gmail 계정은 @gmail.com 주소만 사용할 수 있습니다.'
+            : 'Naver 계정은 @naver.com 주소만 사용할 수 있습니다.',
+      }
+    }
+
+    return { valid: true, email: `${trimmed}@${domain}` }
+  }
+
+  if (!isValidEmail(trimmed)) {
+    return { valid: false, error: '유효한 이메일 주소를 입력해 주세요.' }
+  }
+
+  return { valid: true, email: trimmed }
+}
+
 type LegacyMailAccount = MailAccountData & { providerLabel?: string }
 
 const KNOWN_DOMAIN_LABELS: Record<string, string> = {
