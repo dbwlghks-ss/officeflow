@@ -122,15 +122,15 @@ export default function BriefBentoBlock({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-white/65">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-white/70">
         <span>{resolved.title}</span>
-        <span className="mx-1.5 font-normal text-white/35">·</span>
-        <span className="normal-case tracking-normal text-white/55">{timeLabel}</span>
+        <span className="mx-1.5 font-normal text-white/45">·</span>
+        <span className="normal-case tracking-normal text-white/70">{timeLabel}</span>
       </p>
       <h2 className="mt-2 text-lg font-bold leading-snug tracking-tight text-white lg:text-xl">
         오늘 업무를 한눈에 확인하세요.
       </h2>
-      <div className="mt-1.5 line-clamp-2 space-y-0.5 text-sm leading-relaxed text-white/75 lg:mt-2">
+      <div className="mt-1.5 line-clamp-2 space-y-0.5 text-sm leading-relaxed text-white/80 lg:mt-2">
         {summaryCopy.lines.map((line) => (
           <p key={line}>{line}</p>
         ))}

@@ -29,7 +29,7 @@ export default function BriefSummaryList({
   return (
     <div
       className={
-        (onBrand ? 'border-t border-white/20 pt-3' : 'border-t border-line/70 pt-3') +
+        (onBrand ? 'border-t border-white/18 pt-3' : 'border-t border-line/70 pt-3') +
         (className ? ` ${className}` : '')
       }
       aria-label="오늘의 업무 요약"
@@ -43,7 +43,7 @@ export default function BriefSummaryList({
               key={item.id}
               className={
                 onBrand
-                  ? 'rounded-btn border border-white/15 bg-white/10 px-2 py-1.5 backdrop-blur-[1px]'
+                  ? 'rounded-btn border border-white/[0.16] bg-white/[0.12] px-2 py-1.5 transition-colors hover:bg-white/[0.14]'
                   : 'rounded-btn border border-line/70 bg-canvas/40 px-3 py-2.5'
               }
             >
@@ -51,7 +51,7 @@ export default function BriefSummaryList({
                 <Icon
                   size={13}
                   strokeWidth={1.75}
-                  className={'shrink-0 ' + (onBrand ? 'text-white/70' : 'text-slate-400')}
+                  className={'shrink-0 ' + (onBrand ? 'text-white/65' : 'text-slate-400')}
                   aria-hidden="true"
                 />
                 <span
