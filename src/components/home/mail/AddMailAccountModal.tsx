@@ -1,26 +1,41 @@
-import { useEffect } from 'react'
-import { Building2, Mail, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { X } from 'lucide-react'
 import type { MailProvider } from '../../../lib/mailHubMockData'
 import {
-  MAIL_CONNECT_PREVIEW_NOTICE,
-  MAIL_PROVIDER_OPTIONS,
-} from '../../../lib/mailProviderOptions'
+  DEFAULT_WEBMAIL_URL,
+  createMailAccount,
+  isValidEmail,
+  type NewMailAccountInput,
+} from '../../../lib/mailHubStorage'
 
 type AddMailAccountModalProps = {
   open: boolean
-  selectedProvider: MailProvider | null
-  onSelectProvider: (provider: MailProvider) => void
   onClose: () => void
+  onSave: (account: ReturnType<typeof createMailAccount>) => void
 }
 
-export default function AddMailAccountModal({
-  open,
-  selectedProvider,
-  onSelectProvider,
-  onClose,
-}: AddMailAccountModalProps) {
+const PROVIDER_OPTIONS: { id: MailProvider; label: string }[] = [
+  { id: 'gmail', label: 'Gmail' },
+  { id: 'naver', label: 'Naver' },
+  { id: 'company', label: 'Company Mail' },
+  { id: 'custom', label: 'Custom' },
+]
+
+const EMPTY_FORM = {
+  provider: 'gmail' as MailProvider,
+  label: '',
+  email: '',
+  webmailUrl: DEFAULT_WEBMAIL_URL.gmail ?? '',
+  unreadCount: 0,
+}
+
+export default function AddMailAccountModal({ open, onClose, onSave }: AddMailAccountModalProps) {
+  const [form, setForm] = useState(EMPTY_FORM)
+
   useEffect(() => {
     if (!open) return
+
+    setForm(EMPTY_FORM)
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') onClose()
@@ -37,6 +52,33 @@ export default function AddMailAccountModal({
 
   if (!open) return null
 
+  const canSave = isValidEmail(form.email) && form.label.trim().length > 0
+
+  function handleProviderChange(provider: MailProvider) {
+    const defaultUrl = DEFAULT_WEBMAIL_URL[provider] ?? ''
+    setForm((current) => ({
+      ...current,
+      provider,
+      webmailUrl: defaultUrl,
+      label: current.label || PROVIDER_OPTIONS.find((option) => option.id === provider)?.label || '',
+    }))
+  }
+
+  function handleSave() {
+    if (!canSave) return
+
+    const input: NewMailAccountInput = {
+      provider: form.provider,
+      label: form.label.trim(),
+      email: form.email.trim(),
+      webmailUrl: form.webmailUrl.trim() || undefined,
+      unreadCount: Math.max(0, form.unreadCount),
+    }
+
+    onSave(createMailAccount(input))
+    onClose()
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
@@ -50,7 +92,7 @@ export default function AddMailAccountModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-mail-account-title"
-        className="relative w-full max-w-md rounded-modal border border-line bg-surface p-6 shadow-pop"
+        className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-modal border border-line bg-surface p-6 shadow-pop"
       >
         <button
           type="button"
@@ -64,48 +106,75 @@ export default function AddMailAccountModal({
         <h2 id="add-mail-account-title" className="text-lg font-semibold tracking-tight text-slate-900">
           메일 계정 추가
         </h2>
-        <p className="mt-1 text-sm text-slate-500">연동할 메일 서비스를 선택하세요.</p>
+        <p className="mt-1 text-sm text-slate-500">계정 정보를 입력해 Mail Hub에 추가하세요.</p>
 
-        <ul className="mt-4 flex list-none flex-col gap-2 p-0">
-          {MAIL_PROVIDER_OPTIONS.map((option) => {
-            const Icon = option.id === 'company' ? Building2 : Mail
-            const isSelected = selectedProvider === option.id
+        <div className="mt-4 space-y-3">
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-slate-600">메일 서비스</span>
+            <select
+              value={form.provider}
+              onChange={(event) => handleProviderChange(event.target.value as MailProvider)}
+              className="h-9 w-full rounded-btn border border-line/70 bg-canvas/50 px-3 text-sm text-slate-700 focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/10"
+            >
+              {PROVIDER_OPTIONS.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
 
-            return (
-              <li key={option.id}>
-                <button
-                  type="button"
-                  onClick={() => onSelectProvider(option.id)}
-                  className={
-                    'flex w-full items-start gap-3 rounded-btn border px-3 py-3 text-left transition-colors ' +
-                    (isSelected
-                      ? 'border-brand/30 bg-brand-light/40'
-                      : 'border-line bg-canvas/40 hover:border-slate-300 hover:bg-canvas')
-                  }
-                >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface text-slate-500">
-                    <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-slate-900">{option.name}</p>
-                      <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] font-medium text-slate-500">
-                        {option.statusBadge}
-                      </span>
-                    </div>
-                    <p className="mt-0.5 text-xs text-slate-500">{option.description}</p>
-                  </div>
-                </button>
-              </li>
-            )
-          })}
-        </ul>
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-slate-600">계정 이름</span>
+            <input
+              type="text"
+              value={form.label}
+              onChange={(event) => setForm((current) => ({ ...current, label: event.target.value }))}
+              placeholder="예: 개인 Gmail, 회사 메일"
+              className="h-9 w-full rounded-btn border border-line/70 bg-canvas/50 px-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/10"
+            />
+          </label>
 
-        {selectedProvider ? (
-          <p className="mt-4 whitespace-pre-line rounded-btn border border-line/70 bg-canvas/60 px-3 py-2.5 text-sm leading-relaxed text-slate-600">
-            {MAIL_CONNECT_PREVIEW_NOTICE}
-          </p>
-        ) : null}
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-slate-600">이메일 주소</span>
+            <input
+              type="email"
+              value={form.email}
+              onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
+              placeholder="example@gmail.com"
+              className="h-9 w-full rounded-btn border border-line/70 bg-canvas/50 px-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/10"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-slate-600">웹메일 주소</span>
+            <input
+              type="url"
+              value={form.webmailUrl}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, webmailUrl: event.target.value }))
+              }
+              placeholder="https://mail.google.com/mail/"
+              className="h-9 w-full rounded-btn border border-line/70 bg-canvas/50 px-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/10"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-slate-600">안 읽은 메일 수</span>
+            <input
+              type="number"
+              min={0}
+              value={form.unreadCount}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  unreadCount: Math.max(0, Number(event.target.value) || 0),
+                }))
+              }
+              className="h-9 w-full rounded-btn border border-line/70 bg-canvas/50 px-3 text-sm text-slate-700 focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/10"
+            />
+          </label>
+        </div>
 
         <div className="mt-5 flex items-center justify-end gap-2">
           <button
@@ -113,14 +182,18 @@ export default function AddMailAccountModal({
             onClick={onClose}
             className="rounded-btn border border-line bg-surface px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-canvas"
           >
-            닫기
+            취소
           </button>
           <button
             type="button"
-            disabled
-            className="cursor-not-allowed rounded-btn bg-brand/40 px-4 py-2 text-sm font-medium text-white"
+            disabled={!canSave}
+            onClick={handleSave}
+            className={
+              'rounded-btn px-4 py-2 text-sm font-medium text-white transition-colors ' +
+              (canSave ? 'bg-brand hover:bg-brand-hover' : 'cursor-not-allowed bg-brand/40')
+            }
           >
-            연동 준비 중
+            저장
           </button>
         </div>
       </div>

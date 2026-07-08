@@ -1,33 +1,35 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
-import type { MailHubData, MailProvider } from '../../../lib/mailHubMockData'
-import { getMailHubData } from '../../../lib/mailHubMockData'
+import type { MailAccountData } from '../../../lib/mailHubMockData'
+import {
+  addMailAccount,
+  loadMailAccounts,
+  markAccountRead,
+  removeMailAccount,
+  saveMailAccounts,
+} from '../../../lib/mailHubStorage'
 import AddMailAccountModal from './AddMailAccountModal'
 import MailAccountItem from './MailAccountItem'
-import MailPreviewItem from './MailPreviewItem'
 
-const MAX_MAIL_PREVIEWS = 2
-
-type MailHubPanelProps = {
-  /** Replace with API-driven mail hub data later. */
-  data?: Partial<MailHubData>
-}
-
-export default function MailHubPanel({ data }: MailHubPanelProps) {
-  const { accounts, previews } = getMailHubData(data)
-  const visiblePreviews = previews.slice(0, MAX_MAIL_PREVIEWS)
-  const hasMorePreviews = previews.length > MAX_MAIL_PREVIEWS
+export default function MailHubPanel() {
+  const [accounts, setAccounts] = useState<MailAccountData[]>(() => loadMailAccounts())
   const [modalOpen, setModalOpen] = useState(false)
-  const [selectedProvider, setSelectedProvider] = useState<MailProvider | null>(null)
 
-  function openModal() {
-    setSelectedProvider(null)
-    setModalOpen(true)
+  function persist(nextAccounts: MailAccountData[]) {
+    setAccounts(nextAccounts)
+    saveMailAccounts(nextAccounts)
   }
 
-  function closeModal() {
-    setModalOpen(false)
-    setSelectedProvider(null)
+  function handleAddAccount(account: MailAccountData) {
+    persist(addMailAccount(accounts, account))
+  }
+
+  function handleMarkRead(accountId: string) {
+    persist(markAccountRead(accounts, accountId))
+  }
+
+  function handleDelete(accountId: string) {
+    persist(removeMailAccount(accounts, accountId))
   }
 
   return (
@@ -39,35 +41,41 @@ export default function MailHubPanel({ data }: MailHubPanelProps) {
         <h2 className="mt-1.5 text-base font-bold leading-snug tracking-tight text-slate-900 lg:text-lg">
           메일을 한곳에서 확인하세요.
         </h2>
+        <p className="mt-1 text-[10px] leading-relaxed text-slate-500/90">
+          현재는 수동 관리 모드입니다. 실제 메일 연동은 준비 중입니다.
+        </p>
 
-        <div className="mt-2 min-h-0 flex-1 overflow-hidden">
+        <div className="mt-2 min-h-0 flex-1 overflow-y-auto scrollbar-slim">
           <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500/80">
             연결된 계정
           </p>
-          <ul className="m-0 flex list-none flex-col gap-1 p-0">
-            {accounts.map((account) => (
-              <MailAccountItem key={account.id} account={account} variant="accent" compact />
-            ))}
-          </ul>
 
-          <p className="mb-1 mt-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500/80">
-            최근 메일
-          </p>
-          <ul className="m-0 max-h-[72px] list-none overflow-y-auto p-0 scrollbar-slim">
-            {visiblePreviews.map((mail) => (
-              <MailPreviewItem key={mail.id} mail={mail} variant="accent" compact />
-            ))}
-          </ul>
-          {hasMorePreviews ? (
-            <p className="mt-1 text-center text-[11px] font-medium text-slate-500/80">
-              전체 메일 보기 →
-            </p>
-          ) : null}
+          {accounts.length === 0 ? (
+            <div className="rounded-btn border border-dashed border-white/60 bg-white/40 px-3 py-4 text-center">
+              <p className="text-xs font-medium text-slate-700">등록된 메일 계정이 없습니다.</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
+                메일 계정을 추가하면 이곳에서 한눈에 확인할 수 있습니다.
+              </p>
+            </div>
+          ) : (
+            <ul className="m-0 flex list-none flex-col gap-1 p-0">
+              {accounts.map((account) => (
+                <MailAccountItem
+                  key={account.id}
+                  account={account}
+                  variant="accent"
+                  compact
+                  onMarkRead={handleMarkRead}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </ul>
+          )}
         </div>
 
         <button
           type="button"
-          onClick={openModal}
+          onClick={() => setModalOpen(true)}
           className="mt-2 inline-flex w-full shrink-0 items-center justify-center gap-1.5 rounded-btn border border-brand/15 bg-white/70 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-brand/30 hover:bg-white"
         >
           <Plus size={15} strokeWidth={1.75} aria-hidden="true" />
@@ -77,9 +85,8 @@ export default function MailHubPanel({ data }: MailHubPanelProps) {
 
       <AddMailAccountModal
         open={modalOpen}
-        selectedProvider={selectedProvider}
-        onSelectProvider={setSelectedProvider}
-        onClose={closeModal}
+        onClose={() => setModalOpen(false)}
+        onSave={handleAddAccount}
       />
     </>
   )

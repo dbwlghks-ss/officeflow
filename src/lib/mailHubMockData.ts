@@ -1,18 +1,29 @@
 /** Extensible provider types for future Gmail API / Microsoft Graph / IMAP integrations. */
-export type MailProvider = 'gmail' | 'naver' | 'outlook' | 'company' | 'imap'
+export type MailProvider = 'gmail' | 'naver' | 'outlook' | 'company' | 'custom' | 'imap'
 
 export type MailAccountStatus = 'connected' | 'pending' | 'error'
+
+export type MailAccountSource = 'default' | 'custom' | 'synced'
+
+export type MailSyncStatus = 'manual' | 'connected' | 'error'
 
 export type MailAccountData = {
   id: string
   provider: MailProvider
-  providerLabel: string
+  label: string
   email: string
-  unreadCount: number | null
+  unreadCount: number
   status: MailAccountStatus
   statusLabel?: string
   /** Provider webmail URL — opens in a new tab when the account row is clicked. */
   webmailUrl?: string
+  source: MailAccountSource
+  createdAt: string
+  updatedAt?: string
+  /** Reserved for future provider sync integrations. */
+  providerAccountId?: string
+  lastSyncedAt?: string
+  syncStatus?: MailSyncStatus
 }
 
 export type MailPreviewData = {
@@ -33,99 +44,36 @@ export type MailHubData = {
   previews: MailPreviewData[]
 }
 
-export const MOCK_MAIL_HUB: MailHubData = {
-  accounts: [
-    {
-      id: 'mail-gmail',
-      provider: 'gmail',
-      providerLabel: 'Gmail',
-      email: 'sample@gmail.com',
-      unreadCount: 3,
-      status: 'connected',
-      webmailUrl: 'https://mail.google.com/mail/',
-    },
-    {
-      id: 'mail-naver',
-      provider: 'naver',
-      providerLabel: 'Naver',
-      email: 'sample@naver.com',
-      unreadCount: 1,
-      status: 'connected',
-      webmailUrl: 'https://mail.naver.com/',
-    },
-    {
-      id: 'mail-company',
-      provider: 'company',
-      providerLabel: 'Company Mail',
-      email: 'employee@company.com',
-      unreadCount: null,
-      status: 'pending',
-      statusLabel: '관리자 설정 필요',
-    },
-  ],
-  previews: [
-    {
-      id: 'preview-1',
-      accountId: 'mail-gmail',
-      provider: 'gmail',
-      providerLabel: 'Gmail',
-      from: 'HR Team',
-      subject: '7월 사내 교육 일정 안내',
-      preview: '이번 달 필수 교육 일정과 신청 방법을 공유드립니다.',
-      receivedAt: '2026-07-07T14:20:00+09:00',
-      timeLabel: '10분 전',
-    },
-    {
-      id: 'preview-2',
-      accountId: 'mail-naver',
-      provider: 'naver',
-      providerLabel: 'Naver',
-      from: '김민수',
-      subject: '품질회의 자료 검토 요청',
-      preview: '첨부된 회의 자료 확인 부탁드립니다.',
-      receivedAt: '2026-07-07T13:05:00+09:00',
-      timeLabel: '1시간 전',
-    },
-    {
-      id: 'preview-3',
-      accountId: 'mail-gmail',
-      provider: 'gmail',
-      providerLabel: 'Gmail',
-      from: 'OfficeFlow',
-      subject: '식수 신청 마감 알림',
-      preview: '내일 점심 식수 신청 마감이 오늘 17:00입니다.',
-      receivedAt: '2026-07-07T11:30:00+09:00',
-      timeLabel: '3시간 전',
-    },
-    {
-      id: 'preview-4',
-      accountId: 'mail-company',
-      provider: 'company',
-      providerLabel: 'Company',
-      from: '총무팀',
-      subject: '사내 보안 점검 안내',
-      preview: '금주 금요일 야간 보안 점검이 예정되어 있습니다.',
-      receivedAt: '2026-07-07T09:15:00+09:00',
-      timeLabel: '오늘 09:15',
-    },
-    {
-      id: 'preview-5',
-      accountId: 'mail-naver',
-      provider: 'naver',
-      providerLabel: 'Naver',
-      from: '설문 시스템',
-      subject: '안전교육 설문 참여 요청',
-      preview: '참여 기한이 오늘까지입니다.',
-      receivedAt: '2026-07-06T18:40:00+09:00',
-      timeLabel: '어제',
-    },
-  ],
-}
+/** Legacy mock previews — used by Assistant search until real mail sync exists. */
+export const MOCK_MAIL_PREVIEWS: MailPreviewData[] = [
+  {
+    id: 'preview-1',
+    accountId: 'mail-gmail',
+    provider: 'gmail',
+    providerLabel: 'Gmail',
+    from: 'HR Team',
+    subject: '7월 사내 교육 일정 안내',
+    preview: '이번 달 필수 교육 일정과 신청 방법을 공유드립니다.',
+    receivedAt: '2026-07-07T14:20:00+09:00',
+    timeLabel: '10분 전',
+  },
+  {
+    id: 'preview-2',
+    accountId: 'mail-naver',
+    provider: 'naver',
+    providerLabel: 'Naver',
+    from: '김민수',
+    subject: '품질회의 자료 검토 요청',
+    preview: '첨부된 회의 자료 확인 부탁드립니다.',
+    receivedAt: '2026-07-07T13:05:00+09:00',
+    timeLabel: '1시간 전',
+  },
+]
 
 export function getMailHubData(override?: Partial<MailHubData>): MailHubData {
   return {
-    accounts: override?.accounts ?? MOCK_MAIL_HUB.accounts,
-    previews: override?.previews ?? MOCK_MAIL_HUB.previews,
+    accounts: override?.accounts ?? [],
+    previews: override?.previews ?? MOCK_MAIL_PREVIEWS,
   }
 }
 
@@ -134,5 +82,6 @@ export const MAIL_PROVIDER_BADGE_CLASS: Record<MailProvider, string> = {
   naver: 'bg-emerald-50 text-emerald-700',
   outlook: 'bg-sky-50 text-sky-700',
   company: 'bg-brand-light text-brand',
+  custom: 'bg-slate-100 text-slate-600',
   imap: 'bg-slate-100 text-slate-600',
 }
