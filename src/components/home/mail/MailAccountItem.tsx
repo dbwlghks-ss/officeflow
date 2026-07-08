@@ -1,12 +1,14 @@
 import { useState } from 'react'
-import { ExternalLink, Mail, Trash2 } from 'lucide-react'
+import { ExternalLink, Mail, Pencil, Trash2 } from 'lucide-react'
 import type { MailAccountData } from '../../../lib/mailHubMockData'
+import { getAccountDisplayLabel } from '../../../lib/mailHubStorage'
 
 type MailAccountItemProps = {
   account: MailAccountData
   variant?: 'default' | 'accent'
   compact?: boolean
   onMarkRead?: (accountId: string) => void
+  onEdit?: (accountId: string) => void
   onDelete?: (accountId: string) => void
 }
 
@@ -19,9 +21,11 @@ export default function MailAccountItem({
   variant = 'default',
   compact = false,
   onMarkRead,
+  onEdit,
   onDelete,
 }: MailAccountItemProps) {
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const displayLabel = getAccountDisplayLabel(account)
   const isPending = account.status === 'pending'
   const canOpen = Boolean(account.webmailUrl) && !isPending
   const onAccent = variant === 'accent'
@@ -65,7 +69,7 @@ export default function MailAccountItem({
               type="button"
               onClick={handleOpen}
               className="flex min-w-0 flex-1 items-center gap-2 text-left transition-colors hover:opacity-90"
-              aria-label={`${account.label} 메일함 새 탭에서 열기`}
+              aria-label={`${displayLabel} 메일함 새 탭에서 열기`}
               title="메일함 열기"
             >
               <AccountMeta account={account} showExternal />
@@ -98,10 +102,24 @@ export default function MailAccountItem({
               <span className="px-1 text-[10px] font-medium text-slate-400">확인 완료</span>
             )}
 
+            {onEdit ? (
+              <button
+                type="button"
+                aria-label={`${displayLabel} 수정`}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onEdit(account.id)
+                }}
+                className="grid h-6 w-6 place-items-center rounded-md text-slate-400 opacity-0 transition-opacity hover:bg-white/80 hover:text-brand group-hover:opacity-100"
+              >
+                <Pencil size={12} strokeWidth={1.75} aria-hidden="true" />
+              </button>
+            ) : null}
+
             {onDelete ? (
               <button
                 type="button"
-                aria-label={`${account.label} 삭제`}
+                aria-label={`${displayLabel} 삭제`}
                 onClick={(event) => {
                   event.stopPropagation()
                   setConfirmDelete(true)
@@ -126,6 +144,7 @@ function AccountMeta({
   showExternal: boolean
 }) {
   const isPending = account.status === 'pending'
+  const displayLabel = getAccountDisplayLabel(account)
 
   return (
     <>
@@ -135,7 +154,7 @@ function AccountMeta({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate text-xs font-semibold text-slate-900">{account.label}</p>
+          <p className="truncate text-xs font-semibold text-slate-900">{displayLabel}</p>
           {isPending ? (
             <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">
               {account.statusLabel ?? '연동 대기'}

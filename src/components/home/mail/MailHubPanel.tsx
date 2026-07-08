@@ -7,13 +7,19 @@ import {
   markAccountRead,
   removeMailAccount,
   saveMailAccounts,
+  updateMailAccount,
 } from '../../../lib/mailHubStorage'
 import AddMailAccountModal from './AddMailAccountModal'
 import MailAccountItem from './MailAccountItem'
 
+type ModalState =
+  | { open: false }
+  | { open: true; mode: 'add' }
+  | { open: true; mode: 'edit'; account: MailAccountData }
+
 export default function MailHubPanel() {
   const [accounts, setAccounts] = useState<MailAccountData[]>(() => loadMailAccounts())
-  const [modalOpen, setModalOpen] = useState(false)
+  const [modal, setModal] = useState<ModalState>({ open: false })
 
   function persist(nextAccounts: MailAccountData[]) {
     setAccounts(nextAccounts)
@@ -24,12 +30,29 @@ export default function MailHubPanel() {
     persist(addMailAccount(accounts, account))
   }
 
+  function handleUpdateAccount(account: MailAccountData) {
+    persist(
+      updateMailAccount(accounts, account.id, {
+        provider: account.provider,
+        label: account.label,
+        email: account.email,
+        webmailUrl: account.webmailUrl,
+      }),
+    )
+  }
+
   function handleMarkRead(accountId: string) {
     persist(markAccountRead(accounts, accountId))
   }
 
   function handleDelete(accountId: string) {
     persist(removeMailAccount(accounts, accountId))
+  }
+
+  function handleEdit(accountId: string) {
+    const account = accounts.find((item) => item.id === accountId)
+    if (!account) return
+    setModal({ open: true, mode: 'edit', account })
   }
 
   return (
@@ -66,6 +89,7 @@ export default function MailHubPanel() {
                   variant="accent"
                   compact
                   onMarkRead={handleMarkRead}
+                  onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
               ))}
@@ -75,7 +99,7 @@ export default function MailHubPanel() {
 
         <button
           type="button"
-          onClick={() => setModalOpen(true)}
+          onClick={() => setModal({ open: true, mode: 'add' })}
           className="mt-2 inline-flex w-full shrink-0 items-center justify-center gap-1.5 rounded-btn border border-brand/15 bg-white/70 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-brand/30 hover:bg-white"
         >
           <Plus size={15} strokeWidth={1.75} aria-hidden="true" />
@@ -84,9 +108,17 @@ export default function MailHubPanel() {
       </section>
 
       <AddMailAccountModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSave={handleAddAccount}
+        open={modal.open}
+        mode={modal.open ? modal.mode : 'add'}
+        account={modal.open && modal.mode === 'edit' ? modal.account : undefined}
+        onClose={() => setModal({ open: false })}
+        onSave={(account) => {
+          if (modal.open && modal.mode === 'edit') {
+            handleUpdateAccount(account)
+          } else {
+            handleAddAccount(account)
+          }
+        }}
       />
     </>
   )
