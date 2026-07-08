@@ -7,6 +7,7 @@ import { formatKoreanTime, KOREAN_CLOCK_TICK_MS } from '../../lib/dateTime'
 import { useHomeBriefSnapshot } from '../../hooks/useHomeBriefSnapshot'
 import BriefActionPanel from './BriefActionPanel'
 import BriefSummaryList from './BriefSummaryList'
+import BriefTimeWatermark from './BriefTimeWatermark'
 
 type BriefBentoBlockProps = {
   date?: Date
@@ -41,8 +42,9 @@ export default function BriefBentoBlock({
   }, [])
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-white/70">
+    <div className="relative flex h-full min-h-0 flex-col overflow-hidden">
+      <BriefTimeWatermark date={now} />
+      <p className="relative text-[11px] font-semibold uppercase tracking-wider text-white/70">
         <span>{resolved.title}</span>
         <span className="mx-1.5 font-normal text-white/45">·</span>
         <span className="normal-case tracking-normal text-white/70">{timeLabel}</span>
