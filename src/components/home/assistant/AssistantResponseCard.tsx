@@ -8,6 +8,7 @@ type AssistantResponseCardProps = {
   checkedAt?: Date | null
   onAction?: (path: string) => void
   compact?: boolean
+  hero?: boolean
 }
 
 function resolveActions(response: AssistantResponse) {
@@ -23,8 +24,11 @@ export default function AssistantResponseCard({
   checkedAt,
   onAction,
   compact = false,
+  hero = false,
 }: AssistantResponseCardProps) {
   if (!response) {
+    if (hero) return null
+
     return (
       <div
         className={
@@ -43,12 +47,18 @@ export default function AssistantResponseCard({
   return (
     <div
       className={
-        (compact ? 'rounded-btn border p-2.5 ' : 'mt-3 rounded-btn border p-3 ') +
+        (hero
+          ? 'rounded-2xl border p-4 shadow-soft '
+          : compact
+            ? 'rounded-btn border p-2.5 '
+            : 'mt-3 rounded-btn border p-3 ') +
         (isError
           ? 'border-danger/20 bg-red-50/30'
           : isLoading
             ? 'border-line/60 bg-canvas/40'
-            : 'border-line/70 bg-canvas/50')
+            : hero
+              ? 'border-line/60 bg-white/90'
+              : 'border-line/70 bg-canvas/50')
       }
     >
       <div className="flex items-start justify-between gap-2">
@@ -84,7 +94,7 @@ export default function AssistantResponseCard({
         <ul
           className={
             'mt-1.5 list-none space-y-0.5 overflow-y-auto p-0 ' +
-            (compact ? 'max-h-14' : 'max-h-28')
+            (hero ? 'max-h-40' : compact ? 'max-h-14' : 'max-h-28')
           }
         >
           {response.lines.map((line) => (

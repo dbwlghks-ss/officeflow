@@ -7,7 +7,7 @@ export default function HomeHeroGreeting({ dateLabel, greeting }: HomeHeroGreeti
   return (
     <>
       <p className="mb-1 text-sm font-medium text-slate-400">{dateLabel}</p>
-      <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+      <h1 className="text-3xl font-bold tracking-tight text-slate-900 lg:text-4xl">
         {greeting}.
       </h1>
     </>
