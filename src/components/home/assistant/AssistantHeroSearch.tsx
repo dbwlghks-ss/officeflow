@@ -44,13 +44,12 @@ export default function AssistantHeroSearch({ value, onChange, onSubmit }: Assis
           disabled={!value.trim()}
           aria-label="질문 실행"
           className={
-            'inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-sm font-medium text-white ' +
+            'grid h-10 w-10 shrink-0 place-items-center rounded-full text-white ' +
             'bg-gradient-to-r from-[#1648B8] to-[#2F63E6] transition-opacity hover:opacity-95 ' +
-            'disabled:cursor-not-allowed disabled:opacity-40 lg:px-5'
+            'disabled:cursor-not-allowed disabled:opacity-40 lg:h-11 lg:w-11'
           }
         >
-          <span className="hidden sm:inline">실행</span>
-          <ArrowUp size={16} strokeWidth={2} aria-hidden="true" />
+          <ArrowUp size={18} strokeWidth={2} aria-hidden="true" />
         </button>
       </div>
     </form>

@@ -27,11 +27,11 @@ export default function HomePage() {
           className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col overflow-y-auto px-6 py-4 lg:max-h-[calc(100dvh-var(--header-h))] lg:min-h-0 lg:px-8 lg:py-5"
           style={{ ['--header-h' as string]: `${HEADER_HEIGHT_PX}px` }}
         >
-          <div className="home-hero-surface shrink-0 rounded-[28px] px-2 pb-6 pt-2 lg:px-4 lg:pb-7">
+          <div className="home-hero-surface shrink-0 rounded-[28px] px-2 pb-5 pt-2 lg:px-4 lg:pb-6">
             <div className="mx-auto max-w-3xl text-center lg:max-w-4xl">
               <HomeHeroGreeting dateLabel={dateLabel} greeting={brief.greeting} />
             </div>
-            <div className="mt-5 lg:mt-6">
+            <div className="mt-4 lg:mt-5">
               <AskOfficeFlowHero onNavigate={navigate} />
             </div>
           </div>
