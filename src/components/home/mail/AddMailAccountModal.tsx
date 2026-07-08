@@ -25,7 +25,6 @@ const EMPTY_FORM = {
   provider: 'gmail' as MailProvider,
   email: '',
   webmailUrl: DEFAULT_WEBMAIL_URL.gmail ?? '',
-  unreadCount: 0,
 }
 
 export default function AddMailAccountModal({ open, onClose, onSave }: AddMailAccountModalProps) {
@@ -69,7 +68,6 @@ export default function AddMailAccountModal({ open, onClose, onSave }: AddMailAc
       provider: form.provider,
       email: form.email.trim(),
       webmailUrl: form.webmailUrl.trim() || undefined,
-      unreadCount: Math.max(0, form.unreadCount),
     }
 
     onSave(createMailAccount(input))
@@ -142,22 +140,6 @@ export default function AddMailAccountModal({ open, onClose, onSave }: AddMailAc
               }
               placeholder="https://mail.google.com/mail/"
               className="h-9 w-full rounded-btn border border-line/70 bg-canvas/50 px-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/10"
-            />
-          </label>
-
-          <label className="block">
-            <span className="mb-1 block text-xs font-medium text-slate-600">안 읽은 메일 수</span>
-            <input
-              type="number"
-              min={0}
-              value={form.unreadCount}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  unreadCount: Math.max(0, Number(event.target.value) || 0),
-                }))
-              }
-              className="h-9 w-full rounded-btn border border-line/70 bg-canvas/50 px-3 text-sm text-slate-700 focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/10"
             />
           </label>
         </div>

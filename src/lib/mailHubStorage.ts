@@ -127,7 +127,6 @@ export type NewMailAccountInput = {
   provider: MailProvider
   email: string
   webmailUrl?: string
-  unreadCount: number
 }
 
 export function createMailAccount(input: NewMailAccountInput): MailAccountData {
@@ -140,7 +139,7 @@ export function createMailAccount(input: NewMailAccountInput): MailAccountData {
     provider: input.provider,
     label,
     email: input.email.trim(),
-    unreadCount: Math.max(0, input.unreadCount),
+    unreadCount: 0,
     status: hasUrl ? 'connected' : 'pending',
     statusLabel: hasUrl ? undefined : '관리자 설정 필요',
     webmailUrl,
