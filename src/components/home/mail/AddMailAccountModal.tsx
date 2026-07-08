@@ -42,7 +42,7 @@ type FormState = {
 }
 
 const EMPTY_ADD_FORM: FormState = {
-  label: '',
+  label: generateMailAccountLabel('gmail'),
   provider: 'gmail',
   email: '',
   webmailUrl: DEFAULT_WEBMAIL_URL.gmail ?? '',
@@ -124,7 +124,7 @@ export default function AddMailAccountModal({
   if (!open) return null
 
   const resolvedEmail = resolveMailAccountEmail(form.provider, form.email)
-  const labelValid = !isEdit || isValidMailAccountLabel(form.label)
+  const labelValid = isValidMailAccountLabel(form.label)
   const canSave = resolvedEmail.valid && !emailError && labelValid
 
   function maybeAutoUpdateLabel(
@@ -132,7 +132,7 @@ export default function AddMailAccountModal({
     emailInput: string,
     customized: boolean,
   ): string | undefined {
-    if (!isEdit || customized) return undefined
+    if (customized) return undefined
     const resolved = resolveMailAccountEmail(provider, emailInput)
     if (resolved.valid) return generateMailAccountLabel(provider, resolved.email)
     return generateMailAccountLabel(provider)
@@ -200,6 +200,7 @@ export default function AddMailAccountModal({
     } else {
       const input: NewMailAccountInput = {
         provider: form.provider,
+        label: form.label.trim(),
         email: resolvedEmail.email,
         webmailUrl: form.webmailUrl.trim() || undefined,
       }
@@ -214,10 +215,10 @@ export default function AddMailAccountModal({
   const displayEmailError =
     emailError ?? (resolvedEmail.valid ? null : form.email.trim() ? resolvedEmail.error : null)
   const displayLabelError =
-    isEdit && form.label.trim() && !isValidMailAccountLabel(form.label)
-      ? `메일 이름은 ${MAX_MAIL_ACCOUNT_LABEL_LENGTH}자 이내로 입력해 주세요.`
-      : isEdit && !form.label.trim()
-        ? '메일 이름을 입력해 주세요.'
+    form.label.trim() && !isValidMailAccountLabel(form.label)
+      ? `메일 이름은 ${MAX_MAIL_ACCOUNT_LABEL_LENGTH}자 이내로 입력해주세요.`
+      : !form.label.trim()
+        ? '메일 이름을 입력해주세요.'
         : null
 
   const titleId = isEdit ? 'edit-mail-account-title' : 'add-mail-account-title'
@@ -254,27 +255,25 @@ export default function AddMailAccountModal({
         </p>
 
         <div className="mt-4 space-y-3">
-          {isEdit ? (
-            <label className="block">
-              <span className="mb-1 block text-xs font-medium text-slate-600">메일 이름</span>
-              <input
-                type="text"
-                value={form.label}
-                onChange={(event) => handleLabelChange(event.target.value)}
-                placeholder="예: 개인 Gmail, 회사 메일, 네이버 메일"
-                maxLength={MAX_MAIL_ACCOUNT_LABEL_LENGTH}
-                className={
-                  'h-9 w-full rounded-btn border bg-canvas/50 px-3 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 ' +
-                  (displayLabelError
-                    ? 'border-danger/40 focus:border-danger/40 focus:ring-danger/10'
-                    : 'border-line/70 focus:border-brand/30 focus:ring-brand/10')
-                }
-              />
-              {displayLabelError ? (
-                <p className="mt-1 text-xs text-danger">{displayLabelError}</p>
-              ) : null}
-            </label>
-          ) : null}
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-slate-600">메일 이름</span>
+            <input
+              type="text"
+              value={form.label}
+              onChange={(event) => handleLabelChange(event.target.value)}
+              placeholder="예: 개인 Gmail, 회사 메일, 네이버 메일"
+              maxLength={MAX_MAIL_ACCOUNT_LABEL_LENGTH}
+              className={
+                'h-9 w-full rounded-btn border bg-canvas/50 px-3 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 ' +
+                (displayLabelError
+                  ? 'border-danger/40 focus:border-danger/40 focus:ring-danger/10'
+                  : 'border-line/70 focus:border-brand/30 focus:ring-brand/10')
+              }
+            />
+            {displayLabelError ? (
+              <p className="mt-1 text-xs text-danger">{displayLabelError}</p>
+            ) : null}
+          </label>
 
           <label className="block">
             <span className="mb-1 block text-xs font-medium text-slate-600">메일 서비스</span>

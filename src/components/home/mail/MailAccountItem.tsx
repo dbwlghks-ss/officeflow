@@ -105,12 +105,13 @@ export default function MailAccountItem({
             {onEdit ? (
               <button
                 type="button"
-                aria-label={`${displayLabel} 수정`}
+                aria-label="메일 계정 수정"
+                title="메일 계정 수정"
                 onClick={(event) => {
                   event.stopPropagation()
                   onEdit(account.id)
                 }}
-                className="grid h-6 w-6 place-items-center rounded-md text-slate-400 opacity-0 transition-opacity hover:bg-white/80 hover:text-brand group-hover:opacity-100"
+                className="grid h-6 w-6 place-items-center rounded-md border border-line/60 bg-surface/80 text-slate-500 transition-colors hover:border-brand/25 hover:bg-white hover:text-brand"
               >
                 <Pencil size={12} strokeWidth={1.75} aria-hidden="true" />
               </button>
@@ -120,6 +121,7 @@ export default function MailAccountItem({
               <button
                 type="button"
                 aria-label={`${displayLabel} 삭제`}
+                title="메일 계정 삭제"
                 onClick={(event) => {
                   event.stopPropagation()
                   setConfirmDelete(true)

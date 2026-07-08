@@ -253,6 +253,7 @@ export function createMailAccountId(): string {
 
 export type NewMailAccountInput = {
   provider: MailProvider
+  label: string
   email: string
   webmailUrl?: string
 }
@@ -260,7 +261,7 @@ export type NewMailAccountInput = {
 export function createMailAccount(input: NewMailAccountInput): MailAccountData {
   const webmailUrl = input.webmailUrl?.trim() || undefined
   const hasUrl = Boolean(webmailUrl)
-  const label = generateMailAccountLabel(input.provider, input.email)
+  const label = input.label.trim() || generateMailAccountLabel(input.provider, input.email)
 
   return {
     id: createMailAccountId(),
