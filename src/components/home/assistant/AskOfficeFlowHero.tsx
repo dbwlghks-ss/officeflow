@@ -1,5 +1,6 @@
 import { useAssistantWorkspace } from './AssistantWorkspaceProvider'
 import AssistantHeroSearch from './AssistantHeroSearch'
+import AssistantHeroLibrary from './AssistantHeroLibrary'
 import AssistantResponseCard from './AssistantResponseCard'
 import AssistantSuggestedChips from './AssistantSuggestedChips'
 
@@ -40,13 +41,18 @@ export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps
         />
       </div>
 
-      <div className="mt-3 flex justify-center">
-        <AssistantSuggestedChips
-          variant="hero"
-          queries={suggestedQueries}
-          onSelect={(query) => void handleSuggestedQuery(query)}
-        />
-      </div>
+      {suggestedQueries.length > 0 ? (
+        <div className="mt-3">
+          <p className="mb-1.5 text-center text-[11px] font-medium text-slate-400">추천 명령</p>
+          <div className="flex justify-center">
+            <AssistantSuggestedChips
+              variant="hero"
+              queries={suggestedQueries}
+              onSelect={(query) => void handleSuggestedQuery(query)}
+            />
+          </div>
+        </div>
+      ) : null}
 
       {response ? (
         <div className="mt-4">
@@ -59,6 +65,8 @@ export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps
           />
         </div>
       ) : null}
+
+      <AssistantHeroLibrary />
     </section>
   )
 }

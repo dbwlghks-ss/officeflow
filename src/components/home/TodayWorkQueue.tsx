@@ -6,6 +6,7 @@ import {
 import { useHomeBriefSnapshot } from '../../hooks/useHomeBriefSnapshot'
 import type { BriefSummaryData } from '../../lib/homeBriefSummary'
 import WorkActionButtons from './WorkActionButtons'
+import WorkQueueQuickActions from './WorkQueueQuickActions'
 
 type TodayWorkQueueProps = {
   onNavigate?: (path: string) => void
@@ -37,9 +38,7 @@ export default function TodayWorkQueue({ onNavigate, summary }: TodayWorkQueuePr
       <h2 className="mt-1.5 text-lg font-bold leading-snug tracking-tight text-slate-900 lg:text-xl">
         오늘 처리할 업무
       </h2>
-      <p className="mt-1 text-xs text-slate-500">
-        Ask OfficeFlow에 요청하거나 아래에서 바로 처리하세요.
-      </p>
+      <p className="mt-1 text-xs text-slate-500">필요한 일은 여기서 바로 처리하세요.</p>
 
       <div className="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto">
         {displayMode === 'loading' ? (
@@ -93,6 +92,8 @@ export default function TodayWorkQueue({ onNavigate, summary }: TodayWorkQueuePr
           ))
         )}
       </div>
+
+      {onNavigate ? <WorkQueueQuickActions onNavigate={onNavigate} /> : null}
     </section>
   )
 }

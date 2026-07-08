@@ -1,21 +1,10 @@
-import { ClipboardList, Megaphone, UtensilsCrossed, type LucideIcon } from 'lucide-react'
-
-type QuickAction = {
-  title: string
-  path: string
-  icon: LucideIcon
-}
-
-const QUICK_ACTIONS: QuickAction[] = [
-  { title: '식수', path: '/meal', icon: UtensilsCrossed },
-  { title: '설문', path: '/survey', icon: ClipboardList },
-  { title: '공지', path: '/notice', icon: Megaphone },
-]
+import { HOME_QUICK_ACTIONS } from './WorkQueueQuickActions'
 
 type QuickActionsPanelProps = {
   onNavigate: (path: string) => void
 }
 
+/** @deprecated Use WorkQueueQuickActions inside Today Work Queue. */
 export default function QuickActionsPanel({ onNavigate }: QuickActionsPanelProps) {
   return (
     <section className="flex min-h-0 flex-col" aria-label="Quick Actions">
@@ -25,7 +14,7 @@ export default function QuickActionsPanel({ onNavigate }: QuickActionsPanelProps
       <p className="mt-1 text-xs text-slate-500">자주 쓰는 바로가기</p>
 
       <div className="mt-2.5 flex flex-wrap gap-2">
-        {QUICK_ACTIONS.map((action) => {
+        {HOME_QUICK_ACTIONS.map((action) => {
           const Icon = action.icon
           return (
             <button
