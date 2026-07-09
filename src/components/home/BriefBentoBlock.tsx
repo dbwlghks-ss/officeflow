@@ -52,7 +52,7 @@ export default function BriefBentoBlock({
       <h2 className="mt-2 text-lg font-bold leading-snug tracking-tight text-white lg:text-xl">
         오늘 업무를 한눈에 확인하세요.
       </h2>
-      <div className="mt-1.5 line-clamp-2 space-y-0.5 text-sm leading-relaxed text-white/80 lg:mt-2">
+      <div className="mt-1.5 line-clamp-2 space-y-0.5 text-sm leading-relaxed text-white/85 lg:mt-2">
         {summaryCopy.lines.map((line) => (
           <p key={line}>{line}</p>
         ))}

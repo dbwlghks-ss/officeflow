@@ -14,7 +14,7 @@ export default function BriefActionPanel({ items, onNavigate }: BriefActionPanel
       {items.map((item) => (
         <div
           key={item.id}
-          className="rounded-btn border border-white/[0.14] bg-white/[0.08] px-3 py-2.5"
+          className="rounded-btn border border-white/[0.16] bg-white/[0.12] px-3 py-2.5"
         >
           <p className="text-xs leading-relaxed text-white/85">{item.message}</p>
           <div className="mt-2">

@@ -12,7 +12,7 @@ type BentoCardProps = {
 
 const VARIANT_CLASS: Record<BentoCardVariant, string> = {
   default: 'border-line/80 bg-surface',
-  brand: 'brief-surface border-white/15 text-white',
+  brand: 'brief-surface border-white/12 text-white',
   muted: 'border-line/50 bg-[#f3f5f7]',
   accent: 'border-[#bdd6e4]/70 bg-[#e8f3f8]',
 }

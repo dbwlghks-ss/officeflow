@@ -54,7 +54,7 @@ export default function WorkActionButtons({
 
   const isBrand = variant === 'brand'
   const brandClass =
-    'rounded-full border border-white/20 bg-white/[0.12] px-2.5 py-1 text-[11px] font-medium text-white/90 transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60'
+    'rounded-full border border-white/[0.16] bg-white/[0.12] px-2.5 py-1 text-[11px] font-medium text-white/90 transition-colors hover:bg-white/[0.16] disabled:cursor-not-allowed disabled:opacity-60'
   const primaryClass =
     'rounded-full bg-brand px-2.5 py-1 text-[11px] font-medium text-white transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60'
   const secondaryClass =
