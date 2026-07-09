@@ -7,6 +7,7 @@ type AssistantResponseShellProps = {
   response: AssistantResponse
   checkedAt?: Date | null
   hero?: boolean
+  floating?: boolean
   compact?: boolean
   children?: ReactNode
 }
@@ -15,6 +16,7 @@ export default function AssistantResponseShell({
   response,
   checkedAt,
   hero = false,
+  floating = false,
   compact = false,
   children,
 }: AssistantResponseShellProps) {
@@ -24,18 +26,22 @@ export default function AssistantResponseShell({
   return (
     <div
       className={
-        (hero
-          ? 'rounded-2xl border p-4 shadow-soft '
-          : compact
-            ? 'rounded-btn border p-2.5 '
-            : 'mt-3 rounded-btn border p-3 ') +
-        (isError
-          ? 'border-danger/20 bg-red-50/30'
-          : isLoading
-            ? 'border-line/60 bg-canvas/40'
-            : hero
-              ? 'border-line/60 bg-white/95'
-              : 'border-line/70 bg-canvas/50')
+        (floating
+          ? 'rounded-none border-0 bg-transparent p-0 shadow-none '
+          : hero
+            ? 'rounded-2xl border p-4 shadow-soft '
+            : compact
+              ? 'rounded-btn border p-2.5 '
+              : 'mt-3 rounded-btn border p-3 ') +
+        (floating
+          ? ''
+          : isError
+            ? 'border-danger/20 bg-red-50/30'
+            : isLoading
+              ? 'border-line/60 bg-canvas/40'
+              : hero
+                ? 'border-line/60 bg-white/95'
+                : 'border-line/70 bg-canvas/50')
       }
     >
       <div className="flex items-start justify-between gap-2">

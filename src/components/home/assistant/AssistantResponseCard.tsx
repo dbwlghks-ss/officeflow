@@ -15,6 +15,7 @@ type AssistantResponseCardProps = {
   onSuggestedQuery?: (query: string) => void
   compact?: boolean
   hero?: boolean
+  floating?: boolean
 }
 
 function resolveActions(response: AssistantResponse) {
@@ -93,6 +94,7 @@ export default function AssistantResponseCard({
   onSuggestedQuery,
   compact = false,
   hero = false,
+  floating = false,
 }: AssistantResponseCardProps) {
   if (!response) {
     if (hero) return null
@@ -115,7 +117,7 @@ export default function AssistantResponseCard({
 
   if (kind === 'employee' && response.employee) {
     return (
-      <AssistantResponseShell response={response} checkedAt={checkedAt} hero={hero} compact={compact}>
+      <AssistantResponseShell response={response} checkedAt={checkedAt} hero={hero} floating={floating} compact={compact}>
         {response.message ? (
           <p className="mt-1 text-xs leading-relaxed text-slate-500">{response.message}</p>
         ) : null}
@@ -126,7 +128,7 @@ export default function AssistantResponseCard({
 
   if (kind === 'meal' && response.mealMenu) {
     return (
-      <AssistantResponseShell response={response} checkedAt={checkedAt} hero={hero} compact={compact}>
+      <AssistantResponseShell response={response} checkedAt={checkedAt} hero={hero} floating={floating} compact={compact}>
         <MealMenuResponseCard payload={response.mealMenu} message={response.message} />
         {!isLoading && response.action && onAction ? (
           <div className="mt-2.5">
@@ -147,7 +149,7 @@ export default function AssistantResponseCard({
 
   if (kind === 'meal_action' && response.mealAction) {
     return (
-      <AssistantResponseShell response={response} checkedAt={checkedAt} hero={hero} compact={compact}>
+      <AssistantResponseShell response={response} checkedAt={checkedAt} hero={hero} floating={floating} compact={compact}>
         <MealActionResponseCard
           payload={response.mealAction}
           message={response.message}
@@ -162,7 +164,7 @@ export default function AssistantResponseCard({
     response.workSummary
   ) {
     return (
-      <AssistantResponseShell response={response} checkedAt={checkedAt} hero={hero} compact={compact}>
+      <AssistantResponseShell response={response} checkedAt={checkedAt} hero={hero} floating={floating} compact={compact}>
         <WorkSummaryResponseCard
           payload={response.workSummary}
           message={response.message}
@@ -190,7 +192,7 @@ export default function AssistantResponseCard({
 
   if (kind === 'unknown' && response.unknown) {
     return (
-      <AssistantResponseShell response={response} checkedAt={checkedAt} hero={hero} compact={compact}>
+      <AssistantResponseShell response={response} checkedAt={checkedAt} hero={hero} floating={floating} compact={compact}>
         <UnknownResponseCard
           payload={response.unknown}
           message={response.message}
@@ -201,7 +203,7 @@ export default function AssistantResponseCard({
   }
 
   return (
-    <AssistantResponseShell response={response} checkedAt={checkedAt} hero={hero} compact={compact}>
+    <AssistantResponseShell response={response} checkedAt={checkedAt} hero={hero} floating={floating} compact={compact}>
       <GenericResponseBody response={response} onAction={onAction} isLoading={isLoading} />
     </AssistantResponseShell>
   )

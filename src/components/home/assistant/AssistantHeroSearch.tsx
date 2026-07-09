@@ -1,12 +1,18 @@
-import { ArrowUp, Sparkles } from 'lucide-react'
+import { ArrowUp, Loader2, Sparkles } from 'lucide-react'
 
 type AssistantHeroSearchProps = {
   value: string
   onChange: (value: string) => void
   onSubmit: () => void
+  loading?: boolean
 }
 
-export default function AssistantHeroSearch({ value, onChange, onSubmit }: AssistantHeroSearchProps) {
+export default function AssistantHeroSearch({
+  value,
+  onChange,
+  onSubmit,
+  loading = false,
+}: AssistantHeroSearchProps) {
   return (
     <form
       className="w-full"
@@ -41,7 +47,7 @@ export default function AssistantHeroSearch({ value, onChange, onSubmit }: Assis
         />
         <button
           type="submit"
-          disabled={!value.trim()}
+          disabled={!value.trim() || loading}
           aria-label="질문 실행"
           className={
             'grid h-9 w-9 shrink-0 place-items-center rounded-full text-white ' +
@@ -49,7 +55,11 @@ export default function AssistantHeroSearch({ value, onChange, onSubmit }: Assis
             'disabled:cursor-not-allowed disabled:opacity-40 lg:h-10 lg:w-10'
           }
         >
-          <ArrowUp size={16} strokeWidth={2} aria-hidden="true" />
+          {loading ? (
+            <Loader2 size={16} strokeWidth={2} className="animate-spin" aria-hidden="true" />
+          ) : (
+            <ArrowUp size={16} strokeWidth={2} aria-hidden="true" />
+          )}
         </button>
       </div>
     </form>

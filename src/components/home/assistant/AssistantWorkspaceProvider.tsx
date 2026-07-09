@@ -68,6 +68,7 @@ type AssistantWorkspaceContextValue = {
   handleDeleteCommand: (commandId: string) => void
   handleDeleteSearch: (searchId: string) => void
   suggestedQueries: string[]
+  clearResponse: () => void
 }
 
 const AssistantWorkspaceContext = createContext<AssistantWorkspaceContextValue | null>(null)
@@ -261,6 +262,12 @@ export function AssistantWorkspaceProvider({ children }: AssistantWorkspaceProvi
     saveRecentItems(nextRecent)
   }
 
+  function clearResponse() {
+    requestSeq.current += 1
+    setResponse(null)
+    setCheckedAt(null)
+  }
+
   const value: AssistantWorkspaceContextValue = {
     activeTab,
     setActiveTab,
@@ -285,6 +292,7 @@ export function AssistantWorkspaceProvider({ children }: AssistantWorkspaceProvi
     handleDeleteCommand,
     handleDeleteSearch,
     suggestedQueries,
+    clearResponse,
   }
 
   return (
