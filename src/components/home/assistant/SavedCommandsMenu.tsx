@@ -66,9 +66,9 @@ export default function SavedCommandsMenu({ searchSlot }: SavedCommandsMenuProps
             onClick={() => setOpen((value) => !value)}
             aria-expanded={open}
             className={
-              'inline-flex h-[60px] shrink-0 items-center justify-center gap-1 self-end rounded-full ' +
+              'inline-flex h-[52px] shrink-0 items-center justify-center gap-1 self-end rounded-full ' +
               'border border-slate-200/70 bg-surface px-4 text-xs font-medium text-slate-500 transition-colors ' +
-              'hover:border-brand/20 hover:bg-brand-light/30 hover:text-brand sm:self-auto lg:h-[64px]'
+              'hover:border-brand/20 hover:bg-brand-light/30 hover:text-brand sm:self-auto lg:h-[56px]'
             }
           >
             저장 명령

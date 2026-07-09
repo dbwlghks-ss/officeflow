@@ -20,13 +20,13 @@ export default function AssistantHeroSearch({ value, onChange, onSubmit }: Assis
       </label>
       <div
         className={
-          'flex h-[64px] w-full items-center gap-3 rounded-full border border-slate-200/70 bg-white px-4 ' +
+          'flex h-[52px] w-full items-center gap-2.5 rounded-full border border-slate-200/70 bg-white px-3.5 ' +
           'shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition-shadow focus-within:border-brand/25 ' +
-          'focus-within:ring-4 focus-within:ring-blue-500/10 lg:h-[68px] lg:px-5'
+          'focus-within:ring-4 focus-within:ring-blue-500/10 lg:h-[56px] lg:gap-3 lg:px-4'
         }
       >
         <Sparkles
-          size={20}
+          size={18}
           strokeWidth={1.75}
           className="shrink-0 text-brand/70"
           aria-hidden="true"
@@ -37,19 +37,19 @@ export default function AssistantHeroSearch({ value, onChange, onSubmit }: Assis
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder="직원 정보, 오늘 식단, 식수 신청을 물어보세요"
-          className="min-w-0 flex-1 border-0 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none lg:text-base"
+          className="min-w-0 flex-1 border-0 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
         />
         <button
           type="submit"
           disabled={!value.trim()}
           aria-label="질문 실행"
           className={
-            'grid h-10 w-10 shrink-0 place-items-center rounded-full text-white ' +
+            'grid h-9 w-9 shrink-0 place-items-center rounded-full text-white ' +
             'bg-gradient-to-r from-[#1648B8] to-[#2F63E6] transition-opacity hover:opacity-95 ' +
-            'disabled:cursor-not-allowed disabled:opacity-40 lg:h-11 lg:w-11'
+            'disabled:cursor-not-allowed disabled:opacity-40 lg:h-10 lg:w-10'
           }
         >
-          <ArrowUp size={18} strokeWidth={2} aria-hidden="true" />
+          <ArrowUp size={16} strokeWidth={2} aria-hidden="true" />
         </button>
       </div>
     </form>

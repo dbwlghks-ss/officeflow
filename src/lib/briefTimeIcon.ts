@@ -33,7 +33,7 @@ export function getBriefTimeIconMeta(date: Date = new Date()): BriefTimeIconMeta
     timeOfDay,
     Icon: ICON_BY_TIME[timeOfDay],
     iconClassName:
-      'pointer-events-none absolute right-2 top-1 h-8 w-8 text-white opacity-[0.15] ' +
-      'lg:right-3 lg:top-2 lg:h-9 lg:w-9',
+      'pointer-events-none absolute right-2 top-0.5 h-10 w-10 text-white opacity-[0.15] ' +
+      'lg:right-3 lg:top-1.5 lg:h-11 lg:w-11',
   }
 }

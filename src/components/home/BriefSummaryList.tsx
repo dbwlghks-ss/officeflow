@@ -43,7 +43,7 @@ export default function BriefSummaryList({
               key={item.id}
               className={
                 onBrand
-                  ? 'rounded-btn border border-white/[0.16] bg-white/[0.12] px-2 py-1.5 transition-colors hover:bg-white/[0.14]'
+                  ? 'rounded-btn border border-white/[0.14] bg-white/[0.10] px-2 py-1.5 transition-colors hover:bg-white/[0.12]'
                   : 'rounded-btn border border-line/70 bg-canvas/40 px-3 py-2.5'
               }
             >
