@@ -7,12 +7,6 @@ export type BriefActionButton = {
   path?: string
 }
 
-export type BriefActionItem = {
-  id: string
-  message: string
-  actions: BriefActionButton[]
-}
-
 export type WorkQueueItemStatus = 'action_needed' | 'review' | 'done'
 
 export type WorkQueueItem = {
@@ -27,7 +21,6 @@ export type WorkQueueResult = {
   isAllComplete: boolean
 }
 
-const MAX_BRIEF_ACTIONS = 3
 const MAX_WORK_QUEUE_ITEMS = 4
 
 const EMPTY_SUMMARY: BriefSummaryData = {
@@ -119,18 +112,6 @@ function buildCandidateItems(data: BriefSummaryData): WorkQueueItem[] {
   }
 
   return items
-}
-
-export function buildBriefActionItems(
-  data: BriefSummaryData,
-  mode: BriefDisplayMode,
-): BriefActionItem[] {
-  if (mode !== 'ready') return []
-
-  return buildCandidateItems(data)
-    .filter((item) => item.actions.length > 0)
-    .slice(0, MAX_BRIEF_ACTIONS)
-    .map(({ id, message, actions }) => ({ id, message, actions }))
 }
 
 export function buildWorkQueueItems(

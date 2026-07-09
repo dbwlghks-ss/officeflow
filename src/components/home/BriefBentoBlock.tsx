@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react'
-import { BRIEF_EMPTY_SUMMARY, buildBriefActionItems } from '../../lib/briefActions'
+import { BRIEF_EMPTY_SUMMARY } from '../../lib/briefActions'
 import { buildBriefSummaryDisplay } from '../../lib/briefSummarySentence'
 import { getHomeBriefContent, type HomeBriefContent } from '../../lib/homeBrief'
 import { toBriefSummaryItems, type BriefSummaryData } from '../../lib/homeBriefSummary'
 import { formatKoreanTime, KOREAN_CLOCK_TICK_MS } from '../../lib/dateTime'
 import { useHomeBriefSnapshot } from '../../hooks/useHomeBriefSnapshot'
-import BriefActionPanel from './BriefActionPanel'
 import BriefSummaryList from './BriefSummaryList'
 import BriefTimeWatermark from './BriefTimeWatermark'
 
 type BriefBentoBlockProps = {
   date?: Date
   content?: Partial<HomeBriefContent>
-  onNavigate?: (path: string) => void
   /** Optional override for tests — skips live Supabase fetch when provided. */
   summary?: Partial<BriefSummaryData>
 }
@@ -20,7 +18,6 @@ type BriefBentoBlockProps = {
 export default function BriefBentoBlock({
   date = new Date(),
   content,
-  onNavigate,
   summary,
 }: BriefBentoBlockProps) {
   const [now, setNow] = useState(() => new Date())
@@ -29,7 +26,6 @@ export default function BriefBentoBlock({
 
   const resolved = { ...getHomeBriefContent(date), ...content }
   const summaryItems = toBriefSummaryItems(data, displayMode)
-  const actionItems = buildBriefActionItems(data, displayMode)
   const summaryCopy = buildBriefSummaryDisplay(displayMode, summaryData ?? undefined)
   const timeLabel = formatKoreanTime(now)
 
@@ -49,20 +45,19 @@ export default function BriefBentoBlock({
         <span className="mx-1.5 font-normal text-white/45">·</span>
         <span className="normal-case tracking-normal text-white/70">{timeLabel}</span>
       </p>
-      <h2 className="mt-2 text-lg font-bold leading-snug tracking-tight text-white lg:text-xl">
+      <h2 className="mt-1.5 text-base font-semibold leading-snug tracking-tight text-white lg:text-lg">
         오늘 업무를 한눈에 확인하세요.
       </h2>
-      <div className="mt-1.5 line-clamp-2 space-y-0.5 text-sm leading-relaxed text-white/85 lg:mt-2">
+      <div className="mt-1 line-clamp-2 space-y-0.5 text-sm leading-relaxed text-white/85">
         {summaryCopy.lines.map((line) => (
           <p key={line}>{line}</p>
         ))}
       </div>
-      <BriefActionPanel items={actionItems} onNavigate={onNavigate} />
       <BriefSummaryList
         items={summaryItems}
         tone="brand"
         columns={2}
-        className="mt-2 lg:mt-auto lg:pt-2.5"
+        className="mt-3 lg:mt-auto lg:pt-2"
       />
     </div>
   )

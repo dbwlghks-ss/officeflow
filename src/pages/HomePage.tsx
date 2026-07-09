@@ -37,9 +37,9 @@ export default function HomePage() {
           </div>
 
           <div className="mt-4 grid min-h-0 flex-1 grid-cols-1 gap-3 lg:mt-5 lg:grid-cols-12 lg:gap-4">
-            <div className="min-h-[280px] lg:col-span-4 lg:min-h-0">
+            <div className="min-h-[240px] lg:col-span-4 lg:min-h-0">
               <BentoCard variant="brand" fit className="flex h-full min-h-0 flex-col overflow-hidden">
-                <BriefBentoBlock date={now} onNavigate={navigate} />
+                <BriefBentoBlock date={now} />
               </BentoCard>
             </div>
 

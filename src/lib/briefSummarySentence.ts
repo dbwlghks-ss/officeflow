@@ -6,13 +6,20 @@ export type BriefSummaryCopy = {
   lines: [string] | [string, string]
 }
 
-function formatActionLine(
+function formatReviewSummaryLine(
   noticeCount: number,
   surveyCount: number,
   scheduleCount: number,
 ): string | null {
-  const parts: string[] = []
+  if (noticeCount > 0 && surveyCount === 0 && scheduleCount === 0) {
+    return `공지 ${noticeCount}건을 확인해보세요.`
+  }
 
+  if (surveyCount > 0 && noticeCount === 0 && scheduleCount === 0) {
+    return `참여 대기 설문 ${surveyCount}건이 있습니다.`
+  }
+
+  const parts: string[] = []
   if (noticeCount > 0) parts.push(`공지 ${noticeCount}건`)
   if (surveyCount > 0) parts.push(`설문 ${surveyCount}건`)
   if (scheduleCount > 0) parts.push(`일정 ${scheduleCount}건`)
@@ -24,47 +31,31 @@ function formatActionLine(
   return `${parts[0]}, ${parts[1]}, ${parts[2]}을 확인해보세요.`
 }
 
-/** Short, scannable brief copy from existing summary snapshot data. */
+/** Short digest copy for Today Brief — no action prompts, summary only. */
 export function buildBriefSummaryCopy(data: BriefSummaryData): BriefSummaryCopy {
-  const {
-    mealApplied,
-    mealDeclined,
-    mealServiceAvailable,
-    unreadNoticeCount,
-    pendingSurveyCount,
-    todayScheduleCount,
-  } = data
-  const actionLine = formatActionLine(
-    unreadNoticeCount,
-    pendingSurveyCount,
-    todayScheduleCount,
+  const mealNeedsAction =
+    data.mealServiceAvailable && !data.mealApplied && !data.mealDeclined
+  const reviewLine = formatReviewSummaryLine(
+    data.unreadNoticeCount,
+    data.pendingSurveyCount,
+    data.todayScheduleCount,
   )
-  const mealNeedsAction = mealServiceAvailable && !mealApplied && !mealDeclined
-  const mealLine = mealServiceAvailable
-    ? mealApplied
-      ? '식수 신청 완료.'
-      : mealDeclined
-        ? '오늘 식수를 안 먹는 것으로 처리했습니다.'
-        : '식수 신청이 필요합니다.'
-    : null
 
-  if (!actionLine) {
-    if (!mealServiceAvailable || mealApplied || mealDeclined) {
-      return {
-        lines: ['오늘 확인할 업무는 없습니다.', '여유 있게 하루를 시작하세요.'],
-      }
-    }
-
-    return {
-      lines: ['식수 신청이 필요합니다.', '여유 있게 하루를 시작하세요.'],
-    }
+  if (mealNeedsAction && reviewLine) {
+    return { lines: ['오늘 식수 체크가 필요합니다.', reviewLine] }
   }
 
-  if (!mealLine || (!mealNeedsAction && !mealApplied)) {
-    return { lines: [actionLine] }
+  if (mealNeedsAction) {
+    return { lines: ['오늘 식수 체크가 필요합니다.'] }
   }
 
-  return { lines: [mealLine, actionLine] }
+  if (reviewLine) {
+    return { lines: [reviewLine] }
+  }
+
+  return {
+    lines: ['오늘 확인할 업무는 없습니다.', '여유 있게 하루를 시작하세요.'],
+  }
 }
 
 export function buildBriefSummaryDisplay(
