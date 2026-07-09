@@ -12,6 +12,16 @@ import NoticePage from '../pages/NoticePage'
 import ResetPasswordPage from '../pages/ResetPasswordPage'
 import SignupPage from '../pages/SignupPage'
 import SurveyPage from '../pages/SurveyPage'
+import { OfficeFlowLogo } from '../components/ui/Logo'
+
+function RouteLoadingScreen() {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-[#f7f9fc]">
+      <OfficeFlowLogo />
+      <span className="text-sm text-slate-500">불러오는 중...</span>
+    </div>
+  )
+}
 
 type ProtectedState = 'loading' | 'no-auth' | 'ok'
 
@@ -58,11 +68,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   }, [])
 
   if (state === 'loading') {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f7f9fc]">
-        <span className="text-sm text-slate-500">불러오는 중...</span>
-      </div>
-    )
+    return <RouteLoadingScreen />
   }
 
   if (state === 'no-auth') {
@@ -113,11 +119,7 @@ function AdminRoute({ children }: { children: ReactNode }) {
   }, [])
 
   if (state === 'loading') {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f7f9fc]">
-        <span className="text-sm text-slate-500">불러오는 중...</span>
-      </div>
-    )
+    return <RouteLoadingScreen />
   }
 
   if (state === 'no-auth') {

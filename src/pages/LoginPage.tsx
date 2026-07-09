@@ -129,7 +129,8 @@ export default function LoginPage() {
 
   if (checkingSession) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-canvas">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-canvas">
+        <OfficeFlowLogo />
         <span className="text-sm text-slate-500">불러오는 중...</span>
       </div>
     )

@@ -4,7 +4,7 @@ type OfficeFlowLogoSize = 'sm' | 'md' | 'header' | 'auth'
 
 const HEADER_LOGO_HEIGHT_CLASS = 'h-[34px]'
 const OFFICEFLOW_HEADER_HEIGHT_CLASS = HEADER_LOGO_HEIGHT_CLASS
-const HWASHIN_HEADER_HEIGHT_CLASS = 'h-[29px]'
+const HWASHIN_HEADER_HEIGHT_CLASS = 'h-[25px]'
 const HEADER_LOCKUP_GAP_CLASS = 'gap-[10px]'
 const HEADER_LOCKUP_DIVIDER_CLASS = 'h-[18px] w-px shrink-0 bg-line/90'
 const HWASHIN_LOGO_SRC = '/hwashin-symbol.png'
@@ -39,7 +39,7 @@ export function OfficeFlowLogo({
     <img
       src="/officeflow-logo.png"
       alt="OfficeFlow"
-      className={`w-auto shrink-0 object-contain ${heightClass}${className ? ` ${className}` : ''}`}
+      className={`w-auto shrink-0 bg-transparent object-contain ${heightClass}${className ? ` ${className}` : ''}`}
     />
   )
 }
