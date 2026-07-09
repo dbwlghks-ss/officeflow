@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { BRIEF_EMPTY_SUMMARY } from '../../lib/briefActions'
-import { buildBriefSummaryDisplay } from '../../lib/briefSummarySentence'
 import { getHomeBriefContent, type HomeBriefContent } from '../../lib/homeBrief'
 import { toBriefSummaryItems, type BriefSummaryData } from '../../lib/homeBriefSummary'
 import { formatKoreanTime, KOREAN_CLOCK_TICK_MS } from '../../lib/dateTime'
 import { useHomeBriefSnapshot } from '../../hooks/useHomeBriefSnapshot'
 import { useBriefWeather } from '../../hooks/useBriefWeather'
+import BriefChecklist from './BriefChecklist'
 import BriefSummaryList from './BriefSummaryList'
 import BriefTimeWatermark from './BriefTimeWatermark'
 import BriefWeatherStrip from './BriefWeatherStrip'
@@ -29,7 +29,6 @@ export default function BriefBentoBlock({
 
   const resolved = { ...getHomeBriefContent(date), ...content }
   const summaryItems = toBriefSummaryItems(data, displayMode)
-  const summaryCopy = buildBriefSummaryDisplay(displayMode, summaryData ?? undefined)
   const timeLabel = formatKoreanTime(now)
 
   useEffect(() => {
@@ -48,15 +47,11 @@ export default function BriefBentoBlock({
         <span className="mx-1.5 font-normal text-white/45">·</span>
         <span className="normal-case tracking-normal text-white/70">{timeLabel}</span>
       </p>
+      <BriefWeatherStrip weather={weather} status={weatherStatus} className="mt-1" />
       <h2 className="mt-1.5 text-base font-semibold leading-snug tracking-tight text-white lg:text-lg">
         오늘 업무를 한눈에 확인하세요.
       </h2>
-      <div className="mt-1 line-clamp-2 space-y-0.5 text-sm leading-relaxed text-white/85">
-        {summaryCopy.lines.map((line) => (
-          <p key={line}>{line}</p>
-        ))}
-      </div>
-      <BriefWeatherStrip weather={weather} status={weatherStatus} />
+      <BriefChecklist data={data} mode={displayMode} date={now} />
       <BriefSummaryList
         items={summaryItems}
         tone="brand"

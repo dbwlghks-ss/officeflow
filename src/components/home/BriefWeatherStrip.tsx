@@ -22,6 +22,7 @@ const ICON_BY_CONDITION: Record<BriefWeatherIcon, LucideIcon> = {
 type BriefWeatherStripProps = {
   weather: BriefWeatherSummary | null
   status: 'idle' | 'loading' | 'ready' | 'error'
+  className?: string
 }
 
 function formatTempRange(day: BriefWeatherDay): string {
@@ -45,7 +46,7 @@ function WeatherDayLine({
 
   return (
     <span className="inline-flex min-w-0 items-center gap-1">
-      <Icon size={14} strokeWidth={1.75} className="shrink-0 text-white/75" aria-hidden="true" />
+      <Icon size={13} strokeWidth={1.75} className="shrink-0 text-white/75" aria-hidden="true" />
       <span className="truncate">
         {prefix} {day.condition}
         {tempLabel ? ` ${tempLabel}` : ''}
@@ -54,10 +55,17 @@ function WeatherDayLine({
   )
 }
 
-export default function BriefWeatherStrip({ weather, status }: BriefWeatherStripProps) {
+export default function BriefWeatherStrip({
+  weather,
+  status,
+  className = '',
+}: BriefWeatherStripProps) {
   if (status === 'error') {
     return (
-      <p className="mt-1.5 text-[11px] text-white/55" aria-live="polite">
+      <p
+        className={`text-[11px] text-white/55${className ? ` ${className}` : ''}`}
+        aria-live="polite"
+      >
         날씨 정보를 불러올 수 없습니다
       </p>
     )
@@ -69,7 +77,10 @@ export default function BriefWeatherStrip({ weather, status }: BriefWeatherStrip
 
   return (
     <div
-      className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs leading-relaxed text-white/80"
+      className={
+        `flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs leading-relaxed text-white/75` +
+        (className ? ` ${className}` : '')
+      }
       aria-label={`${weather.locationName} 날씨 요약`}
     >
       <WeatherDayLine prefix="오늘" day={weather.today} />
