@@ -5,8 +5,10 @@ import { getHomeBriefContent, type HomeBriefContent } from '../../lib/homeBrief'
 import { toBriefSummaryItems, type BriefSummaryData } from '../../lib/homeBriefSummary'
 import { formatKoreanTime, KOREAN_CLOCK_TICK_MS } from '../../lib/dateTime'
 import { useHomeBriefSnapshot } from '../../hooks/useHomeBriefSnapshot'
+import { useBriefWeather } from '../../hooks/useBriefWeather'
 import BriefSummaryList from './BriefSummaryList'
 import BriefTimeWatermark from './BriefTimeWatermark'
+import BriefWeatherStrip from './BriefWeatherStrip'
 
 type BriefBentoBlockProps = {
   date?: Date
@@ -22,6 +24,7 @@ export default function BriefBentoBlock({
 }: BriefBentoBlockProps) {
   const [now, setNow] = useState(() => new Date())
   const { displayMode, summaryData } = useHomeBriefSnapshot({ summary })
+  const { weather, status: weatherStatus } = useBriefWeather()
   const data = summaryData ?? BRIEF_EMPTY_SUMMARY
 
   const resolved = { ...getHomeBriefContent(date), ...content }
@@ -53,6 +56,7 @@ export default function BriefBentoBlock({
           <p key={line}>{line}</p>
         ))}
       </div>
+      <BriefWeatherStrip weather={weather} status={weatherStatus} />
       <BriefSummaryList
         items={summaryItems}
         tone="brand"
