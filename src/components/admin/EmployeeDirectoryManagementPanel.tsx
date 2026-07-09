@@ -5,6 +5,7 @@ import {
   createEmployee,
   deactivateEmployee,
   deleteEmployee,
+  getEmployeeDirectorySource,
   listEmployeesForAdmin,
   updateEmployee,
   type EmployeeDirectoryEntry,
@@ -110,7 +111,7 @@ export default function EmployeeDirectoryManagementPanel() {
       if (editing === 'new') {
         await createEmployee(payload)
       } else if (editing) {
-        await updateEmployee(editing.id, payload)
+        await updateEmployee(editing.id, payload, { profileId: editing.profile_id })
       }
 
       closeForm()
@@ -300,6 +301,7 @@ export default function EmployeeDirectoryManagementPanel() {
                     <th className="px-3 py-3">부서</th>
                     <th className="px-3 py-3">직급</th>
                     <th className="px-3 py-3">연락처</th>
+                    <th className="px-3 py-3">등록</th>
                     <th className="px-3 py-3">상태</th>
                     <th className="px-6 py-3 text-right">작업</th>
                   </tr>
@@ -319,6 +321,11 @@ export default function EmployeeDirectoryManagementPanel() {
                             <span>-</span>
                           ) : null}
                         </div>
+                      </td>
+                      <td className="px-3 py-3">
+                        <Badge tone={getEmployeeDirectorySource(employee) === 'auto' ? 'brand' : 'neutral'}>
+                          {getEmployeeDirectorySource(employee) === 'auto' ? '자동' : '수동'}
+                        </Badge>
                       </td>
                       <td className="px-3 py-3">
                         <Badge tone={employee.is_active ? 'success' : 'neutral'}>

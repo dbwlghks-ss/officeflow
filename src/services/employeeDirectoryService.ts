@@ -4,6 +4,7 @@ import type { EmployeeLookupField } from '../features/assistant/assistantTypes'
 
 export type EmployeeDirectoryEntry = {
   id: string
+  profile_id: string | null
   name: string
   department: string | null
   position: string | null
@@ -11,6 +12,12 @@ export type EmployeeDirectoryEntry = {
   extension: string | null
   work_phone: string | null
   is_active: boolean
+}
+
+export type EmployeeDirectorySource = 'auto' | 'manual'
+
+export function getEmployeeDirectorySource(entry: EmployeeDirectoryEntry): EmployeeDirectorySource {
+  return entry.profile_id ? 'auto' : 'manual'
 }
 
 export type EmployeeDirectoryInput = {
@@ -60,7 +67,7 @@ export async function searchEmployees(query: string): Promise<EmployeeDirectoryQ
 
   const { data, error } = await supabase
     .from('employee_directory')
-    .select('id, name, department, position, work_email, extension, work_phone, is_active')
+    .select('id, profile_id, name, department, position, work_email, extension, work_phone, is_active')
     .eq('is_active', true)
     .or(`name.ilike.${pattern},department.ilike.${pattern},position.ilike.${pattern},work_email.ilike.${pattern}`)
     .order('name', { ascending: true })
@@ -125,7 +132,7 @@ export function formatEmployeeForAssistant(
 export async function listEmployeesForAdmin(): Promise<EmployeeDirectoryEntry[]> {
   const { data, error } = await supabase
     .from('employee_directory')
-    .select('id, name, department, position, work_email, extension, work_phone, is_active')
+    .select('id, profile_id, name, department, position, work_email, extension, work_phone, is_active')
     .order('name', { ascending: true })
 
   if (error) throw error
@@ -137,7 +144,7 @@ export async function createEmployee(input: EmployeeDirectoryInput): Promise<Emp
   const { data, error } = await supabase
     .from('employee_directory')
     .insert(payload)
-    .select('id, name, department, position, work_email, extension, work_phone, is_active')
+    .select('id, profile_id, name, department, position, work_email, extension, work_phone, is_active')
     .single()
 
   if (error) throw error
@@ -147,13 +154,24 @@ export async function createEmployee(input: EmployeeDirectoryInput): Promise<Emp
 export async function updateEmployee(
   id: string,
   input: EmployeeDirectoryInput,
+  options?: { profileId?: string | null },
 ): Promise<EmployeeDirectoryEntry> {
   const payload = normalizeEmployeeInput(input)
+
+  if (options?.profileId) {
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ is_active: payload.is_active })
+      .eq('id', options.profileId)
+
+    if (profileError) throw profileError
+  }
+
   const { data, error } = await supabase
     .from('employee_directory')
     .update({ ...payload, updated_at: new Date().toISOString() })
     .eq('id', id)
-    .select('id, name, department, position, work_email, extension, work_phone, is_active')
+    .select('id, profile_id, name, department, position, work_email, extension, work_phone, is_active')
     .single()
 
   if (error) throw error
@@ -161,12 +179,29 @@ export async function updateEmployee(
 }
 
 export async function deactivateEmployee(id: string): Promise<void> {
+  const { data: row, error: fetchError } = await supabase
+    .from('employee_directory')
+    .select('profile_id')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (fetchError) throw fetchError
+
   const { error } = await supabase
     .from('employee_directory')
     .update({ is_active: false, updated_at: new Date().toISOString() })
     .eq('id', id)
 
   if (error) throw error
+
+  if (row?.profile_id) {
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ is_active: false })
+      .eq('id', row.profile_id)
+
+    if (profileError) throw profileError
+  }
 }
 
 export async function deleteEmployee(id: string): Promise<void> {
