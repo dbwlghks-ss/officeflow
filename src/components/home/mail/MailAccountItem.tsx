@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Mail, Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import type { MailAccountData } from '../../../lib/mailHubMockData'
 import { getAccountDisplayLabel } from '../../../lib/mailHubStorage'
+import MailProviderIcon from './MailProviderIcon'
 
 type MailAccountItemProps = {
   account: MailAccountData
@@ -92,14 +93,7 @@ export default function MailAccountItem({
 
   const accountBody = (
     <>
-      <div
-        className={
-          'flex shrink-0 items-center justify-center rounded-lg bg-surface text-slate-500 ' +
-          (compact ? 'h-7 w-7' : 'h-8 w-8')
-        }
-      >
-        <Mail size={compact ? 14 : 15} strokeWidth={1.75} aria-hidden="true" />
-      </div>
+      <MailProviderIcon provider={account.provider} compact={compact} />
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-xs font-semibold text-slate-900">{displayLabel}</p>
