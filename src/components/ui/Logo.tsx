@@ -62,7 +62,7 @@ export function HeaderBrandLockup({ onOfficeFlowClick }: { onOfficeFlowClick?: (
         href="https://www.hwashin.co.kr"
         target="_blank"
         rel="noopener noreferrer"
-        className={`block shrink-0 p-0 leading-none outline-none focus-visible:ring-2 focus-visible:ring-brand/30 rounded-md ${logoMotionClass}`}
+        className={`block shrink-0 -translate-y-[2px] p-0 leading-none outline-none focus-visible:ring-2 focus-visible:ring-brand/30 rounded-md ${logoMotionClass}`}
         onClick={(e) => e.stopPropagation()}
       >
         <HwashinLogoImage className={`${HWASHIN_HEADER_HEIGHT_CLASS} block max-h-none`} />
