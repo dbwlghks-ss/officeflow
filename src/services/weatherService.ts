@@ -24,13 +24,20 @@ export type BriefWeatherSummary = {
   updatedAt: string
 }
 
-/** Company HQ coordinates — set real values when available. */
-export const DEFAULT_WEATHER_LOCATION = {
-  name: '회사 기준',
-  // TODO: Replace with actual HWASHIN headquarters latitude/longitude.
-  latitude: 0,
-  longitude: 0,
-} as const
+/**
+ * HWASHIN 언하공장 본사 — 경상북도 영천시 언하공단1길 14
+ * Source: https://www.hwashin.co.kr/kr/group/group_address_1.do?fcode=6
+ * Coordinates: map lookup for the address above (verify if needed).
+ */
+export const DEFAULT_WEATHER_LOCATION: {
+  readonly name: string
+  readonly latitude: number
+  readonly longitude: number
+} = {
+  name: '영천 본사 기준',
+  latitude: 35.987876,
+  longitude: 128.96105,
+}
 
 const WEATHER_CACHE_KEY = 'officeflow_weather_summary'
 const WEATHER_CACHE_TTL_MS = 45 * 60 * 1000
