@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Bell, LogIn, LogOut, Settings } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { scrollToAskOfficeFlowHero } from '../../lib/homeNavigation'
 import { getLiveNotificationUnreadCount } from '../../services/notificationDataService'
 import { ASSISTANT_DATA_UPDATED_EVENT } from '../../lib/assistantDataEvents'
 import { NOTICE_READ_EVENT } from '../../services/noticeReadService'
@@ -13,6 +14,7 @@ type AuthUser = { name: string; position: string | null; role: string | null }
 
 export default function Header() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [authUser, setAuthUser] = useState<AuthUser | null | undefined>(undefined)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
@@ -118,12 +120,21 @@ export default function Header() {
     navigate('/')
   }
 
+  function handleBrandHomeClick() {
+    if (location.pathname === '/') {
+      scrollToAskOfficeFlowHero()
+      return
+    }
+
+    navigate('/')
+  }
+
   const initial = authUser?.name?.trim()?.charAt(0) ?? 'U'
 
   return (
     <header className="sticky top-0 z-30 h-[72px] border-b border-line bg-surface/80 backdrop-blur-xl">
       <div className="mx-auto flex h-full max-w-[1600px] items-center justify-between px-6 lg:px-10">
-        <HeaderBrandLockup onOfficeFlowClick={() => navigate('/')} />
+        <HeaderBrandLockup onOfficeFlowClick={handleBrandHomeClick} />
 
         <div className="flex items-center gap-2 sm:gap-3">
           {authUser ? (

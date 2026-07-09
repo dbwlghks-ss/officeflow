@@ -65,6 +65,7 @@ export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps
 
   return (
     <section
+      id="ask-officeflow"
       className="mx-auto w-full max-w-3xl px-1 lg:max-w-4xl"
       aria-label="Ask OfficeFlow"
     >

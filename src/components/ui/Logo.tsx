@@ -53,13 +53,16 @@ export function HwashinLogo({ className, header = false }: LogoProps) {
 
 /** Header brand lockup: [HWASHIN CI] | [OfficeFlow logo] */
 export function HeaderBrandLockup({ onOfficeFlowClick }: { onOfficeFlowClick?: () => void }) {
+  const logoMotionClass =
+    'cursor-pointer transition-all duration-200 ease-out hover:opacity-90 active:scale-[0.98]'
+
   return (
     <div className={`inline-flex items-end ${HEADER_LOCKUP_GAP_CLASS}`}>
       <a
         href="https://www.hwashin.co.kr"
         target="_blank"
         rel="noopener noreferrer"
-        className="block shrink-0 cursor-pointer p-0 leading-none transition-opacity duration-200 hover:opacity-90"
+        className={`block shrink-0 p-0 leading-none outline-none focus-visible:ring-2 focus-visible:ring-brand/30 rounded-md ${logoMotionClass}`}
         onClick={(e) => e.stopPropagation()}
       >
         <HwashinLogoImage className={`${HWASHIN_HEADER_HEIGHT_CLASS} block max-h-none`} />
@@ -68,7 +71,8 @@ export function HeaderBrandLockup({ onOfficeFlowClick }: { onOfficeFlowClick?: (
       <button
         type="button"
         onClick={onOfficeFlowClick}
-        className="block shrink-0 p-0 leading-none outline-none focus-visible:ring-2 focus-visible:ring-brand/30 rounded-md"
+        aria-label="홈으로 이동"
+        className={`block shrink-0 p-0 leading-none outline-none focus-visible:ring-2 focus-visible:ring-brand/30 rounded-md ${logoMotionClass}`}
       >
         <OfficeFlowLogo size="header" className="block object-left-bottom" />
       </button>
