@@ -13,10 +13,11 @@ import ResetPasswordPage from '../pages/ResetPasswordPage'
 import SignupPage from '../pages/SignupPage'
 import SurveyPage from '../pages/SurveyPage'
 import { OfficeFlowLogo } from '../components/ui/Logo'
+import PageTransition from '../components/layout/PageTransition'
 
 function RouteLoadingScreen() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-[#f7f9fc]">
+    <div className="animate-page-in flex min-h-screen flex-col items-center justify-center gap-3 bg-canvas">
       <OfficeFlowLogo />
       <span className="text-sm text-slate-500">불러오는 중...</span>
     </div>
@@ -136,16 +137,53 @@ function AdminRoute({ children }: { children: ReactNode }) {
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
-      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route
+        path="/"
+        element={
+          <PageTransition>
+            <HomePage />
+          </PageTransition>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <PageTransition>
+            <LoginPage />
+          </PageTransition>
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <PageTransition>
+            <SignupPage />
+          </PageTransition>
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          <PageTransition>
+            <ForgotPasswordPage />
+          </PageTransition>
+        }
+      />
+      <Route
+        path="/reset-password"
+        element={
+          <PageTransition>
+            <ResetPasswordPage />
+          </PageTransition>
+        }
+      />
       <Route
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <DashboardPage />
+            <PageTransition>
+              <DashboardPage />
+            </PageTransition>
           </ProtectedRoute>
         }
       />
@@ -153,7 +191,9 @@ export default function AppRoutes() {
         path="/meal"
         element={
           <ProtectedRoute>
-            <MealPage />
+            <PageTransition>
+              <MealPage />
+            </PageTransition>
           </ProtectedRoute>
         }
       />
@@ -161,7 +201,9 @@ export default function AppRoutes() {
         path="/survey"
         element={
           <ProtectedRoute>
-            <SurveyPage />
+            <PageTransition>
+              <SurveyPage />
+            </PageTransition>
           </ProtectedRoute>
         }
       />
@@ -169,7 +211,9 @@ export default function AppRoutes() {
         path="/notice"
         element={
           <ProtectedRoute>
-            <NoticePage />
+            <PageTransition>
+              <NoticePage />
+            </PageTransition>
           </ProtectedRoute>
         }
       />
@@ -177,7 +221,9 @@ export default function AppRoutes() {
         path="/admin"
         element={
           <AdminRoute>
-            <AdminPage />
+            <PageTransition>
+              <AdminPage />
+            </PageTransition>
           </AdminRoute>
         }
       />

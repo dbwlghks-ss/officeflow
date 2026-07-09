@@ -20,14 +20,16 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-canvas text-slate-800">
-      <Header />
+      <div className="motion-enter motion-enter-delay-0">
+        <Header />
+      </div>
 
       <AssistantWorkspaceProvider>
         <main
           className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col overflow-y-auto px-6 py-4 lg:max-h-[calc(100dvh-var(--header-h))] lg:min-h-0 lg:px-8 lg:py-5"
           style={{ ['--header-h' as string]: `${HEADER_HEIGHT_PX}px` }}
         >
-          <div className="home-hero-surface shrink-0 rounded-[28px] px-2 pb-5 pt-2 lg:px-4 lg:pb-6">
+          <div className="home-hero-surface motion-enter motion-enter-delay-1 shrink-0 rounded-[28px] px-2 pb-5 pt-2 lg:px-4 lg:pb-6">
             <div className="mx-auto max-w-3xl text-center lg:max-w-4xl">
               <HomeHeroGreeting dateLabel={dateLabel} greeting={brief.greeting} />
             </div>
@@ -37,19 +39,19 @@ export default function HomePage() {
           </div>
 
           <div className="mt-4 grid min-h-0 flex-1 grid-cols-1 gap-3 lg:mt-5 lg:grid-cols-12 lg:gap-4">
-            <div className="min-h-[240px] lg:col-span-4 lg:min-h-0">
+            <div className="motion-enter motion-enter-delay-2 min-h-[240px] lg:col-span-4 lg:min-h-0">
               <BentoCard variant="brand" fit className="flex h-full min-h-0 flex-col overflow-hidden">
                 <BriefBentoBlock date={now} />
               </BentoCard>
             </div>
 
-            <div className="min-h-[320px] lg:col-span-5 lg:min-h-0">
+            <div className="motion-enter motion-enter-delay-3 min-h-[320px] lg:col-span-5 lg:min-h-0">
               <BentoCard fit className="flex h-full min-h-0 flex-col overflow-hidden">
                 <TodayWorkQueue onNavigate={navigate} />
               </BentoCard>
             </div>
 
-            <div className="min-h-[280px] lg:col-span-3 lg:min-h-0">
+            <div className="motion-enter motion-enter-delay-4 min-h-[280px] lg:col-span-3 lg:min-h-0">
               <BentoCard variant="accent" fit className="flex h-full min-h-0 flex-col overflow-hidden">
                 <MailHubPanel />
               </BentoCard>
