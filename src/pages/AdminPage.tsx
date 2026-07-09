@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import {
   BarChart3,
   ClipboardList,
-  Contact,
   Home,
   LayoutDashboard,
   LogOut,
@@ -17,7 +16,6 @@ import { supabase } from '../lib/supabase'
 import { OfficeFlowLogo } from '../components/ui/Logo'
 import { Badge } from '../components/ui/primitives'
 import DashboardPanel from '../components/admin/DashboardPanel'
-import EmployeeDirectoryManagementPanel from '../components/admin/EmployeeDirectoryManagementPanel'
 import MealManagementPanel from '../components/admin/MealManagementPanel'
 import MealMenuManagementPanel from '../components/admin/MealMenuManagementPanel'
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel'
@@ -32,7 +30,6 @@ type MenuKey =
   | 'notice'
   | 'survey'
   | 'user'
-  | 'directory'
   | 'stats'
 
 type MenuItem = { key: MenuKey; label: string; icon: LucideIcon }
@@ -52,10 +49,6 @@ const MENU_SECTIONS: Array<{ title: string; items: MenuItem[] }> = [
     ],
   },
   {
-    title: 'Assistant 데이터',
-    items: [{ key: 'directory', label: '직원 디렉토리', icon: Contact }],
-  },
-  {
     title: '조직 · 분석',
     items: [
       { key: 'user', label: '사용자 관리', icon: Users },
@@ -71,7 +64,6 @@ const MENU_LABELS: Record<MenuKey, string> = {
   notice: '공지 관리',
   survey: '설문 관리',
   user: '사용자 관리',
-  directory: '직원 디렉토리',
   stats: '통계',
 }
 
@@ -81,8 +73,7 @@ const MENU_DESCRIPTIONS: Record<MenuKey, string> = {
   mealmenu: 'Assistant 식단 조회용 메뉴를 등록합니다',
   notice: '사내 공지를 작성하고 게시합니다',
   survey: '설문을 만들고 응답 결과를 확인합니다',
-  user: '임직원 계정과 권한을 관리합니다',
-  directory: 'Assistant 직원 조회용 업무 연락처를 관리합니다',
+  user: '임직원 계정과 Assistant 공개 연락처를 관리합니다',
   stats: '전사 지표와 추이를 분석합니다',
 }
 
@@ -100,8 +91,6 @@ function renderPanel(menu: MenuKey) {
       return <SurveyManagementPanel />
     case 'user':
       return <UserManagementPanel />
-    case 'directory':
-      return <EmployeeDirectoryManagementPanel />
     case 'stats':
       return <StatisticsPanel />
   }
