@@ -31,6 +31,7 @@ const EMPTY_SUMMARY: BriefSummaryData = {
   unreadNoticeCount: 0,
   pendingSurveyCount: 0,
   todayScheduleCount: 0,
+  meetingActionCount: 0,
 }
 
 function buildMealCheckItem(): WorkQueueItem {
@@ -90,6 +91,15 @@ function buildSurveyEmptyItem(): WorkQueueItem {
   }
 }
 
+function buildMeetingActionsItem(count: number): WorkQueueItem {
+  return {
+    id: 'meeting-actions',
+    status: 'review',
+    message: `회의록에서 추출된 업무 ${count}건이 있습니다.`,
+    actions: [],
+  }
+}
+
 function buildCandidateItems(data: BriefSummaryData): WorkQueueItem[] {
   const items: WorkQueueItem[] = []
 
@@ -103,6 +113,10 @@ function buildCandidateItems(data: BriefSummaryData): WorkQueueItem[] {
 
   if (data.pendingSurveyCount > 0) {
     items.push(buildSurveyItem(data.pendingSurveyCount))
+  }
+
+  if (data.meetingActionCount > 0) {
+    items.push(buildMeetingActionsItem(data.meetingActionCount))
   }
 
   if (data.mealServiceAvailable && data.mealApplied) {

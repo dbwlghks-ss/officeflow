@@ -57,6 +57,7 @@ export function toWorkSummaryPayload(
     mealServiceAvailable: summary.mealServiceAvailable,
     unreadNoticeCount: summary.unreadNoticeCount,
     pendingSurveyCount: summary.pendingSurveyCount,
+    meetingActionCount: summary.meetingActionCount,
     noticeTitles: snapshot.notices.unreadTitles,
     surveyTitles: snapshot.surveys.pendingTitles,
   }

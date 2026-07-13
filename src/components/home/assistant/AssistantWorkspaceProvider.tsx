@@ -5,6 +5,11 @@ import {
   executeRuleBasedIntent,
   getLoadingRuleAssistantResponse,
 } from '../../../features/assistant/assistantExecutor'
+import { shouldAnalyzeMeetingMinutes } from '../../../lib/meetingDetection'
+import {
+  notifyAssistantDataUpdated,
+  notifyMeetingDataUpdated,
+} from '../../../lib/assistantDataEvents'
 import { buildSuggestedAssistantQueries } from '../../../features/assistant/assistantSuggestedQueries'
 import {
   createCustomCommand,
@@ -33,7 +38,16 @@ import {
   fetchAssistantSnapshot,
   type AssistantSnapshot,
 } from '../../../services/assistantDataService'
+import {
+  analyzeMeetingMinutes,
+  saveMeetingAnalysis,
+} from '../../../services/meetingService'
 import type { AssistantCommand, AssistantResponse, AssistantSavedSearch } from '../../../types/assistant'
+import type {
+  MeetingActionItem,
+  MeetingAnalysisState,
+  MeetingSaveState,
+} from '../../../types/meeting'
 import type { AssistantTab } from './AssistantTabs'
 
 type AssistantWorkspaceContextValue = {
@@ -69,6 +83,13 @@ type AssistantWorkspaceContextValue = {
   handleDeleteSearch: (searchId: string) => void
   suggestedQueries: string[]
   clearResponse: () => void
+  meetingAnalysisState: MeetingAnalysisState
+  meetingSaveState: MeetingSaveState
+  isMeetingAnalyzing: boolean
+  updateMeetingActionItems: (items: MeetingActionItem[]) => void
+  saveMeetingAnalysisResult: () => Promise<void>
+  reanalyzeMeeting: () => Promise<void>
+  clearMeetingAnalysis: () => void
 }
 
 const AssistantWorkspaceContext = createContext<AssistantWorkspaceContextValue | null>(null)
@@ -98,7 +119,15 @@ export function AssistantWorkspaceProvider({ children }: AssistantWorkspaceProvi
   const [searchModalOpen, setSearchModalOpen] = useState(false)
   const [directQuery, setDirectQuery] = useState('')
   const [snapshot, setSnapshot] = useState<AssistantSnapshot | null>(null)
+  const [meetingAnalysisState, setMeetingAnalysisState] = useState<MeetingAnalysisState>({
+    status: 'idle',
+  })
+  const [meetingSaveState, setMeetingSaveState] = useState<MeetingSaveState>({
+    status: 'idle',
+  })
   const requestSeq = useRef(0)
+  const meetingRequestSeq = useRef(0)
+  const saveInFlightRef = useRef(false)
 
   const refreshSnapshot = useRef(async () => {
     const next = await fetchAssistantSnapshot()
@@ -206,10 +235,44 @@ export function AssistantWorkspaceProvider({ children }: AssistantWorkspaceProvi
     await runSearch(search.query, search.scope)
   }
 
+  async function runMeetingAnalysis(rawText: string) {
+    const trimmed = rawText.trim()
+    if (!trimmed) return
+
+    const seq = ++meetingRequestSeq.current
+    saveInFlightRef.current = false
+    setMeetingSaveState({ status: 'idle' })
+    setMeetingAnalysisState({ status: 'loading', rawText: trimmed })
+    clearResponse()
+
+    try {
+      const result = await analyzeMeetingMinutes({ rawText: trimmed })
+      if (seq !== meetingRequestSeq.current) return
+      setMeetingAnalysisState({ status: 'ready', rawText: trimmed, result })
+    } catch (error) {
+      if (seq !== meetingRequestSeq.current) return
+      const message =
+        error instanceof Error ? error.message : '회의록 분석에 실패했습니다.'
+      setMeetingAnalysisState({
+        status: 'error',
+        rawText: trimmed,
+        message,
+      })
+    }
+  }
+
   async function handleDirectQuery(query?: string) {
     const trimmed = (query ?? directQuery).trim()
     if (!trimmed) return
     setDirectQuery(trimmed)
+
+    if (shouldAnalyzeMeetingMinutes(trimmed)) {
+      await runMeetingAnalysis(trimmed)
+      return
+    }
+
+    setMeetingAnalysisState({ status: 'idle' })
+    setMeetingSaveState({ status: 'idle' })
     await runNaturalLanguageQuery(trimmed)
   }
 
@@ -262,6 +325,68 @@ export function AssistantWorkspaceProvider({ children }: AssistantWorkspaceProvi
     saveRecentItems(nextRecent)
   }
 
+  function clearMeetingAnalysis() {
+    meetingRequestSeq.current += 1
+    saveInFlightRef.current = false
+    setMeetingAnalysisState({ status: 'idle' })
+    setMeetingSaveState({ status: 'idle' })
+  }
+
+  function updateMeetingActionItems(items: MeetingActionItem[]) {
+    setMeetingAnalysisState((current) => {
+      if (current.status !== 'ready') return current
+      return {
+        ...current,
+        result: {
+          ...current.result,
+          action_items: items,
+        },
+      }
+    })
+  }
+
+  async function saveMeetingAnalysisResult() {
+    if (saveInFlightRef.current) return
+    if (meetingSaveState.status === 'saved' || meetingSaveState.status === 'saving') return
+    if (meetingAnalysisState.status !== 'ready') return
+
+    saveInFlightRef.current = true
+    setMeetingSaveState({ status: 'saving' })
+
+    try {
+      const saved = await saveMeetingAnalysis({
+        rawText: meetingAnalysisState.rawText,
+        analysis: meetingAnalysisState.result,
+      })
+
+      setMeetingSaveState({
+        status: 'saved',
+        actionItemCount: saved.actionItemCount,
+      })
+      setMeetingAnalysisState({ status: 'idle' })
+      notifyMeetingDataUpdated()
+      notifyAssistantDataUpdated()
+      void refreshSnapshot.current()
+    } catch (error) {
+      console.error('[meeting] save failed:', error)
+      setMeetingSaveState({
+        status: 'error',
+        message: '업무 저장에 실패했습니다. Supabase 연결과 권한을 확인해주세요.',
+      })
+    } finally {
+      saveInFlightRef.current = false
+    }
+  }
+
+  async function reanalyzeMeeting() {
+    const rawText =
+      meetingAnalysisState.status === 'idle'
+        ? directQuery
+        : meetingAnalysisState.rawText
+
+    await runMeetingAnalysis(rawText)
+  }
+
   function clearResponse() {
     requestSeq.current += 1
     setResponse(null)
@@ -293,6 +418,13 @@ export function AssistantWorkspaceProvider({ children }: AssistantWorkspaceProvi
     handleDeleteSearch,
     suggestedQueries,
     clearResponse,
+    meetingAnalysisState,
+    meetingSaveState,
+    isMeetingAnalyzing: meetingAnalysisState.status === 'loading',
+    updateMeetingActionItems,
+    saveMeetingAnalysisResult,
+    reanalyzeMeeting,
+    clearMeetingAnalysis,
   }
 
   return (

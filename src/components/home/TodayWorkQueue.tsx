@@ -4,6 +4,8 @@ import {
   type WorkQueueItemStatus,
 } from '../../lib/briefActions'
 import { useHomeBriefSnapshot } from '../../hooks/useHomeBriefSnapshot'
+import MeetingAnalysisPanel from './meeting/MeetingAnalysisPanel'
+import { useAssistantWorkspace } from './assistant/AssistantWorkspaceProvider'
 import type { BriefSummaryData } from '../../lib/homeBriefSummary'
 import WorkActionButtons from './WorkActionButtons'
 import WorkQueueQuickActions from './WorkQueueQuickActions'
@@ -27,6 +29,13 @@ const STATUS_CLASS: Record<WorkQueueItemStatus, string> = {
 
 export default function TodayWorkQueue({ onNavigate, summary }: TodayWorkQueueProps) {
   const { displayMode, summaryData } = useHomeBriefSnapshot({ summary })
+  const {
+    meetingAnalysisState,
+    meetingSaveState,
+    updateMeetingActionItems,
+    saveMeetingAnalysisResult,
+    reanalyzeMeeting,
+  } = useAssistantWorkspace()
   const data = summaryData ?? BRIEF_EMPTY_SUMMARY
   const queue = buildWorkQueueItems(data, displayMode)
 
@@ -41,6 +50,14 @@ export default function TodayWorkQueue({ onNavigate, summary }: TodayWorkQueuePr
       <p className="mt-1 text-xs text-slate-500">필요한 일은 여기서 바로 처리하세요.</p>
 
       <div className="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto">
+        <MeetingAnalysisPanel
+          analysisState={meetingAnalysisState}
+          saveState={meetingSaveState}
+          onActionItemsChange={updateMeetingActionItems}
+          onSave={() => void saveMeetingAnalysisResult()}
+          onReanalyze={() => void reanalyzeMeeting()}
+        />
+
         {displayMode === 'loading' ? (
           Array.from({ length: 3 }).map((_, index) => (
             <div

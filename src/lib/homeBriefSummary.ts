@@ -8,6 +8,7 @@ export type BriefSummaryData = {
   unreadNoticeCount: number
   pendingSurveyCount: number
   todayScheduleCount: number
+  meetingActionCount: number
 }
 
 export type BriefSummaryItem = {
@@ -27,6 +28,7 @@ const DEFAULT_BRIEF_SUMMARY: BriefSummaryData = {
   unreadNoticeCount: 0,
   pendingSurveyCount: 0,
   todayScheduleCount: 0,
+  meetingActionCount: 0,
 }
 
 /** Legacy helper for unused HomeHeroBrief — prefer mapSnapshotToBriefSummary. */
@@ -45,6 +47,7 @@ export function mapSnapshotToBriefSummary(snapshot: AssistantSnapshot): BriefSum
     unreadNoticeCount: snapshot.notices.unreadCount,
     pendingSurveyCount: snapshot.surveys.pendingCount,
     todayScheduleCount: 0,
+    meetingActionCount: snapshot.meetings.pendingActionCount,
   }
 }
 

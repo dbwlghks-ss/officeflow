@@ -18,6 +18,7 @@ function toBriefSummary(payload: AssistantWorkSummaryPayload): BriefSummaryData 
     unreadNoticeCount: payload.unreadNoticeCount,
     pendingSurveyCount: payload.pendingSurveyCount,
     todayScheduleCount: 0,
+    meetingActionCount: payload.meetingActionCount ?? 0,
   }
 }
 

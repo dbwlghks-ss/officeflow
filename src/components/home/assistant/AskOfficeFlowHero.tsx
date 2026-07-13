@@ -17,13 +17,14 @@ export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps
     handleDirectQuery,
     handleSuggestedQuery,
     clearResponse,
+    isMeetingAnalyzing,
   } = useAssistantWorkspace()
 
   const [savedOpen, setSavedOpen] = useState(false)
   const anchorRef = useRef<HTMLDivElement>(null)
   const resultRef = useRef<HTMLDivElement>(null)
 
-  const isLoading = response?.state === 'loading'
+  const isLoading = response?.state === 'loading' || isMeetingAnalyzing
 
   async function submitQuery() {
     setSavedOpen(false)
@@ -86,6 +87,7 @@ export default function AskOfficeFlowHero({ onNavigate }: AskOfficeFlowHeroProps
               onChange={setDirectQuery}
               onSubmit={() => void submitQuery()}
               loading={isLoading}
+              loadingLabel={isMeetingAnalyzing ? '회의록 분석 중' : '질문 실행'}
             />
           }
         />

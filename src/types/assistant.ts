@@ -65,6 +65,7 @@ export type AssistantWorkSummaryPayload = {
   mealServiceAvailable: boolean
   unreadNoticeCount: number
   pendingSurveyCount: number
+  meetingActionCount?: number
   noticeTitles?: string[]
   surveyTitles?: string[]
 }

@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase'
 import { getTodayDate, getTodayLunchService, getMyApplication } from './mealService'
 import { getNotices } from './noticeService'
 import { getUnreadNoticeSummary } from './noticeReadService'
+import { getPendingMeetingActionCount } from './meetingService'
 import { getOpenSurveys } from './surveyService'
 
 export type AssistantMealSnapshot = {
@@ -23,11 +24,16 @@ export type AssistantSurveysSnapshot = {
   pendingTitles: string[]
 }
 
+export type AssistantMeetingsSnapshot = {
+  pendingActionCount: number
+}
+
 export type AssistantSnapshot = {
   userId: string
   meal: AssistantMealSnapshot
   notices: AssistantNoticesSnapshot
   surveys: AssistantSurveysSnapshot
+  meetings: AssistantMeetingsSnapshot
 }
 
 async function getCurrentUserId(): Promise<string | null> {
@@ -97,17 +103,28 @@ async function fetchSurveysSnapshot(userId: string): Promise<AssistantSurveysSna
   }
 }
 
+async function fetchMeetingsSnapshot(userId: string): Promise<AssistantMeetingsSnapshot> {
+  try {
+    const pendingActionCount = await getPendingMeetingActionCount(userId)
+    return { pendingActionCount }
+  } catch (error) {
+    console.error('[assistant] meeting action count failed:', error)
+    return { pendingActionCount: 0 }
+  }
+}
+
 export async function fetchAssistantSnapshot(): Promise<AssistantSnapshot | null> {
   const userId = await getCurrentUserId()
   if (!userId) return null
 
-  const [meal, notices, surveys] = await Promise.all([
+  const [meal, notices, surveys, meetings] = await Promise.all([
     fetchMealSnapshot(userId),
     fetchNoticesSnapshot(userId),
     fetchSurveysSnapshot(userId),
+    fetchMeetingsSnapshot(userId),
   ])
 
-  return { userId, meal, notices, surveys }
+  return { userId, meal, notices, surveys, meetings }
 }
 
 export function buildUpdateItems(snapshot: AssistantSnapshot): string[] {

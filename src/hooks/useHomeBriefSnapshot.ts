@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ASSISTANT_DATA_UPDATED_EVENT } from '../lib/assistantDataEvents'
+import { ASSISTANT_DATA_UPDATED_EVENT, MEETING_DATA_UPDATED_EVENT } from '../lib/assistantDataEvents'
 import {
   mapSnapshotToBriefSummary,
   type BriefDisplayMode,
@@ -28,6 +28,7 @@ export function useHomeBriefSnapshot(options: UseHomeBriefSnapshotOptions = {}) 
           unreadNoticeCount: summary.unreadNoticeCount ?? 0,
           pendingSurveyCount: summary.pendingSurveyCount ?? 0,
           todayScheduleCount: summary.todayScheduleCount ?? 0,
+          meetingActionCount: summary.meetingActionCount ?? 0,
         }
       : null,
   )
@@ -76,12 +77,14 @@ export function useHomeBriefSnapshot(options: UseHomeBriefSnapshotOptions = {}) 
 
     window.addEventListener(NOTICE_READ_EVENT, handleRefresh)
     window.addEventListener(ASSISTANT_DATA_UPDATED_EVENT, handleRefresh)
+    window.addEventListener(MEETING_DATA_UPDATED_EVENT, handleRefresh)
     window.addEventListener('focus', handleRefresh)
     document.addEventListener('visibilitychange', handleVisibility)
 
     return () => {
       window.removeEventListener(NOTICE_READ_EVENT, handleRefresh)
       window.removeEventListener(ASSISTANT_DATA_UPDATED_EVENT, handleRefresh)
+      window.removeEventListener(MEETING_DATA_UPDATED_EVENT, handleRefresh)
       window.removeEventListener('focus', handleRefresh)
       document.removeEventListener('visibilitychange', handleVisibility)
     }

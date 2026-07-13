@@ -50,6 +50,14 @@ export function buildBriefChecklistItems(
     })
   }
 
+  if (data.meetingActionCount > 0) {
+    items.push({
+      id: 'meeting-actions',
+      label: `회의록에서 추출된 업무 ${data.meetingActionCount}건을 확인하세요.`,
+      checkable: true,
+    })
+  }
+
   if (data.todayScheduleCount > 0) {
     items.push({
       id: 'schedule',
