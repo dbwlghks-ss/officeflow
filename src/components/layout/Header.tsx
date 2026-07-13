@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Bell, LogIn, LogOut, Settings } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { scrollToAskOfficeFlowHero } from '../../lib/homeNavigation'
+import { markNotificationCenterSeen } from '../../lib/notificationBadgeStorage'
 import { getLiveNotificationUnreadCount } from '../../services/notificationDataService'
 import { ASSISTANT_DATA_UPDATED_EVENT } from '../../lib/assistantDataEvents'
 import { NOTICE_READ_EVENT } from '../../services/noticeReadService'
@@ -129,6 +130,22 @@ export default function Header() {
     navigate('/')
   }
 
+  async function handleNotificationToggle() {
+    const nextOpen = !notificationsOpen
+
+    if (nextOpen) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (user) {
+        markNotificationCenterSeen(new Date().toISOString(), user.id)
+      }
+      setUnreadCount(0)
+    }
+
+    setNotificationsOpen(nextOpen)
+  }
+
   const initial = authUser?.name?.trim()?.charAt(0) ?? 'U'
 
   return (
@@ -144,7 +161,7 @@ export default function Header() {
                   type="button"
                   aria-label="알림"
                   aria-expanded={notificationsOpen}
-                  onClick={() => setNotificationsOpen((open) => !open)}
+                  onClick={() => void handleNotificationToggle()}
                   className="relative grid h-10 w-10 place-items-center rounded-full text-slate-500 transition-all duration-200 hover:bg-slate-100 hover:text-slate-700"
                 >
                   <Bell size={19} />

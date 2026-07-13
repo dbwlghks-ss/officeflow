@@ -1,3 +1,7 @@
+import {
+  countUnseenNotificationItems,
+  getNotificationLastSeenAt,
+} from '../lib/notificationBadgeStorage'
 import type { RecentUpdateSourceType } from '../lib/recentUpdatesMockData'
 import { supabase } from '../lib/supabase'
 import { fetchAssistantSnapshot } from './assistantDataService'
@@ -102,14 +106,6 @@ function mealStatusToItem(
   }
 }
 
-function countActionableItems(
-  unreadNoticeCount: number,
-  pendingSurveyCount: number,
-  mealNeedsAction: boolean,
-): number {
-  return unreadNoticeCount + pendingSurveyCount + (mealNeedsAction ? 1 : 0)
-}
-
 export async function fetchNotificationCenterData(): Promise<NotificationCenterData> {
   const {
     data: { user },
@@ -136,11 +132,8 @@ export async function fetchNotificationCenterData(): Promise<NotificationCenterD
       ...(mealItem ? [mealItem] : []),
     ]
 
-    const badgeCount = countActionableItems(
-      noticeSummary.unreadCount,
-      snapshot.surveys.pendingCount,
-      Boolean(mealItem),
-    )
+    const lastSeenAt = getNotificationLastSeenAt(user.id)
+    const badgeCount = countUnseenNotificationItems(liveItems, lastSeenAt)
 
     return {
       items: liveItems,

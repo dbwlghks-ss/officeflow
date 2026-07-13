@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Bell } from 'lucide-react'
+import { ASSISTANT_DATA_UPDATED_EVENT } from '../../lib/assistantDataEvents'
+import { markNotificationCenterSeen } from '../../lib/notificationBadgeStorage'
 import {
   fetchNotificationCenterData,
   type NotificationCenterItem,
 } from '../../services/notificationDataService'
 import { NOTICE_READ_EVENT } from '../../services/noticeReadService'
-import { ASSISTANT_DATA_UPDATED_EVENT } from '../../lib/assistantDataEvents'
+import { supabase } from '../../lib/supabase'
 import NotificationItem from './NotificationItem'
 
 type NotificationCenterProps = {
@@ -29,6 +31,13 @@ export default function NotificationCenter({
     setError(false)
 
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (user) {
+        markNotificationCenterSeen(new Date().toISOString(), user.id)
+      }
+
       const data = await fetchNotificationCenterData()
       setItems(data.items)
       onItemsChange?.(data.badgeCount)
