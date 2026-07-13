@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 type AnalyzeMeetingRequest = {
@@ -162,6 +163,16 @@ function validateAndNormalizeAnalysis(payload: unknown): MeetingAnalysisResponse
   }
 }
 
+function truncateText(value: string, maxLength = 500): string {
+  if (value.length <= maxLength) return value
+  return `${value.slice(0, maxLength)}...`
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message
+  return String(error)
+}
+
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -169,8 +180,9 @@ function jsonResponse(body: unknown, status = 200) {
   })
 }
 
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return jsonResponse({ ok: true })
   }
 
   if (req.method !== 'POST') {
@@ -183,16 +195,23 @@ function jsonResponse(body: unknown, status = 200) {
     const openAiKey = Deno.env.get('OPENAI_API_KEY')
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      return jsonResponse({ error: 'Supabase environment is not configured.' }, 500)
+      return jsonResponse(
+        {
+          error:
+            'Supabase 환경 변수가 설정되지 않았습니다. SUPABASE_URL과 SUPABASE_ANON_KEY를 확인해주세요.',
+        },
+        500,
+      )
     }
 
     if (!openAiKey) {
-      return jsonResponse({ error: 'OPENAI_API_KEY is not configured on the server.' }, 503)
+      console.error('[analyze-meeting] OPENAI_API_KEY is missing')
+      return jsonResponse({ error: 'OPENAI_API_KEY가 설정되지 않았습니다' }, 500)
     }
 
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
-      return jsonResponse({ error: 'Unauthorized' }, 401)
+      return jsonResponse({ error: '인증 토큰이 없습니다. 다시 로그인해주세요.' }, 401)
     }
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -205,16 +224,32 @@ function jsonResponse(body: unknown, status = 200) {
     } = await supabase.auth.getUser()
 
     if (userError || !user) {
-      return jsonResponse({ error: 'Unauthorized' }, 401)
+      return jsonResponse(
+        { error: userError?.message ?? '인증에 실패했습니다. 다시 로그인해주세요.' },
+        401,
+      )
     }
 
-    const body = (await req.json()) as AnalyzeMeetingRequest
+    let body: AnalyzeMeetingRequest
+    try {
+      body = (await req.json()) as AnalyzeMeetingRequest
+    } catch (parseError) {
+      console.error('[analyze-meeting] invalid JSON body:', parseError)
+      return jsonResponse({ error: '요청 본문이 올바른 JSON 형식이 아닙니다.' }, 400)
+    }
+
     const rawText = body.raw_text?.trim() ?? ''
     const currentDate = body.current_date ?? new Date().toISOString().slice(0, 10)
 
     if (!rawText) {
       return jsonResponse({ error: 'raw_text is required.' }, 400)
     }
+
+    console.log('[analyze-meeting] calling OpenAI API', {
+      model: 'gpt-4o-mini',
+      textLength: rawText.length,
+      currentDate,
+    })
 
     const openAiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -236,23 +271,79 @@ function jsonResponse(body: unknown, status = 200) {
       }),
     })
 
+    console.log('[analyze-meeting] OpenAI API response received', {
+      status: openAiResponse.status,
+      ok: openAiResponse.ok,
+    })
+
     if (!openAiResponse.ok) {
       const errorText = await openAiResponse.text()
-      console.error('[analyze-meeting] OpenAI error:', errorText)
-      return jsonResponse({ error: 'Meeting analysis failed.' }, 502)
+      console.error('[analyze-meeting] OpenAI API error:', {
+        status: openAiResponse.status,
+        statusText: openAiResponse.statusText,
+        body: errorText,
+      })
+      return jsonResponse(
+        {
+          error: 'OpenAI 회의록 분석 요청에 실패했습니다.',
+          detail: {
+            status: openAiResponse.status,
+            message: openAiResponse.statusText,
+            body: errorText,
+          },
+        },
+        502,
+      )
     }
 
     const completion = await openAiResponse.json()
     const content = completion?.choices?.[0]?.message?.content
 
+    console.log('[analyze-meeting] OpenAI API parsed completion', {
+      hasContent: Boolean(content),
+      contentLength: typeof content === 'string' ? content.length : 0,
+    })
+
     if (!content || typeof content !== 'string') {
-      return jsonResponse({ error: 'Invalid AI response.' }, 502)
+      return jsonResponse(
+        {
+          error: 'AI 응답 형식이 올바르지 않습니다.',
+          detail: truncateText(JSON.stringify(completion ?? {})),
+        },
+        502,
+      )
     }
 
-    const parsed = validateAndNormalizeAnalysis(JSON.parse(content))
+    let parsedContent: unknown
+    try {
+      parsedContent = JSON.parse(content)
+    } catch (parseError) {
+      console.error('[analyze-meeting] AI JSON parse error:', parseError, content)
+      return jsonResponse(
+        {
+          error: 'AI 응답 JSON 파싱에 실패했습니다.',
+          detail: truncateText(content),
+        },
+        502,
+      )
+    }
+
+    const parsed = validateAndNormalizeAnalysis(parsedContent)
+    console.log('[analyze-meeting] analysis normalized', {
+      decisionCount: parsed.decisions.length,
+      riskCount: parsed.risks.length,
+      actionItemCount: parsed.action_items.length,
+    })
     return jsonResponse(parsed)
   } catch (error) {
+    const message = getErrorMessage(error)
     console.error('[analyze-meeting] unexpected error:', error)
-    return jsonResponse({ error: 'Meeting analysis failed.' }, 500)
+    return jsonResponse(
+      {
+        error: '회의록 분석 중 서버 오류가 발생했습니다.',
+        detail: message,
+      },
+      500,
+    )
   }
 })

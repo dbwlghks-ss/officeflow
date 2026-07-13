@@ -40,6 +40,7 @@ import {
 } from '../../../services/assistantDataService'
 import {
   analyzeMeetingMinutes,
+  MEETING_ANALYSIS_SERVER_ERROR_MESSAGE,
   saveMeetingAnalysis,
 } from '../../../services/meetingService'
 import type { AssistantCommand, AssistantResponse, AssistantSavedSearch } from '../../../types/assistant'
@@ -251,8 +252,9 @@ export function AssistantWorkspaceProvider({ children }: AssistantWorkspaceProvi
       setMeetingAnalysisState({ status: 'ready', rawText: trimmed, result })
     } catch (error) {
       if (seq !== meetingRequestSeq.current) return
+      console.error('[meeting] analysis failed:', error)
       const message =
-        error instanceof Error ? error.message : '회의록 분석에 실패했습니다.'
+        error instanceof Error ? error.message : MEETING_ANALYSIS_SERVER_ERROR_MESSAGE
       setMeetingAnalysisState({
         status: 'error',
         rawText: trimmed,

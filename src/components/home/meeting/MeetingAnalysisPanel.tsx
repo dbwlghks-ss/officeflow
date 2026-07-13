@@ -248,10 +248,12 @@ export default function MeetingAnalysisPanel({
   if (analysisState.status === 'error') {
     return (
       <div className="space-y-3 rounded-[14px] border border-line/70 bg-canvas/40 px-3 py-4">
-        <p className="text-sm text-slate-700">
-          회의록 분석에 실패했습니다. 내용을 조금 더 명확히 입력해주세요.
+        <p className="text-sm font-medium text-slate-700">
+          {analysisState.message || 'AI 분석 서버에서 오류가 발생했습니다. Supabase Edge Function 로그를 확인해주세요.'}
         </p>
-        <p className="text-xs text-slate-500">{analysisState.message}</p>
+        <p className="text-xs text-slate-500">
+          입력 내용을 조금 더 명확히 한 뒤 다시 분석할 수 있습니다.
+        </p>
         <Button type="button" variant="secondary" size="sm" onClick={onReanalyze}>
           <RotateCcw size={14} />
           다시 분석하기
